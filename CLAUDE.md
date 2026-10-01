@@ -1,6 +1,6 @@
 # Stylo Flow — guía para Claude
 
-Sistema de gestión de peluquería: catálogo, usuarios, clientes, punto de venta (POS), caja y reportes.
+SaaS **multitenant** de gestión de peluquerías: catálogo, usuarios, clientes, cobro (POS), caja y reportes por negocio, más un panel de plataforma para el superadmin.
 Monorepo: `backend/` (Spring Boot 4.1, Java 17, Gradle) · `frontend/` (Angular 22, CDK, Tailwind v4) · PostgreSQL 16 en Docker.
 
 ## Comandos
@@ -14,7 +14,7 @@ Monorepo: `backend/` (Spring Boot 4.1, Java 17, Gradle) · `frontend/` (Angular 
 | Tests frontend | `cd frontend && npx ng test --watch=false` (Vitest) |
 | Build / tipos | `npm run build` · `npm run typecheck` · `npm run format` |
 
-Usuario inicial: `admin` / `admin123` (lo crea `AdminInitializer` si no hay usuarios; configurable con `ADMIN_USERNAME`/`ADMIN_PASSWORD`).
+Accesos de dev: negocio `demo` / `admin` / `admin123` y plataforma `superadmin` / `superadmin123` (`PlataformaInitializer`; configurables con `ADMIN_*` y `SUPERADMIN_*`).
 Los puertos 5432/5433/8080/4200 están ocupados por otros proyectos en esta máquina; no los uses.
 
 ## Backend
@@ -28,6 +28,15 @@ Los puertos 5432/5433/8080/4200 están ocupados por otros proyectos en esta máq
 - Esquema solo con Flyway (`ddl-auto: validate`). **Nunca edites una migración existente**: crea `V<n+1>__descripcion.sql` (un hook lo impide).
 - Reportes con SQL nativo vía `JdbcClient` en `ReporteService`.
 - Spring Boot 4 usa Jackson 3 (`tools.jackson.*`) y starters modulares (`spring-boot-starter-webmvc`, `-flyway`, etc.).
+
+## Multitenant (leer antes de tocar persistencia)
+
+- Base compartida, columna `negocio_id` (tabla `negocio` = tenants, identificados por `codigo` para el login).
+- Toda entidad de negocio **extiende `common/TenantScopedEntity`** (`@TenantId`): Hibernate filtra JPQL, consultas derivadas y `findById`, y asigna el tenant al insertar. `VentaItem` cuelga de `Venta` y no lo necesita.
+- El tenant sale de `tenant/TenantContext`: override con `ejecutarComo(id, …)` → claim `nid` del JWT → `SIN_TENANT` (-1, no ve nada). Hibernate fija el tenant al abrir la sesión: usar `ejecutarComo` fuera de transacciones abiertas.
+- **Todo SQL nativo (`JdbcClient`) debe filtrar `negocio_id = :nid`** a mano (ver `ReporteService.params`). Las unicidades son por negocio (`(negocio_id, …)`).
+- Seguridad: `/api/plataforma/**` solo `SUPERADMIN` (token sin `nid`); el resto de `/api/**` exige token con `nid`. `NegocioActivoFilter` responde 403 "Negocio suspendido" (cacheado en `NegocioEstadoService`).
+- Altas de negocio: `PlataformaService.crear` (SQL en una transacción). `MultiTenantIsolationTest` cubre el aislamiento: agregar casos al crear endpoints nuevos.
 
 ## Reglas de negocio clave
 

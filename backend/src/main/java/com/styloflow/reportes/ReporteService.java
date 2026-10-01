@@ -1,6 +1,7 @@
 package com.styloflow.reportes;
 
 import com.styloflow.common.BusinessException;
+import com.styloflow.tenant.TenantContext;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -64,7 +65,7 @@ public class ReporteService {
                                COALESCE(SUM(iva) FILTER (WHERE estado = 'COMPLETADA'), 0)        AS iva,
                                COUNT(*) FILTER (WHERE estado = 'ANULADA')                         AS anuladas
                         FROM ventas
-                        WHERE fecha >= :desde AND fecha < :hasta
+                        WHERE negocio_id = :nid AND fecha >= :desde AND fecha < :hasta
                         """)
                 .params(params(r))
                 .query((rs, n) -> new Object[] {rs.getLong("cantidad"), rs.getBigDecimal("total"),
@@ -78,7 +79,7 @@ public class ReporteService {
         List<TotalMetodo> porMetodo = jdbc.sql("""
                         SELECT metodo_pago, COUNT(*) AS cantidad, SUM(total) AS total
                         FROM ventas
-                        WHERE estado = 'COMPLETADA' AND fecha >= :desde AND fecha < :hasta
+                        WHERE negocio_id = :nid AND estado = 'COMPLETADA' AND fecha >= :desde AND fecha < :hasta
                         GROUP BY metodo_pago
                         ORDER BY total DESC
                         """)
@@ -94,7 +95,7 @@ public class ReporteService {
         return jdbc.sql("""
                         SELECT CAST(fecha AT TIME ZONE :tz AS date) AS dia, COUNT(*) AS cantidad, SUM(total) AS total
                         FROM ventas
-                        WHERE estado = 'COMPLETADA' AND fecha >= :desde AND fecha < :hasta
+                        WHERE negocio_id = :nid AND estado = 'COMPLETADA' AND fecha >= :desde AND fecha < :hasta
                         GROUP BY dia
                         ORDER BY dia
                         """)
@@ -111,7 +112,7 @@ public class ReporteService {
                         FROM venta_items i
                         JOIN ventas v   ON v.id = i.venta_id
                         JOIN usuarios u ON u.id = i.estilista_id
-                        WHERE v.estado = 'COMPLETADA' AND v.fecha >= :desde AND v.fecha < :hasta
+                        WHERE v.negocio_id = :nid AND v.estado = 'COMPLETADA' AND v.fecha >= :desde AND v.fecha < :hasta
                           AND i.tipo = 'SERVICIO'
                           AND (CAST(:estilista AS BIGINT) IS NULL OR u.id = CAST(:estilista AS BIGINT))
                         GROUP BY u.id, u.nombre, u.comision_porcentaje
@@ -136,7 +137,7 @@ public class ReporteService {
                                ROUND(SUM(%2$s), 2) AS total
                         FROM venta_items i
                         JOIN ventas v ON v.id = i.venta_id
-                        WHERE v.estado = 'COMPLETADA' AND v.fecha >= :desde AND v.fecha < :hasta AND i.tipo = :tipo
+                        WHERE v.negocio_id = :nid AND v.estado = 'COMPLETADA' AND v.fecha >= :desde AND v.fecha < :hasta AND i.tipo = :tipo
                         GROUP BY i.%1$s
                         ORDER BY cantidad DESC, total DESC
                         LIMIT :limite
@@ -160,7 +161,7 @@ public class ReporteService {
                         FROM ventas v
                         JOIN usuarios u ON u.id = v.cajero_id
                         LEFT JOIN clientes c ON c.id = v.cliente_id
-                        WHERE v.fecha >= :desde AND v.fecha < :hasta
+                        WHERE v.negocio_id = :nid AND v.fecha >= :desde AND v.fecha < :hasta
                         ORDER BY v.fecha
                         """)
                 .params(params(r))
@@ -183,7 +184,9 @@ public class ReporteService {
     private java.util.Map<String, Object> params(Rango r) {
         Instant desde = r.desde().atStartOfDay(zona).toInstant();
         Instant hasta = r.hasta().plusDays(1).atStartOfDay(zona).toInstant();
-        return java.util.Map.of("desde", java.sql.Timestamp.from(desde), "hasta", java.sql.Timestamp.from(hasta));
+        // SQL nativo: Hibernate no aplica el filtro de tenant, se agrega negocio_id en cada consulta
+        return java.util.Map.of("nid", TenantContext.actual(), "desde", java.sql.Timestamp.from(desde),
+                "hasta", java.sql.Timestamp.from(hasta));
     }
 
     private static String csv(String valor) {

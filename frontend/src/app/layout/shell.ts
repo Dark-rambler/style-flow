@@ -31,6 +31,7 @@ const NAV: NavItem[] = [
   { path: '/usuarios', label: 'Usuarios', icon: 'shield', roles: ['ADMIN'] },
   { path: '/configuracion', label: 'Configuración', icon: 'settings', roles: ['ADMIN'] },
   { path: '/mis-comisiones', label: 'Mis comisiones', icon: 'percent', roles: ['ESTILISTA'] },
+  { path: '/plataforma', label: 'Negocios', icon: 'building', roles: ['SUPERADMIN'] },
 ];
 
 @Component({
@@ -52,9 +53,16 @@ const NAV: NavItem[] = [
             class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 font-bold text-white"
             >S</span
           >
-          <span class="truncate font-semibold text-slate-900" [class]="rail() ? 'lg:hidden' : ''">{{
-            negocio.negocio()?.nombre ?? 'Stylo Flow'
-          }}</span>
+          <span class="min-w-0 leading-tight" [class]="rail() ? 'lg:hidden' : ''">
+            <span class="block truncate font-semibold text-slate-900">{{
+              auth.esPlataforma()
+                ? 'Plataforma'
+                : (negocio.negocio()?.nombre ?? auth.negocio()?.nombre ?? 'Stylo Flow')
+            }}</span>
+            @if (auth.negocio(); as n) {
+              <span class="block truncate text-xs text-slate-400">{{ n.codigo }}</span>
+            }
+          </span>
         </div>
         <nav
           class="flex flex-1 flex-col gap-1 overflow-y-auto p-3"
@@ -213,8 +221,10 @@ export class Shell implements OnInit {
     const rol = this.auth.usuario()?.rol;
     return NAV.filter((i) => rol && i.roles.includes(rol));
   });
-  protected readonly rolLabel = computed(
-    () => ROLES.find((r) => r.value === this.auth.usuario()?.rol)?.label ?? '',
+  protected readonly rolLabel = computed(() =>
+    this.auth.esPlataforma()
+      ? 'Superadministrador'
+      : (ROLES.find((r) => r.value === this.auth.usuario()?.rol)?.label ?? ''),
   );
   protected readonly iniciales = computed(() =>
     (this.auth.usuario()?.nombre ?? '?')
@@ -225,7 +235,8 @@ export class Shell implements OnInit {
   );
 
   ngOnInit(): void {
-    this.negocio.cargar();
+    // El superadmin no pertenece a ningún negocio: no hay configuración ni caja que cargar
+    if (!this.auth.esPlataforma()) this.negocio.cargar();
     if (this.auth.hasRole('ADMIN', 'CAJERO')) this.cajaStore.refrescar();
   }
 

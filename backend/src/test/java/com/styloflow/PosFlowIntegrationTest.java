@@ -36,7 +36,7 @@ class PosFlowIntegrationTest {
     @Test
     @Order(1)
     void loginInvalidoDevuelve401() throws Exception {
-        mvc.perform(json(post("/api/auth/login"), "{\"username\":\"admin\",\"password\":\"mala\"}"))
+        mvc.perform(json(post("/api/auth/login"), "{\"negocio\":\"demo\",\"username\":\"admin\",\"password\":\"mala\"}"))
                 .andExpect(status().isUnauthorized());
         mvc.perform(get("/api/ventas")).andExpect(status().isUnauthorized());
     }
@@ -158,7 +158,7 @@ class PosFlowIntegrationTest {
 
     private String login(String user, String pass) throws Exception {
         String res = mvc.perform(json(post("/api/auth/login"),
-                        "{\"username\":\"%s\",\"password\":\"%s\"}".formatted(user, pass)))
+                        "{\"negocio\":\"demo\",\"username\":\"%s\",\"password\":\"%s\"}".formatted(user, pass)))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return JsonPath.read(res, "$.token");
     }

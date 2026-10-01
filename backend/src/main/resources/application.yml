@@ -40,6 +40,10 @@ app:
     username: ${ADMIN_USERNAME:admin}
     password: ${ADMIN_PASSWORD:admin123}
     nombre: Administrador
+  superadmin:
+    username: ${SUPERADMIN_USERNAME:superadmin}
+    password: ${SUPERADMIN_PASSWORD:superadmin123}
+    nombre: Administrador de plataforma
 
 springdoc:
   swagger-ui:

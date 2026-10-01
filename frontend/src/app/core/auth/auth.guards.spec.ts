@@ -50,6 +50,15 @@ describe('roleGuard', () => {
     expect(router.serializeUrl(result as UrlTree)).toBe('/mis-comisiones');
   });
 
+  it('el superadmin no entra a vistas de negocio y va al panel de plataforma', () => {
+    sesion('SUPERADMIN');
+    const router = setup();
+    const result = TestBed.runInInjectionContext(() =>
+      roleGuard('ADMIN', 'CAJERO')({} as never, {} as never),
+    );
+    expect(router.serializeUrl(result as UrlTree)).toBe('/plataforma');
+  });
+
   it('descarta una sesión expirada', () => {
     localStorage.setItem(
       'stylo.session',

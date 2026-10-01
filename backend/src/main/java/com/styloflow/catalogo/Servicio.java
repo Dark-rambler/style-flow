@@ -1,6 +1,6 @@
 package com.styloflow.catalogo;
 
-import com.styloflow.common.BaseEntity;
+import com.styloflow.common.TenantScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "servicios")
-public class Servicio extends BaseEntity {
+public class Servicio extends TenantScopedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "categoria_id")

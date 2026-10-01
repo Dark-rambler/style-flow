@@ -1,5 +1,8 @@
 package com.styloflow.auth;
 
+import com.styloflow.negocio.Negocio;
+import com.styloflow.negocio.NegocioRepository;
+import com.styloflow.tenant.TenantContext;
 import com.styloflow.usuarios.Usuario;
 import com.styloflow.usuarios.UsuarioDtos.UsuarioResponse;
 import com.styloflow.usuarios.UsuarioRepository;
@@ -22,22 +25,34 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthController {
 
     private final UsuarioRepository usuarios;
+    private final NegocioRepository negocios;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final CurrentUser currentUser;
 
-    public record LoginRequest(@NotBlank String username, @NotBlank String password) {}
+    public record LoginRequest(@NotBlank String negocio, @NotBlank String username, @NotBlank String password) {}
 
-    public record LoginResponse(String token, Instant expiresAt, UsuarioResponse usuario) {}
+    public record NegocioInfo(String codigo, String nombre) {}
+
+    public record LoginResponse(String token, Instant expiresAt, UsuarioResponse usuario, NegocioInfo negocio) {}
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest req) {
-        Usuario u = usuarios.findByUsernameIgnoreCase(req.username().trim())
+        // Mismo mensaje para cualquier dato incorrecto: no revela qué negocios o usuarios existen
+        ResponseStatusException credencialesInvalidas =
+                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Negocio, usuario o contraseña incorrectos");
+        Negocio n = negocios.findByCodigoIgnoreCase(req.negocio().trim()).orElseThrow(() -> credencialesInvalidas);
+        // El usuario se busca dentro de su negocio (el JWT todavía no existe)
+        Usuario u = TenantContext.ejecutarComo(n.getId(), () -> usuarios.findByUsernameIgnoreCase(req.username().trim()))
                 .filter(Usuario::isActivo)
                 .filter(x -> passwordEncoder.matches(req.password(), x.getPasswordHash()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario o contraseña incorrectos"));
-        TokenService.Token token = tokenService.generar(u);
-        return new LoginResponse(token.value(), token.expiresAt(), UsuarioResponse.from(u));
+                .orElseThrow(() -> credencialesInvalidas);
+        if (!n.isActivo()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Este negocio está suspendido. Contacte al soporte.");
+        }
+        TokenService.Token token = tokenService.generar(u, n);
+        return new LoginResponse(token.value(), token.expiresAt(), UsuarioResponse.from(u),
+                new NegocioInfo(n.getCodigo(), n.getNombre()));
     }
 
     @GetMapping("/me")

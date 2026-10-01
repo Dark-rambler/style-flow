@@ -9,6 +9,8 @@ import {
   EstilistaTotal,
   ItemTop,
   Negocio,
+  NegocioRequest,
+  NegocioResumen,
   Page,
   Producto,
   ProductoRequest,
@@ -126,6 +128,15 @@ export class ApiService {
       this.http.get<ItemTop[]>('/api/reportes/top', { params: params({ tipo, limite, ...r }) }),
     ventasCsv: (r: RangoFechas): Observable<Blob> =>
       this.http.get('/api/reportes/ventas.csv', { params: params({ ...r }), responseType: 'blob' }),
+  };
+
+  // ---- Plataforma (solo SUPERADMIN) ----
+  plataforma = {
+    negocios: () => this.http.get<NegocioResumen[]>('/api/plataforma/negocios'),
+    crearNegocio: (body: NegocioRequest) =>
+      this.http.post<NegocioResumen>('/api/plataforma/negocios', body),
+    cambiarEstado: (id: number, activo: boolean) =>
+      this.http.put<void>(`/api/plataforma/negocios/${id}/estado`, { activo }),
   };
 
   // ---- Negocio ----

@@ -1,6 +1,6 @@
 package com.styloflow.caja;
 
-import com.styloflow.common.BaseEntity;
+import com.styloflow.common.TenantScopedEntity;
 import com.styloflow.usuarios.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,7 +20,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "cajas")
-public class Caja extends BaseEntity {
+public class Caja extends TenantScopedEntity {
 
     public enum Estado { ABIERTA, CERRADA }
 

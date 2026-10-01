@@ -1,6 +1,7 @@
 // Tipos que reflejan los DTOs del backend (com.styloflow.*Dtos)
 
-export type Rol = 'ADMIN' | 'CAJERO' | 'ESTILISTA';
+/** SUPERADMIN es de la plataforma: no pertenece a ningún negocio. */
+export type Rol = 'ADMIN' | 'CAJERO' | 'ESTILISTA' | 'SUPERADMIN';
 export type MetodoPago = 'EFECTIVO' | 'QR' | 'TARJETA' | 'TRANSFERENCIA';
 export type TipoItem = 'SERVICIO' | 'PRODUCTO';
 
@@ -51,10 +52,45 @@ export interface UsuarioResumen {
   rol: Rol;
 }
 
+export interface NegocioInfo {
+  codigo: string;
+  nombre: string;
+}
+
 export interface LoginResponse {
   token: string;
   expiresAt: string;
   usuario: Usuario;
+  negocio: NegocioInfo;
+}
+
+export interface PlataformaLoginResponse {
+  token: string;
+  expiresAt: string;
+  nombre: string;
+}
+
+/** Negocio (tenant) visto desde la plataforma. */
+export interface NegocioResumen {
+  id: number;
+  codigo: string;
+  nombre: string;
+  activo: boolean;
+  createdAt: string;
+  usuarios: number;
+  ventas30d: number;
+  total30d: number;
+}
+
+export interface NegocioRequest {
+  nombre: string;
+  codigo: string;
+  nit?: string | null;
+  telefono?: string | null;
+  adminNombre: string;
+  adminUsername: string;
+  adminPassword: string;
+  catalogoBase: boolean;
 }
 
 export interface Categoria {
@@ -228,6 +264,8 @@ export interface ItemTop {
 }
 
 export interface Negocio {
+  /** Solo lectura: se usa al iniciar sesión. */
+  codigo?: string;
   nombre: string;
   nit: string | null;
   direccion: string | null;

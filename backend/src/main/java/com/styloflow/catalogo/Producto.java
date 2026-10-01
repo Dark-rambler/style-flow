@@ -1,6 +1,6 @@
 package com.styloflow.catalogo;
 
-import com.styloflow.common.BaseEntity;
+import com.styloflow.common.TenantScopedEntity;
 import com.styloflow.common.BusinessException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "productos")
-public class Producto extends BaseEntity {
+public class Producto extends TenantScopedEntity {
 
     @Column(nullable = false)
     private String nombre;

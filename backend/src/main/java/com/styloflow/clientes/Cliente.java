@@ -1,6 +1,6 @@
 package com.styloflow.clientes;
 
-import com.styloflow.common.BaseEntity;
+import com.styloflow.common.TenantScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "clientes")
-public class Cliente extends BaseEntity {
+public class Cliente extends TenantScopedEntity {
 
     @Column(nullable = false)
     private String nombre;

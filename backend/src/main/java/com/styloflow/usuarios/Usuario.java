@@ -1,6 +1,6 @@
 package com.styloflow.usuarios;
 
-import com.styloflow.common.BaseEntity;
+import com.styloflow.common.TenantScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,12 +14,13 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "usuarios")
-public class Usuario extends BaseEntity {
+public class Usuario extends TenantScopedEntity {
 
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false, unique = true)
+    /** Único dentro del negocio (índice uq_usuarios_negocio_username). */
+    @Column(nullable = false)
     private String username;
 
     @Column(name = "password_hash", nullable = false)

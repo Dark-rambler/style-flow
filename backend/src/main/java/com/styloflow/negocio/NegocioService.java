@@ -5,6 +5,8 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import com.styloflow.common.NotFoundException;
+import com.styloflow.tenant.TenantContext;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class NegocioService {
 
+    /** {@code codigo} es solo de lectura: identifica al negocio en el login y no se modifica. */
     public record NegocioDto(
+            String codigo,
             @NotBlank @Size(max = 120) String nombre,
             @Size(max = 30) String nit,
             @Size(max = 200) String direccion,
@@ -25,7 +29,7 @@ public class NegocioService {
             @Size(max = 250) String mensajeTicket) {
 
         static NegocioDto from(Negocio n) {
-            return new NegocioDto(n.getNombre(), n.getNit(), n.getDireccion(), n.getTelefono(), n.getMoneda(),
+            return new NegocioDto(n.getCodigo(), n.getNombre(), n.getNit(), n.getDireccion(), n.getTelefono(), n.getMoneda(),
                     n.getSimbolo(), n.getIvaPorcentaje(), n.getMensajeTicket());
         }
     }
@@ -34,7 +38,8 @@ public class NegocioService {
 
     @Transactional(readOnly = true)
     public Negocio actual() {
-        return repo.findById(Negocio.ID).orElseThrow(() -> new IllegalStateException("Falta la fila de negocio"));
+        long id = TenantContext.actual();
+        return repo.findById(id).orElseThrow(() -> new NotFoundException("Negocio", id));
     }
 
     @Transactional(readOnly = true)

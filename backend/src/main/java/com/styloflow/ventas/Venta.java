@@ -2,7 +2,7 @@ package com.styloflow.ventas;
 
 import com.styloflow.caja.Caja;
 import com.styloflow.clientes.Cliente;
-import com.styloflow.common.BaseEntity;
+import com.styloflow.common.TenantScopedEntity;
 import com.styloflow.usuarios.Usuario;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -26,7 +26,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "ventas")
-public class Venta extends BaseEntity {
+public class Venta extends TenantScopedEntity {
 
     public enum Estado { COMPLETADA, ANULADA }
 

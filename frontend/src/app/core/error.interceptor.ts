@@ -1,6 +1,7 @@
 import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
+import { esNegocioSuspendido } from './auth/auth.interceptor';
 import { ToastService } from './toast.service';
 
 /** Permite que una llamada maneje sus propios errores: `{ context: new HttpContext().set(SILENT, true) }` */
@@ -27,7 +28,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((err: unknown) => {
       const status = err instanceof HttpErrorResponse ? err.status : -1;
-      if (!req.context.get(SILENT) && status !== 401) {
+      // Las pantallas de login muestran su propio error
+      const esLogin = req.url.endsWith('/auth/login');
+      // Negocio suspendido: la sesión se cierra y el login muestra el motivo una sola vez
+      const suspendido = err instanceof HttpErrorResponse && esNegocioSuspendido(err);
+      if (!req.context.get(SILENT) && status !== 401 && !esLogin && !suspendido) {
         toast.error(errorMessage(err));
       }
       return throwError(() => err);

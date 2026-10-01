@@ -9,6 +9,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage),
   },
   {
+    path: 'plataforma/login',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/plataforma/plataforma-login.page').then((m) => m.PlataformaLoginPage),
+  },
+  {
     path: '',
     component: Shell,
     canActivate: [authGuard],
@@ -68,6 +74,12 @@ export const routes: Routes = [
         path: 'mis-comisiones',
         loadComponent: () =>
           import('./features/mis-comisiones/mis-comisiones.page').then((m) => m.MisComisionesPage),
+      },
+      {
+        path: 'plataforma',
+        canActivate: [roleGuard('SUPERADMIN')],
+        loadComponent: () =>
+          import('./features/plataforma/negocios.page').then((m) => m.NegociosPage),
       },
       { path: 'pos', redirectTo: 'cobrar' },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },

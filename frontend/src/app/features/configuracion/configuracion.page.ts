@@ -9,7 +9,16 @@ import { ToastService } from '../../core/toast.service';
   selector: 'sf-configuracion-page',
   imports: [ReactiveFormsModule],
   template: `
-    <h1 class="page-title mb-6">Configuración del negocio</h1>
+    <h1 class="page-title">Configuración del negocio</h1>
+    @if (codigo()) {
+      <p class="mt-1 mb-6 text-sm text-slate-500">
+        Código de acceso:
+        <code class="rounded bg-slate-100 px-1.5 py-0.5 text-slate-700">{{ codigo() }}</code>
+        — sus usuarios lo escriben al iniciar sesión.
+      </p>
+    } @else {
+      <div class="mb-6"></div>
+    }
     <form
       class="card grid max-w-2xl grid-cols-1 gap-4 p-6 sm:grid-cols-2"
       [formGroup]="form"
@@ -63,6 +72,7 @@ export class ConfiguracionPage implements OnInit {
   private readonly store = inject(NegocioStore);
   private readonly toast = inject(ToastService);
   protected readonly saving = signal(false);
+  protected readonly codigo = signal('');
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     nombre: ['', Validators.required],
@@ -76,7 +86,10 @@ export class ConfiguracionPage implements OnInit {
   });
 
   ngOnInit(): void {
-    this.api.negocio.obtener().subscribe((n) => this.form.patchValue(n as never));
+    this.api.negocio.obtener().subscribe((n) => {
+      this.codigo.set(n.codigo ?? '');
+      this.form.patchValue(n as never);
+    });
   }
 
   protected guardar(): void {

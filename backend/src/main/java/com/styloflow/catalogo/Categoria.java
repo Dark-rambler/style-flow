@@ -1,6 +1,6 @@
 package com.styloflow.catalogo;
 
-import com.styloflow.common.BaseEntity;
+import com.styloflow.common.TenantScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "categorias")
-public class Categoria extends BaseEntity {
+public class Categoria extends TenantScopedEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String nombre;
 
     @Column(nullable = false)

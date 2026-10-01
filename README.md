@@ -1,6 +1,6 @@
 # Stylo Flow
 
-Gestión para peluquerías: catálogo de servicios y productos, usuarios con roles, clientes, punto de venta con ticket, caja con arqueo y reportes (ventas, métodos de pago, comisiones por estilista, más vendidos, export CSV).
+Plataforma **multitenant** de gestión para peluquerías (cada negocio con sus datos aislados): catálogo de servicios y productos, usuarios con roles, clientes, punto de venta con ticket, caja con arqueo y reportes (ventas, métodos de pago, comisiones por estilista, más vendidos, export CSV).
 
 **Stack:** Angular 22 + Angular CDK + Tailwind CSS 4 · Spring Boot 4.1 (Java 17, Gradle) · PostgreSQL 16 · JWT.
 
@@ -18,9 +18,20 @@ cd backend && ./gradlew bootRun   # API en http://localhost:8085  (Windows: grad
 cd frontend && npm install && npm start   # App en http://localhost:4201
 ```
 
-Ingresa con **admin / admin123** y cambia la contraseña desde el menú de usuario.
+**Accesos de desarrollo**
 
-Primeros pasos en la app:
+| Dónde | Negocio | Usuario | Contraseña |
+|---|---|---|---|
+| http://localhost:4201/login | `demo` | `admin` | `admin123` |
+| http://localhost:4201/plataforma/login | — | `superadmin` | `superadmin123` |
+
+Cambia ambas contraseñas (`ADMIN_PASSWORD`, `SUPERADMIN_PASSWORD`) fuera de desarrollo.
+
+**Alta de una peluquería:** el superadmin entra a *Plataforma → Negocios → Nuevo negocio*, define el **código de
+acceso** (p. ej. `salon-bella`) y el administrador inicial; opcionalmente carga el catálogo base. Los usuarios de esa
+peluquería ingresan con *código + usuario + contraseña*. Desde el mismo panel se suspende o reactiva un negocio.
+
+Primeros pasos dentro de un negocio:
 1. **Configuración** → datos del negocio (NIT, dirección, mensaje del ticket).
 2. **Usuarios** → crea cajeros y estilistas (con su % de comisión).
 3. **Catálogo** → ajusta servicios, precios y productos.
@@ -34,6 +45,7 @@ Primeros pasos en la app:
 | ADMIN | Todo: catálogo, usuarios, reportes, configuración, anular ventas |
 | CAJERO | Cobrar, caja, historial de ventas, clientes |
 | ESTILISTA | Ver sus servicios y comisiones |
+| SUPERADMIN | Plataforma: alta, suspensión y métricas de negocios (no opera dentro de ellos) |
 
 ## Documentación de la API
 
