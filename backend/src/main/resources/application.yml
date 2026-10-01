@@ -35,7 +35,7 @@ app:
     expiration-hours: ${JWT_EXPIRATION_HOURS:8}
     issuer: stylo-flow
   cors:
-    origins: ${CORS_ORIGINS:http://localhost:4201}
+    origins: ${CORS_ORIGINS:http://localhost:*,http://127.0.0.1:*}
   admin:
     username: ${ADMIN_USERNAME:admin}
     password: ${ADMIN_PASSWORD:admin123}

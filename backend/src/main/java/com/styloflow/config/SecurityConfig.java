@@ -88,7 +88,8 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(props.cors().origins());
+        // Patrones: permite p. ej. http://localhost:* en desarrollo (el puerto de ng serve puede variar)
+        config.setAllowedOriginPatterns(props.cors().origins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Content-Disposition"));
