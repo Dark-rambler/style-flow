@@ -1,0 +1,28 @@
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.iml
+.DS_Store
+Thumbs.db
+
+# Claude Code local
+.claude/settings.local.json
+
+# Backend
+backend/build/
+backend/.gradle/
+backend/bin/
+backend/out/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+node_modules/
