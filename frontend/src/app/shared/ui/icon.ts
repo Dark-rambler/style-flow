@@ -72,6 +72,8 @@ const ICONS = {
     paths: ['M19 5 5 19'],
   },
   panel: { rects: [[3, 3, 18, 18, 2]], paths: ['M9 3v18'] },
+  chevronLeft: { paths: ['m15 18-6-6 6-6'] },
+  chevronRight: { paths: ['m9 18 6-6-6-6'] },
   key: {
     circles: [[7.5, 15.5, 5.5]],
     paths: ['m21 2-9.6 9.6', 'm15.5 7.5 3 3L22 7l-3-3'],

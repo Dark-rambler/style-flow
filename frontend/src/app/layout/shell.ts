@@ -39,7 +39,7 @@ const NAV: NavItem[] = [
     <div class="flex h-full">
       <!-- Sidebar -->
       <aside
-        class="fixed inset-y-0 left-0 z-30 flex w-60 shrink-0 -translate-x-full flex-col border-r border-slate-200 bg-white transition-[translate,width] lg:static lg:translate-x-0 print:hidden"
+        class="fixed inset-y-0 left-0 z-30 flex w-60 shrink-0 -translate-x-full flex-col border-r border-slate-200 bg-white transition-[translate,width] lg:relative lg:translate-x-0 print:hidden"
         [class.translate-x-0]="menuAbierto()"
         [class]="rail() ? 'lg:w-16' : ''"
       >
@@ -73,6 +73,17 @@ const NAV: NavItem[] = [
             </a>
           }
         </nav>
+        <!-- Botón en el borde del menú (escritorio): contraer / expandir -->
+        <button
+          type="button"
+          class="absolute top-20 -right-3 z-10 hidden size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 shadow-sm transition hover:border-brand-300 hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-brand-500 lg:flex"
+          [attr.aria-label]="rail() ? 'Expandir menú' : 'Contraer menú'"
+          [attr.title]="rail() ? 'Expandir menú' : 'Contraer menú'"
+          [attr.aria-expanded]="!rail()"
+          (click)="alternarMenu()"
+        >
+          <sf-icon [name]="rail() ? 'chevronRight' : 'chevronLeft'" class="size-4" />
+        </button>
       </aside>
 
       @if (menuAbierto()) {
