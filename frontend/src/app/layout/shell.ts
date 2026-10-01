@@ -7,33 +7,34 @@ import { AuthService } from '../core/auth/auth.service';
 import { NegocioStore } from '../core/negocio.store';
 import { Rol, ROLES } from '../core/models';
 import { injectDialog, openDialog } from '../shared/ui/dialog';
+import { Icon, IconName } from '../shared/ui/icon';
 import { PasswordDialog } from './password-dialog';
 
 interface NavItem {
   path: string;
   label: string;
-  icon: string;
+  icon: IconName;
   roles: Rol[];
 }
 
 const SIDEBAR_KEY = 'stylo.sidebar';
 
 const NAV: NavItem[] = [
-  { path: '/dashboard', label: 'Inicio', icon: '◧', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/pos', label: 'Punto de venta', icon: '🛒', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/caja', label: 'Caja', icon: '💵', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/ventas', label: 'Ventas', icon: '🧾', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/clientes', label: 'Clientes', icon: '👥', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/catalogo', label: 'Catálogo', icon: '✂️', roles: ['ADMIN'] },
-  { path: '/reportes', label: 'Reportes', icon: '📊', roles: ['ADMIN'] },
-  { path: '/usuarios', label: 'Usuarios', icon: '🔑', roles: ['ADMIN'] },
-  { path: '/configuracion', label: 'Configuración', icon: '⚙️', roles: ['ADMIN'] },
-  { path: '/mis-comisiones', label: 'Mis comisiones', icon: '⭐', roles: ['ESTILISTA'] },
+  { path: '/dashboard', label: 'Inicio', icon: 'dashboard', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/pos', label: 'Punto de venta', icon: 'cart', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/caja', label: 'Caja', icon: 'wallet', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/ventas', label: 'Ventas', icon: 'receipt', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/clientes', label: 'Clientes', icon: 'users', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/catalogo', label: 'Catálogo', icon: 'scissors', roles: ['ADMIN'] },
+  { path: '/reportes', label: 'Reportes', icon: 'chart', roles: ['ADMIN'] },
+  { path: '/usuarios', label: 'Usuarios', icon: 'shield', roles: ['ADMIN'] },
+  { path: '/configuracion', label: 'Configuración', icon: 'settings', roles: ['ADMIN'] },
+  { path: '/mis-comisiones', label: 'Mis comisiones', icon: 'percent', roles: ['ESTILISTA'] },
 ];
 
 @Component({
   selector: 'sf-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CdkMenuTrigger, CdkMenu, CdkMenuItem],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CdkMenuTrigger, CdkMenu, CdkMenuItem, Icon],
   template: `
     <div class="flex h-full">
       <!-- Sidebar -->
@@ -67,24 +68,11 @@ const NAV: NavItem[] = [
               [attr.title]="rail() ? item.label : null"
               (click)="menuAbierto.set(false)"
             >
-              <span class="w-5 shrink-0 text-center" aria-hidden="true">{{ item.icon }}</span>
+              <sf-icon [name]="item.icon" class="size-5" />
               <span class="truncate" [class]="rail() ? 'lg:sr-only' : ''">{{ item.label }}</span>
             </a>
           }
         </nav>
-        <button
-          type="button"
-          class="hidden h-11 shrink-0 items-center gap-3 border-t border-slate-200 px-6 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800 lg:flex"
-          [class]="rail() ? 'lg:justify-center lg:px-0' : ''"
-          [attr.aria-expanded]="!rail()"
-          [attr.title]="rail() ? 'Expandir menú' : 'Contraer menú'"
-          (click)="alternarSidebar()"
-        >
-          <span aria-hidden="true" class="text-base">{{ rail() ? '»' : '«' }}</span>
-          <span [class]="rail() ? 'lg:sr-only' : ''">{{
-            rail() ? 'Expandir menú' : 'Contraer menú'
-          }}</span>
-        </button>
       </aside>
 
       @if (menuAbierto()) {
@@ -99,13 +87,15 @@ const NAV: NavItem[] = [
         <header
           class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6 print:hidden"
         >
+          <!-- Mostrar/ocultar menú: en escritorio alterna entre completo e íconos; en móvil lo abre encima -->
           <button
             type="button"
-            class="btn-ghost lg:hidden"
-            (click)="menuAbierto.set(true)"
-            aria-label="Abrir menú"
+            class="btn-ghost -ml-2 px-2 text-slate-500 hover:text-slate-800"
+            aria-label="Mostrar u ocultar menú"
+            [attr.title]="rail() ? 'Expandir menú' : 'Contraer menú'"
+            (click)="alternarMenu()"
           >
-            ☰
+            <sf-icon name="panel" class="size-5" />
           </button>
           <div class="flex-1"></div>
           <button type="button" class="btn-ghost" [cdkMenuTriggerFor]="userMenu">
@@ -128,16 +118,18 @@ const NAV: NavItem[] = [
             >
               <button
                 cdkMenuItem
-                class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
+                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-100"
                 (cdkMenuItemTriggered)="cambiarPassword()"
               >
+                <sf-icon name="key" class="size-4 text-slate-400" />
                 Cambiar contraseña
               </button>
               <button
                 cdkMenuItem
-                class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-100"
+                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-100"
                 (cdkMenuItemTriggered)="auth.logout()"
               >
+                <sf-icon name="logout" class="size-4" />
                 Cerrar sesión
               </button>
             </div>
@@ -202,7 +194,15 @@ export class Shell implements OnInit {
     this.negocio.cargar();
   }
 
-  protected alternarSidebar(): void {
+  protected alternarMenu(): void {
+    if (matchMedia('(min-width: 64rem)').matches) {
+      this.alternarSidebar();
+    } else {
+      this.menuAbierto.update((v) => !v);
+    }
+  }
+
+  private alternarSidebar(): void {
     if (this.enPos()) {
       this.expandidoEnPos.update((v) => !v);
       return;
