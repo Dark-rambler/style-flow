@@ -1,0 +1,13 @@
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { ToastContainer } from './shared/ui/toast-container';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet, ToastContainer],
+  template: `
+    <router-outlet />
+    <sf-toast-container />
+  `,
+})
+export class App {}

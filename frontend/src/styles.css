@@ -1,0 +1,121 @@
+@import 'tailwindcss';
+@import '@angular/cdk/overlay-prebuilt.css';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #fdf2f8;
+  --color-brand-100: #fce7f3;
+  --color-brand-200: #fbcfe8;
+  --color-brand-500: #db2777;
+  --color-brand-600: #be185d;
+  --color-brand-700: #9d174d;
+}
+
+@layer base {
+  html,
+  body {
+    @apply h-full bg-slate-50 text-slate-800 antialiased;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500
+      disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-brand-600 text-white hover:bg-brand-700;
+}
+
+@utility btn-secondary {
+  @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+}
+
+@utility btn-danger {
+  @apply btn bg-red-600 text-white hover:bg-red-700;
+}
+
+@utility btn-ghost {
+  @apply btn text-slate-600 hover:bg-slate-100;
+}
+
+@utility btn-sm {
+  @apply px-2.5 py-1 text-xs;
+}
+
+@utility field {
+  @apply flex flex-col gap-1;
+}
+
+@utility label {
+  @apply text-sm font-medium text-slate-700;
+}
+
+@utility input {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm
+      placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none
+      disabled:bg-slate-100;
+}
+
+@utility error-text {
+  @apply text-xs text-red-600;
+}
+
+@utility card {
+  @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+}
+
+@utility badge {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+}
+
+@utility data-table {
+  @apply w-full text-left text-sm;
+}
+
+@utility page-title {
+  @apply text-2xl font-semibold text-slate-900;
+}
+
+@layer components {
+  .input.ng-invalid.ng-touched {
+    @apply border-red-400 focus:ring-red-100;
+  }
+
+  .data-table th {
+    @apply border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold tracking-wide text-slate-500 uppercase;
+  }
+
+  .data-table td {
+    @apply border-b border-slate-100 px-4 py-2.5;
+  }
+
+  .data-table tr:last-child td {
+    @apply border-b-0;
+  }
+}
+
+/* Panel de los diálogos CDK */
+.sf-dialog {
+  @apply max-h-[90vh] w-full overflow-auto rounded-xl bg-white shadow-xl;
+}
+.cdk-overlay-dark-backdrop {
+  background: rgb(15 23 42 / 0.5);
+}
+
+/* Impresión del ticket: solo se imprime el contenido marcado */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 80mm;
+  }
+}
