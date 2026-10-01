@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "angular-cli": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["frontend/node_modules/@angular/cli/bin/ng.js", "mcp"]
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "DATABASE_URI",
+        "crystaldba/postgres-mcp",
+        "--access-mode=restricted"
+      ],
+      "env": {
+        "DATABASE_URI": "${STYLO_MCP_DATABASE_URI:-postgresql://stylo:stylo@host.docker.internal:5434/stylo}"
+      }
+    }
+  }
+}

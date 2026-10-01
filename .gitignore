@@ -26,3 +26,6 @@ frontend/dist/
 frontend/.angular/
 frontend/coverage/
 node_modules/
+
+# Claude Code
+.claude/.cache/
