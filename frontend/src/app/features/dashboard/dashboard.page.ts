@@ -3,7 +3,8 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { Caja, Producto, Resumen, VentaResumen } from '../../core/models';
+import { CajaStore } from '../../core/caja.store';
+import { Producto, Resumen, VentaResumen } from '../../core/models';
 import { MoneyPipe } from '../../shared/money.pipe';
 
 @Component({
@@ -15,7 +16,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
         <h1 class="page-title">Hola, {{ auth.usuario()?.nombre }}</h1>
         <p class="text-sm text-slate-500">Resumen de hoy</p>
       </div>
-      <a routerLink="/pos" class="btn-primary">Nueva venta</a>
+      <a routerLink="/cobrar" class="btn-primary">Cobrar</a>
     </div>
 
     <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -91,13 +92,14 @@ export class DashboardPage implements OnInit {
   private readonly api = inject(ApiService);
   protected readonly auth = inject(AuthService);
   protected readonly resumen = signal<Resumen | null>(null);
-  protected readonly caja = signal<Caja | null>(null);
+  private readonly cajaStore = inject(CajaStore);
+  protected readonly caja = this.cajaStore.caja;
   protected readonly ultimas = signal<VentaResumen[]>([]);
   protected readonly stockBajo = signal<Producto[]>([]);
 
   ngOnInit(): void {
     this.api.reportes.resumen({}).subscribe((r) => this.resumen.set(r));
-    this.api.caja.actual().subscribe((c) => this.caja.set(c));
+    this.cajaStore.refrescar();
     this.api.ventas.buscar({ size: 8 }).subscribe((p) => this.ultimas.set(p.content));
     this.api.catalogo.stockBajo().subscribe((p) => this.stockBajo.set(p));
   }

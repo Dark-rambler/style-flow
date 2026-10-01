@@ -35,8 +35,14 @@ import { MoneyPipe } from '../../shared/money.pipe';
         @for (i of v.items; track i.id) {
           <div class="flex justify-between gap-2">
             <span>{{ i.cantidad }} x {{ i.descripcion }}</span>
-            <span class="whitespace-nowrap">{{ i.subtotal | money }}</span>
+            <span class="whitespace-nowrap">{{ i.precioUnitario * i.cantidad | money }}</span>
           </div>
+          @if (i.descuento > 0) {
+            <div class="flex justify-between gap-2 pl-4 text-slate-500">
+              <span>{{ i.subtotal === 0 ? 'Cortesía' : 'Descuento' }}</span>
+              <span class="whitespace-nowrap">-{{ i.descuento | money }}</span>
+            </div>
+          }
           @if (i.estilista) {
             <p class="pl-4 text-slate-500">({{ i.estilista }})</p>
           }

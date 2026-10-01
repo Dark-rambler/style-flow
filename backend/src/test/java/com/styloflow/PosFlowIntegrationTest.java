@@ -30,6 +30,9 @@ class PosFlowIntegrationTest {
     @Autowired
     MockMvc mvc;
 
+    /** Estilista creado en el test 3 y reutilizado después. */
+    static String estilistaId;
+
     @Test
     @Order(1)
     void loginInvalidoDevuelve401() throws Exception {
@@ -51,7 +54,7 @@ class PosFlowIntegrationTest {
     @Order(3)
     void ventaCalculaTotalesCambioEIvaYDescuentaStock() throws Exception {
         String token = admin();
-        String estilistaId = crearEstilista(token, "luis", 50);
+        estilistaId = crearEstilista(token, "luis", 50);
         mvc.perform(auth(json(post("/api/caja/abrir"), "{\"montoInicial\":100}"), token))
                 .andExpect(status().isOk());
 
@@ -108,6 +111,43 @@ class PosFlowIntegrationTest {
         mvc.perform(auth(get("/api/reportes/resumen"), admin()))
                 .andExpect(jsonPath("$.cantidadVentas").value(1))
                 .andExpect(jsonPath("$.totalVentas").value(250.00));
+    }
+
+    @Test
+    @Order(6)
+    void cortesiaEnProductoNoReduceLaComisionDelServicio() throws Exception {
+        String token = admin();
+        mvc.perform(auth(json(post("/api/caja/abrir"), "{\"montoInicial\":0}"), token)).andExpect(status().isOk());
+        String productoId = idProducto(token, "SHA-500");
+
+        // Descuento de línea mayor al importe -> 422
+        mvc.perform(auth(json(post("/api/ventas"), """
+                        {"items":[{"tipo":"PRODUCTO","itemId":%s,"cantidad":1,"descuento":999}],"metodoPago":"QR"}
+                        """.formatted(productoId)), token))
+                .andExpect(status().isUnprocessableContent());
+
+        // Servicio 100 con estilista + producto 85 en cortesía: total 100
+        mvc.perform(auth(json(post("/api/ventas"), """
+                        {"items":[
+                          {"tipo":"SERVICIO","itemId":1,"cantidad":1,"precioUnitario":100,"estilistaId":%s},
+                          {"tipo":"PRODUCTO","itemId":%s,"cantidad":1,"descuento":85}],
+                         "metodoPago":"QR"}
+                        """.formatted(estilistaId, productoId)), token))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.subtotal").value(100.00))
+                .andExpect(jsonPath("$.descuento").value(0))
+                .andExpect(jsonPath("$.total").value(100.00))
+                .andExpect(jsonPath("$.items[1].descuento").value(85.00))
+                .andExpect(jsonPath("$.items[1].subtotal").value(0));
+
+        // Producción del día: 92.59 (venta del test 3) + 100 completos de esta venta -> 192.59; 50% = 96.30
+        mvc.perform(auth(get("/api/reportes/estilistas"), token))
+                .andExpect(jsonPath("$[0].total").value(192.59))
+                .andExpect(jsonPath("$[0].comision").value(96.30));
+
+        mvc.perform(auth(get("/api/ventas"), token))
+                .andExpect(jsonPath("$.content[0].cajaAbierta").value(true))
+                .andExpect(jsonPath("$.content[1].cajaAbierta").value(false));
     }
 
     // ---- helpers ----

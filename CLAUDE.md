@@ -34,6 +34,7 @@ Los puertos 5432/5433/8080/4200 están ocupados por otros proyectos en esta máq
 - Solo una caja abierta a la vez (índice único parcial). Sin caja abierta no se vende.
 - Venta: precio de catálogo o manual por ítem; descuento global ≤ subtotal; en EFECTIVO se calcula el cambio; productos descuentan stock con bloqueo pesimista.
 - Anular venta: solo ADMIN, solo si su caja sigue abierta; repone stock.
+- Descuentos: cada ítem tiene su propio `descuento` (cortesía = descuento total de la línea) y `venta_items.subtotal` es neto; `ventas.descuento` es solo el descuento global. Así la comisión de cada servicio no se ve afectada por cortesías en otros ítems.
 - Comisión del estilista = subtotal del servicio prorrateado por el descuento × `comision_porcentaje`.
 
 ## Frontend
@@ -44,6 +45,8 @@ Los puertos 5432/5433/8080/4200 están ocupados por otros proyectos en esta máq
 - Rutas lazy con `roleGuard(...)` en `app.routes.ts`; el menú lateral (`layout/shell.ts`) filtra por rol.
 - UI: utilidades Tailwind propias en `styles.css` (`btn-primary`, `input`, `card`, `data-table`, …). Diálogos con CDK Dialog vía `openDialog()` en `shared/ui/dialog.ts`.
 - Montos con el pipe `money` (usa el símbolo del negocio, `Bs`).
+- Nombres de menú: **Cobrar** (`/cobrar`, el POS; `/pos` redirige), **Caja** (abrir/cerrar turno), **Historial de ventas** (`/ventas`, acepta `?clienteId=&cliente=`).
+- Estado de la caja abierta: usar `core/caja.store.ts` (`CajaStore`) y llamar `refrescar()` tras vender o anular; no llamar `api.caja.actual()` directo.
 
 ## Claude Code en este repo
 

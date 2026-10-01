@@ -60,6 +60,11 @@ public class VentaItem {
     @Column(name = "precio_unitario", nullable = false)
     private BigDecimal precioUnitario;
 
+    /** Descuento sobre la línea (cortesía o rebaja puntual). */
+    @Column(nullable = false)
+    private BigDecimal descuento = BigDecimal.ZERO;
+
+    /** Neto de la línea: precio × cantidad − descuento. */
     @Column(nullable = false)
     private BigDecimal subtotal;
 }

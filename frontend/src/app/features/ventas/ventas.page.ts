@@ -1,11 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { CajaStore } from '../../core/caja.store';
 import { METODOS_PAGO, Page, VentaResumen } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
-import { isoDate } from '../../shared/dates';
+import { haceDias, isoDate } from '../../shared/dates';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { ConfirmData, ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { injectDialog, openDialog } from '../../shared/ui/dialog';
@@ -16,7 +18,22 @@ import { TicketDialog } from './ticket.dialog';
   imports: [FormsModule, MoneyPipe, DatePipe],
   template: `
     <div class="mb-6 flex flex-wrap items-end gap-3">
-      <h1 class="page-title mr-auto">Ventas</h1>
+      <div class="mr-auto">
+        <h1 class="page-title">Historial de ventas</h1>
+        @if (filtroCliente(); as c) {
+          <span class="badge mt-2 gap-1 bg-brand-50 text-brand-700">
+            Cliente: {{ c.nombre }}
+            <button
+              type="button"
+              class="ml-1 hover:text-brand-900"
+              aria-label="Quitar filtro de cliente"
+              (click)="quitarCliente()"
+            >
+              ✕
+            </button>
+          </span>
+        }
+      </div>
       <label class="field"
         ><span class="label">Desde</span
         ><input class="input" type="date" [ngModel]="desde()" (ngModelChange)="desde.set($event)"
@@ -67,7 +84,7 @@ import { TicketDialog } from './ticket.dialog';
                 <button type="button" class="btn-ghost btn-sm" (click)="verTicket(v)">
                   Ticket
                 </button>
-                @if (esAdmin && v.estado === 'COMPLETADA') {
+                @if (esAdmin && v.estado === 'COMPLETADA' && v.cajaAbierta) {
                   <button type="button" class="btn-ghost btn-sm text-red-600" (click)="anular(v)">
                     Anular
                   </button>
@@ -77,7 +94,8 @@ import { TicketDialog } from './ticket.dialog';
           } @empty {
             <tr>
               <td colspan="8" class="text-center text-slate-400">
-                No hay ventas en el rango seleccionado
+                No hay ventas {{ filtroCliente() ? 'de este cliente ' : '' }}en el rango
+                seleccionado
               </td>
             </tr>
           }
@@ -110,24 +128,55 @@ import { TicketDialog } from './ticket.dialog';
     }
   `,
 })
-export class VentasPage implements OnInit {
+export class VentasPage {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastService);
   private readonly dialog = injectDialog();
+  private readonly router = inject(Router);
+  private readonly cajaStore = inject(CajaStore);
   protected readonly esAdmin = inject(AuthService).hasRole('ADMIN');
 
+  /** Query params opcionales: `/ventas?clienteId=3&cliente=María` (desde Clientes → Ver ventas). */
+  readonly clienteId = input<string>();
+  readonly cliente = input<string>();
+
+  protected readonly filtroCliente = signal<{ id: number; nombre: string } | null>(null);
   protected readonly desde = signal(isoDate());
   protected readonly hasta = signal(isoDate());
   protected readonly page = signal<Page<VentaResumen> | null>(null);
 
-  ngOnInit(): void {
-    this.buscar(0);
+  constructor() {
+    // Se reevalúa con cada cambio de URL: entrar desde Clientes filtra, volver a /ventas lo quita.
+    effect(() => {
+      const id = Number(this.clienteId());
+      const nombre = this.cliente();
+      untracked(() => {
+        if (id) {
+          this.filtroCliente.set({ id, nombre: nombre ?? `N° ${id}` });
+          this.desde.set(haceDias(365)); // historial del cliente: último año por defecto
+        } else if (this.filtroCliente()) {
+          this.filtroCliente.set(null);
+          this.desde.set(isoDate());
+        }
+        this.buscar(0);
+      });
+    });
   }
 
   protected buscar(page: number): void {
     this.api.ventas
-      .buscar({ desde: this.desde(), hasta: this.hasta(), page, size: 20 })
+      .buscar({
+        desde: this.desde(),
+        hasta: this.hasta(),
+        clienteId: this.filtroCliente()?.id,
+        page,
+        size: 20,
+      })
       .subscribe((p) => this.page.set(p));
+  }
+
+  protected quitarCliente(): void {
+    this.router.navigate(['/ventas'], { replaceUrl: true });
   }
 
   protected metodo(m: string): string {
@@ -159,6 +208,7 @@ export class VentasPage implements OnInit {
       this.api.ventas.anular(v.id, motivo).subscribe(() => {
         this.toast.success('Venta anulada');
         this.buscar(this.page()?.page ?? 0);
+        this.cajaStore.refrescar();
       });
     });
   }

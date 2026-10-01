@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
+import { CajaStore } from '../core/caja.store';
 import { NegocioStore } from '../core/negocio.store';
 import { Rol, ROLES } from '../core/models';
 import { injectDialog, openDialog } from '../shared/ui/dialog';
@@ -21,9 +22,9 @@ const SIDEBAR_KEY = 'stylo.sidebar';
 
 const NAV: NavItem[] = [
   { path: '/dashboard', label: 'Inicio', icon: 'dashboard', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/pos', label: 'Punto de venta', icon: 'cart', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/cobrar', label: 'Cobrar', icon: 'cart', roles: ['ADMIN', 'CAJERO'] },
   { path: '/caja', label: 'Caja', icon: 'wallet', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/ventas', label: 'Ventas', icon: 'receipt', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/ventas', label: 'Historial de ventas', icon: 'receipt', roles: ['ADMIN', 'CAJERO'] },
   { path: '/clientes', label: 'Clientes', icon: 'users', roles: ['ADMIN', 'CAJERO'] },
   { path: '/catalogo', label: 'Catálogo', icon: 'scissors', roles: ['ADMIN'] },
   { path: '/reportes', label: 'Reportes', icon: 'chart', roles: ['ADMIN'] },
@@ -108,6 +109,27 @@ const NAV: NavItem[] = [
           >
             <sf-icon name="panel" class="size-5" />
           </button>
+          @if (auth.hasRole('ADMIN', 'CAJERO') && cajaStore.cargada()) {
+            <a
+              routerLink="/caja"
+              class="ml-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium transition"
+              [class]="
+                cajaStore.abierta()
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+              "
+              [attr.title]="
+                cajaStore.abierta() ? 'Ver la caja del turno' : 'Abrir caja para poder cobrar'
+              "
+            >
+              <span
+                class="size-2 rounded-full"
+                [class]="cajaStore.abierta() ? 'bg-emerald-500' : 'bg-amber-500'"
+                aria-hidden="true"
+              ></span>
+              {{ cajaStore.abierta() ? 'Caja abierta' : 'Caja cerrada' }}
+            </a>
+          }
           <div class="flex-1"></div>
           <button type="button" class="btn-ghost" [cdkMenuTriggerFor]="userMenu">
             <span
@@ -157,6 +179,7 @@ const NAV: NavItem[] = [
 export class Shell implements OnInit {
   protected readonly auth = inject(AuthService);
   protected readonly negocio = inject(NegocioStore);
+  protected readonly cajaStore = inject(CajaStore);
   private readonly dialog = injectDialog();
 
   private readonly router = inject(Router);
@@ -165,7 +188,7 @@ export class Shell implements OnInit {
 
   /** Preferencia del usuario fuera del POS (persistida). */
   private readonly colapsado = signal(leerPreferencia());
-  /** En el POS el menú se contrae solo; el usuario puede expandirlo mientras siga ahí. */
+  /** En Cobrar el menú se contrae solo; el usuario puede expandirlo mientras siga ahí. */
   private readonly expandidoEnPos = signal(false);
   private readonly enPos = toSignal(
     this.router.events.pipe(
@@ -203,6 +226,7 @@ export class Shell implements OnInit {
 
   ngOnInit(): void {
     this.negocio.cargar();
+    if (this.auth.hasRole('ADMIN', 'CAJERO')) this.cajaStore.refrescar();
   }
 
   protected alternarMenu(): void {
@@ -228,7 +252,7 @@ export class Shell implements OnInit {
   }
 
   private esPos(): boolean {
-    return this.router.url.startsWith('/pos');
+    return this.router.url.startsWith('/cobrar');
   }
 
   protected cambiarPassword(): void {

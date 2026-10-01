@@ -3,10 +3,12 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
 import { Caja, METODOS_PAGO } from '../../core/models';
+import { CajaStore } from '../../core/caja.store';
 import { ToastService } from '../../core/toast.service';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { ConfirmData, ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { injectDialog, openDialog } from '../../shared/ui/dialog';
+import { AbrirCajaDialog } from './abrir-caja.dialog';
 
 @Component({
   selector: 'sf-caja-page',
@@ -117,30 +119,15 @@ import { injectDialog, openDialog } from '../../shared/ui/dialog';
         </form>
       </div>
     } @else {
-      <form class="card max-w-md p-6" (ngSubmit)="abrir()">
-        <h2 class="font-semibold">Abrir caja</h2>
-        <p class="mt-1 text-sm text-slate-500">Ingrese el efectivo con el que inicia el turno.</p>
-        <label class="field mt-4">
-          <span class="label">Fondo inicial</span>
-          <input
-            class="input text-lg"
-            type="number"
-            min="0"
-            step="0.5"
-            name="monto"
-            [ngModel]="montoInicial()"
-            (ngModelChange)="montoInicial.set($event)"
-            required
-          />
-        </label>
-        <button
-          type="submit"
-          class="btn-primary mt-4 w-full"
-          [disabled]="montoInicial() === null || procesando()"
-        >
-          Abrir caja
-        </button>
-      </form>
+      <div class="card flex max-w-md flex-col items-start gap-3 p-6">
+        <span class="badge bg-amber-100 text-amber-700">Cerrada</span>
+        <h2 class="font-semibold">No hay una caja abierta</h2>
+        <p class="text-sm text-slate-500">
+          Abra la caja al iniciar el turno con el efectivo disponible. Solo con la caja abierta se
+          puede cobrar.
+        </p>
+        <button type="button" class="btn-primary" (click)="abrir()">Abrir caja</button>
+      </div>
     }
 
     <h2 class="mt-10 mb-3 text-lg font-semibold">Historial de cierres</h2>
@@ -189,11 +176,11 @@ export class CajaPage implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly dialog = injectDialog();
 
-  protected readonly cargando = signal(true);
+  private readonly store = inject(CajaStore);
+  protected readonly caja = this.store.caja;
+  protected readonly cargando = computed(() => !this.store.cargada());
   protected readonly procesando = signal(false);
-  protected readonly caja = signal<Caja | null>(null);
   protected readonly historial = signal<Caja[]>([]);
-  protected readonly montoInicial = signal<number | null>(0);
   protected readonly contado = signal<number | null>(null);
   protected readonly observaciones = signal('');
   protected readonly diferencia = computed(() => {
@@ -207,10 +194,7 @@ export class CajaPage implements OnInit {
   }
 
   protected cargar(): void {
-    this.api.caja.actual().subscribe((c) => {
-      this.caja.set(c);
-      this.cargando.set(false);
-    });
+    this.store.refrescar();
     this.api.caja.historial(0, 15).subscribe((p) => this.historial.set(p.content));
   }
 
@@ -219,15 +203,12 @@ export class CajaPage implements OnInit {
   }
 
   protected abrir(): void {
-    this.procesando.set(true);
-    this.api.caja.abrir(this.montoInicial() ?? 0).subscribe({
-      next: () => {
-        this.toast.success('Caja abierta');
-        this.procesando.set(false);
-        this.cargar();
-      },
-      error: () => this.procesando.set(false),
-    });
+    openDialog<Caja, undefined, AbrirCajaDialog>(
+      this.dialog,
+      AbrirCajaDialog,
+      undefined,
+      '26rem',
+    ).closed.subscribe((c) => c && this.cargar());
   }
 
   protected cerrar(): void {
@@ -240,9 +221,14 @@ export class CajaPage implements OnInit {
     openDialog(this.dialog, ConfirmDialog, data, '26rem').closed.subscribe((ok) => {
       if (!ok) return;
       this.procesando.set(true);
-      this.api.caja.cerrar(this.contado() ?? 0, this.observaciones() || undefined).subscribe({
+      this.store.cerrar(this.contado() ?? 0, this.observaciones() || undefined).subscribe({
         next: (c) => {
-          this.toast.success(`Caja cerrada. Diferencia: ${c.diferencia}`);
+          const d = c.diferencia ?? 0;
+          this.toast.success(
+            d === 0
+              ? 'Caja cerrada: el efectivo cuadra'
+              : `Caja cerrada con ${d > 0 ? 'sobrante' : 'faltante'} de ${Math.abs(d).toFixed(2)}`,
+          );
           this.procesando.set(false);
           this.contado.set(null);
           this.observaciones.set('');

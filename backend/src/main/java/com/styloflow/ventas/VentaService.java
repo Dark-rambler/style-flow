@@ -60,6 +60,7 @@ public class VentaService {
         }
 
         BigDecimal subtotal = v.getItems().stream().map(VentaItem::getSubtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+        // subtotal ya es neto de los descuentos por línea; este es el descuento global de la venta
         BigDecimal descuento = dinero(req.descuento() != null ? req.descuento() : BigDecimal.ZERO);
         if (descuento.compareTo(subtotal) > 0) {
             throw new BusinessException("El descuento no puede superar el subtotal");
@@ -120,8 +121,14 @@ public class VentaService {
             item.setEstilista(e);
         }
         BigDecimal precio = dinero(ir.precioUnitario() != null ? ir.precioUnitario() : precioCatalogo);
+        BigDecimal bruto = precio.multiply(BigDecimal.valueOf(ir.cantidad()));
+        BigDecimal descuento = dinero(ir.descuento() != null ? ir.descuento() : BigDecimal.ZERO);
+        if (descuento.compareTo(bruto) > 0) {
+            throw new BusinessException("El descuento de '" + item.getDescripcion() + "' supera su importe");
+        }
         item.setPrecioUnitario(precio);
-        item.setSubtotal(precio.multiply(BigDecimal.valueOf(ir.cantidad())));
+        item.setDescuento(descuento);
+        item.setSubtotal(bruto.subtract(descuento));
         return item;
     }
 

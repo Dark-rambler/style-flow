@@ -1,6 +1,7 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { debounceTime, Subject } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { Cliente, Page } from '../../core/models';
@@ -9,7 +10,7 @@ import { ClienteFormDialog } from './cliente-form.dialog';
 
 @Component({
   selector: 'sf-clientes-page',
-  imports: [FormsModule, CdkTableModule],
+  imports: [FormsModule, CdkTableModule, RouterLink],
   template: `
     <div class="mb-6 flex flex-wrap items-center gap-3">
       <h1 class="page-title mr-auto">Clientes</h1>
@@ -45,6 +46,12 @@ import { ClienteFormDialog } from './cliente-form.dialog';
         <ng-container cdkColumnDef="acciones">
           <th cdk-header-cell *cdkHeaderCellDef></th>
           <td cdk-cell *cdkCellDef="let c" class="text-right">
+            <a
+              class="btn-ghost btn-sm"
+              routerLink="/ventas"
+              [queryParams]="{ clienteId: c.id, cliente: c.nombre }"
+              >Ver ventas</a
+            >
             <button type="button" class="btn-ghost btn-sm" (click)="editar(c)">Editar</button>
           </td>
         </ng-container>

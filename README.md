@@ -24,15 +24,15 @@ Primeros pasos en la app:
 1. **Configuración** → datos del negocio (NIT, dirección, mensaje del ticket).
 2. **Usuarios** → crea cajeros y estilistas (con su % de comisión).
 3. **Catálogo** → ajusta servicios, precios y productos.
-4. **Caja** → abre caja con el fondo inicial.
-5. **Punto de venta** → cobra; al cerrar el día, arquea la caja.
+4. **Caja** → abre la caja con el fondo inicial (también se puede abrir desde **Cobrar**).
+5. **Cobrar** → registra la venta e imprime el ticket; al cerrar el día, arquea la caja en **Caja**.
 
 ## Roles
 
 | Rol | Puede |
 |---|---|
 | ADMIN | Todo: catálogo, usuarios, reportes, configuración, anular ventas |
-| CAJERO | POS, caja, ventas del día, clientes |
+| CAJERO | Cobrar, caja, historial de ventas, clientes |
 | ESTILISTA | Ver sus servicios y comisiones |
 
 ## Documentación de la API

@@ -20,7 +20,7 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
       },
       {
-        path: 'pos',
+        path: 'cobrar',
         canActivate: [roleGuard('ADMIN', 'CAJERO')],
         loadComponent: () => import('./features/pos/pos.page').then((m) => m.PosPage),
       },
@@ -69,6 +69,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/mis-comisiones/mis-comisiones.page').then((m) => m.MisComisionesPage),
       },
+      { path: 'pos', redirectTo: 'cobrar' },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

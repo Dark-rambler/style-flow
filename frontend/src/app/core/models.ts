@@ -106,6 +106,8 @@ export interface ItemRequest {
   itemId: number;
   cantidad: number;
   precioUnitario?: number | null;
+  /** Descuento de la línea (cortesía o rebaja); no puede superar precio × cantidad. */
+  descuento?: number | null;
   estilistaId?: number | null;
 }
 
@@ -125,6 +127,8 @@ export interface VentaItem {
   descripcion: string;
   cantidad: number;
   precioUnitario: number;
+  descuento: number;
+  /** Neto de la línea: precio × cantidad − descuento. */
   subtotal: number;
   estilistaId: number | null;
   estilista: string | null;
@@ -162,6 +166,8 @@ export interface VentaResumen {
   total: number;
   metodoPago: MetodoPago;
   estado: 'COMPLETADA' | 'ANULADA';
+  /** Solo se pueden anular ventas de la caja abierta. */
+  cajaAbierta: boolean;
 }
 
 export interface TotalMetodo {

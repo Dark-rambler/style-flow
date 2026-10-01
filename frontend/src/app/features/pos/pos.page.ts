@@ -1,10 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, of, Subject, switchMap } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import {
-  Caja,
   Cliente,
   Producto,
   Servicio,
@@ -12,9 +10,11 @@ import {
   UsuarioResumen,
   VentaRequest,
 } from '../../core/models';
+import { CajaStore } from '../../core/caja.store';
 import { ToastService } from '../../core/toast.service';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { injectDialog, openDialog } from '../../shared/ui/dialog';
+import { AbrirCajaDialog } from '../caja/abrir-caja.dialog';
 import { ClienteFormDialog } from '../clientes/cliente-form.dialog';
 import { TicketDialog } from '../ventas/ticket.dialog';
 import { CobroDialog, CobroData, CobroResult } from './cobro.dialog';
@@ -50,7 +50,7 @@ const PRODUCTOS = '__productos__';
 
 @Component({
   selector: 'sf-pos-page',
-  imports: [FormsModule, MoneyPipe, RouterLink],
+  imports: [FormsModule, MoneyPipe],
   host: { '(window:keydown.f4)': 'atajoCobrar($event)' },
   template: `
     <!-- El layout responde al ancho disponible (container queries), no al viewport:
@@ -61,8 +61,10 @@ const PRODUCTOS = '__productos__';
           <div
             class="flex shrink-0 items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
           >
-            <span>No hay una caja abierta. Debe abrir caja para registrar ventas.</span>
-            <a routerLink="/caja" class="btn-primary btn-sm">Abrir caja</a>
+            <span>La caja está cerrada. Ábrala para empezar a cobrar.</span>
+            <button type="button" class="btn-primary btn-sm" (click)="abrirCaja()">
+              Abrir caja
+            </button>
           </div>
         }
 
@@ -603,8 +605,9 @@ export class PosPage implements OnInit {
   protected readonly servicios = signal<Servicio[]>([]);
   protected readonly productos = signal<Producto[]>([]);
   protected readonly estilistas = signal<UsuarioResumen[]>([]);
-  protected readonly caja = signal<Caja | null>(null);
-  protected readonly cajaCargada = signal(false);
+  private readonly cajaStore = inject(CajaStore);
+  protected readonly caja = this.cajaStore.caja;
+  protected readonly cajaCargada = this.cajaStore.cargada;
 
   // Filtros del catálogo
   protected readonly categoria = signal(GENERAL);
@@ -720,10 +723,7 @@ export class PosPage implements OnInit {
     this.api.catalogo.servicios(true).subscribe((s) => this.servicios.set(s));
     this.cargarProductos();
     this.api.usuarios.estilistas().subscribe((e) => this.estilistas.set(e));
-    this.api.caja.actual().subscribe((c) => {
-      this.caja.set(c);
-      this.cajaCargada.set(true);
-    });
+    this.cajaStore.refrescar();
   }
 
   protected iniciales(nombre: string): string {
@@ -867,6 +867,10 @@ export class PosPage implements OnInit {
     });
   }
 
+  protected abrirCaja(): void {
+    openDialog(this.dialog, AbrirCajaDialog, undefined, '26rem');
+  }
+
   protected atajoCobrar(e: Event): void {
     e.preventDefault();
     if (this.puedeCobrar() && this.dialog.openDialogs.length === 0) this.cobrar();
@@ -882,12 +886,11 @@ export class PosPage implements OnInit {
   }
 
   private registrar(r: CobroResult): void {
-    // El backend aplica un único descuento sobre la venta: se envía la suma de los
-    // descuentos por línea más el descuento global.
-    const descuentoLineas = this.carrito().reduce((a, l) => a + l.descuento, 0);
+    // Cada línea viaja con su propio descuento (así las comisiones se calculan sobre lo realmente
+    // cobrado por cada servicio) y `descuento` es solo el descuento global de la venta.
     const body: VentaRequest = {
       clienteId: this.cliente()?.id ?? null,
-      descuento: round2(descuentoLineas + this.descuento()),
+      descuento: this.descuento(),
       metodoPago: r.metodoPago,
       montoRecibido: r.montoRecibido,
       observaciones: this.observaciones().trim() || null,
@@ -896,6 +899,7 @@ export class PosPage implements OnInit {
         itemId: l.itemId,
         cantidad: l.cantidad,
         precioUnitario: l.precio,
+        descuento: l.descuento,
         estilistaId: l.estilistaId,
       })),
     };
@@ -906,6 +910,7 @@ export class PosPage implements OnInit {
         this.toast.success(`Venta N° ${venta.id} registrada`);
         this.limpiar();
         this.cargarProductos();
+        this.cajaStore.refrescar();
         openDialog(this.dialog, TicketDialog, venta, '24rem');
       },
       error: () => this.guardando.set(false),

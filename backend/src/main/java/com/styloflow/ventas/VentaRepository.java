@@ -28,7 +28,7 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
             """)
     List<TotalMetodo> totalesPorMetodo(Long cajaId);
 
-    @EntityGraph(attributePaths = {"cajero", "cliente"})
+    @EntityGraph(attributePaths = {"cajero", "cliente", "caja"})
     @Query("""
             select v from Venta v
             where v.fecha >= :desde and v.fecha < :hasta

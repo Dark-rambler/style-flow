@@ -24,6 +24,8 @@ public final class VentaDtos {
             @NotNull @Min(1) @Max(999) Integer cantidad,
             /** Opcional: precio distinto al de catálogo (p. ej. cabello largo). */
             @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal precioUnitario,
+            /** Opcional: descuento de esta línea; no puede superar precio × cantidad. */
+            @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal descuento,
             Long estilistaId) {}
 
     public record VentaRequest(
@@ -37,25 +39,26 @@ public final class VentaDtos {
     public record AnularRequest(@NotBlank @Size(max = 250) String motivo) {}
 
     public record ItemResponse(Long id, VentaItem.Tipo tipo, Long itemId, String descripcion, int cantidad,
-            BigDecimal precioUnitario, BigDecimal subtotal, Long estilistaId, String estilista) {
+            BigDecimal precioUnitario, BigDecimal descuento, BigDecimal subtotal, Long estilistaId,
+            String estilista) {
 
         static ItemResponse from(VentaItem i) {
             Long itemId = i.getTipo() == VentaItem.Tipo.SERVICIO ? i.getServicio().getId() : i.getProducto().getId();
             return new ItemResponse(i.getId(), i.getTipo(), itemId, i.getDescripcion(), i.getCantidad(),
-                    i.getPrecioUnitario(), i.getSubtotal(),
+                    i.getPrecioUnitario(), i.getDescuento(), i.getSubtotal(),
                     i.getEstilista() != null ? i.getEstilista().getId() : null,
                     i.getEstilista() != null ? i.getEstilista().getNombre() : null);
         }
     }
 
     public record VentaResumen(Long id, Instant fecha, String cajero, Long clienteId, String cliente,
-            BigDecimal total, MetodoPago metodoPago, Venta.Estado estado) {
+            BigDecimal total, MetodoPago metodoPago, Venta.Estado estado, boolean cajaAbierta) {
 
         static VentaResumen from(Venta v) {
             return new VentaResumen(v.getId(), v.getFecha(), v.getCajero().getNombre(),
                     v.getCliente() != null ? v.getCliente().getId() : null,
                     v.getCliente() != null ? v.getCliente().getNombre() : null,
-                    v.getTotal(), v.getMetodoPago(), v.getEstado());
+                    v.getTotal(), v.getMetodoPago(), v.getEstado(), v.getCaja().isAbierta());
         }
     }
 
