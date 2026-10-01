@@ -1,6 +1,8 @@
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
 import { NegocioStore } from '../core/negocio.store';
 import { Rol, ROLES } from '../core/models';
@@ -13,6 +15,8 @@ interface NavItem {
   icon: string;
   roles: Rol[];
 }
+
+const SIDEBAR_KEY = 'stylo.sidebar';
 
 const NAV: NavItem[] = [
   { path: '/dashboard', label: 'Inicio', icon: '◧', roles: ['ADMIN', 'CAJERO'] },
@@ -34,31 +38,53 @@ const NAV: NavItem[] = [
     <div class="flex h-full">
       <!-- Sidebar -->
       <aside
-        class="fixed inset-y-0 left-0 z-30 w-60 -translate-x-full border-r border-slate-200 bg-white transition-transform lg:static lg:translate-x-0 print:hidden"
+        class="fixed inset-y-0 left-0 z-30 flex w-60 shrink-0 -translate-x-full flex-col border-r border-slate-200 bg-white transition-[translate,width] lg:static lg:translate-x-0 print:hidden"
         [class.translate-x-0]="menuAbierto()"
+        [class]="rail() ? 'lg:w-16' : ''"
       >
-        <div class="flex h-16 items-center gap-2 border-b border-slate-200 px-5">
+        <div
+          class="flex h-16 shrink-0 items-center gap-2 border-b border-slate-200 px-5"
+          [class]="rail() ? 'lg:justify-center lg:px-0' : ''"
+        >
           <span
-            class="flex size-8 items-center justify-center rounded-lg bg-brand-600 font-bold text-white"
+            class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 font-bold text-white"
             >S</span
           >
-          <span class="truncate font-semibold text-slate-900">{{
+          <span class="truncate font-semibold text-slate-900" [class]="rail() ? 'lg:hidden' : ''">{{
             negocio.negocio()?.nombre ?? 'Stylo Flow'
           }}</span>
         </div>
-        <nav class="flex flex-col gap-1 p-3">
+        <nav
+          class="flex flex-1 flex-col gap-1 overflow-y-auto p-3"
+          [class]="rail() ? 'lg:px-2' : ''"
+        >
           @for (item of nav(); track item.path) {
             <a
               [routerLink]="item.path"
               routerLinkActive="bg-brand-50 text-brand-700"
               class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+              [class]="rail() ? 'lg:justify-center lg:px-0' : ''"
+              [attr.title]="rail() ? item.label : null"
               (click)="menuAbierto.set(false)"
             >
-              <span class="w-5 text-center" aria-hidden="true">{{ item.icon }}</span>
-              {{ item.label }}
+              <span class="w-5 shrink-0 text-center" aria-hidden="true">{{ item.icon }}</span>
+              <span class="truncate" [class]="rail() ? 'lg:sr-only' : ''">{{ item.label }}</span>
             </a>
           }
         </nav>
+        <button
+          type="button"
+          class="hidden h-11 shrink-0 items-center gap-3 border-t border-slate-200 px-6 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800 lg:flex"
+          [class]="rail() ? 'lg:justify-center lg:px-0' : ''"
+          [attr.aria-expanded]="!rail()"
+          [attr.title]="rail() ? 'Expandir menú' : 'Contraer menú'"
+          (click)="alternarSidebar()"
+        >
+          <span aria-hidden="true" class="text-base">{{ rail() ? '»' : '«' }}</span>
+          <span [class]="rail() ? 'lg:sr-only' : ''">{{
+            rail() ? 'Expandir menú' : 'Contraer menú'
+          }}</span>
+        </button>
       </aside>
 
       @if (menuAbierto()) {
@@ -130,7 +156,33 @@ export class Shell implements OnInit {
   protected readonly negocio = inject(NegocioStore);
   private readonly dialog = injectDialog();
 
+  private readonly router = inject(Router);
+
   protected readonly menuAbierto = signal(false);
+
+  /** Preferencia del usuario fuera del POS (persistida). */
+  private readonly colapsado = signal(leerPreferencia());
+  /** En el POS el menú se contrae solo; el usuario puede expandirlo mientras siga ahí. */
+  private readonly expandidoEnPos = signal(false);
+  private readonly enPos = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map(() => this.esPos()),
+    ),
+    { initialValue: this.esPos() },
+  );
+  /** Sidebar reducido a íconos (solo aplica en pantallas lg+). */
+  protected readonly rail = computed(() =>
+    this.enPos() ? !this.expandidoEnPos() : this.colapsado(),
+  );
+
+  constructor() {
+    // Al salir del POS se olvida la expansión manual: la próxima visita vuelve a contraerse.
+    effect(() => {
+      if (!this.enPos()) this.expandidoEnPos.set(false);
+    });
+  }
+
   protected readonly nav = computed(() => {
     const rol = this.auth.usuario()?.rol;
     return NAV.filter((i) => rol && i.roles.includes(rol));
@@ -150,7 +202,33 @@ export class Shell implements OnInit {
     this.negocio.cargar();
   }
 
+  protected alternarSidebar(): void {
+    if (this.enPos()) {
+      this.expandidoEnPos.update((v) => !v);
+      return;
+    }
+    const valor = !this.colapsado();
+    this.colapsado.set(valor);
+    try {
+      localStorage.setItem(SIDEBAR_KEY, valor ? 'rail' : 'abierto');
+    } catch {
+      // almacenamiento no disponible: la preferencia dura solo esta sesión
+    }
+  }
+
+  private esPos(): boolean {
+    return this.router.url.startsWith('/pos');
+  }
+
   protected cambiarPassword(): void {
     openDialog(this.dialog, PasswordDialog, undefined, '24rem');
+  }
+}
+
+function leerPreferencia(): boolean {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === 'rail';
+  } catch {
+    return false;
   }
 }

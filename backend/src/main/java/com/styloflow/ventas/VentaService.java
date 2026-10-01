@@ -71,6 +71,8 @@ public class VentaService {
         v.setTotal(total);
         v.setIva(ivaIncluido(total, negocioService.actual().getIvaPorcentaje()));
         v.setMetodoPago(req.metodoPago());
+        v.setObservaciones(req.observaciones() != null && !req.observaciones().isBlank()
+                ? req.observaciones().trim() : null);
 
         if (req.metodoPago() == MetodoPago.EFECTIVO) {
             BigDecimal recibido = req.montoRecibido() != null ? dinero(req.montoRecibido()) : total;

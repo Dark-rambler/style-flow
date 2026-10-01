@@ -65,6 +65,9 @@ import { MoneyPipe } from '../../shared/money.pipe';
             <span>Cambio</span><span>{{ v.cambio | money }}</span>
           </div>
         }
+        @if (v.observaciones) {
+          <p class="mt-2 text-slate-600">Obs.: {{ v.observaciones }}</p>
+        }
         @if (v.estado === 'ANULADA') {
           <p class="mt-2 text-center font-bold text-red-600">*** ANULADA ***</p>
         }

@@ -31,7 +31,8 @@ public final class VentaDtos {
             @NotEmpty @Size(max = 50) List<@Valid ItemRequest> items,
             @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal descuento,
             @NotNull MetodoPago metodoPago,
-            @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal montoRecibido) {}
+            @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal montoRecibido,
+            @Size(max = 500) String observaciones) {}
 
     public record AnularRequest(@NotBlank @Size(max = 250) String motivo) {}
 
@@ -61,7 +62,8 @@ public final class VentaDtos {
     public record VentaResponse(Long id, Instant fecha, Long cajaId, String cajero, Long clienteId, String cliente,
             String clienteCiNit, BigDecimal subtotal, BigDecimal descuento, BigDecimal total, BigDecimal iva,
             MetodoPago metodoPago, BigDecimal montoRecibido, BigDecimal cambio, Venta.Estado estado,
-            String anuladaPor, Instant anuladaEn, String motivoAnulacion, List<ItemResponse> items) {
+            String anuladaPor, Instant anuladaEn, String motivoAnulacion, String observaciones,
+            List<ItemResponse> items) {
 
         static VentaResponse from(Venta v) {
             return new VentaResponse(v.getId(), v.getFecha(), v.getCaja().getId(), v.getCajero().getNombre(),
@@ -71,7 +73,7 @@ public final class VentaDtos {
                     v.getSubtotal(), v.getDescuento(), v.getTotal(), v.getIva(), v.getMetodoPago(),
                     v.getMontoRecibido(), v.getCambio(), v.getEstado(),
                     v.getAnuladaPor() != null ? v.getAnuladaPor().getNombre() : null,
-                    v.getAnuladaEn(), v.getMotivoAnulacion(),
+                    v.getAnuladaEn(), v.getMotivoAnulacion(), v.getObservaciones(),
                     v.getItems().stream().map(ItemResponse::from).toList());
         }
     }

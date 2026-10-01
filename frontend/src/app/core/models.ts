@@ -115,6 +115,7 @@ export interface VentaRequest {
   descuento?: number | null;
   metodoPago: MetodoPago;
   montoRecibido?: number | null;
+  observaciones?: string | null;
 }
 
 export interface VentaItem {
@@ -148,6 +149,7 @@ export interface Venta {
   anuladaPor: string | null;
   anuladaEn: string | null;
   motivoAnulacion: string | null;
+  observaciones: string | null;
   items: VentaItem[];
 }
 

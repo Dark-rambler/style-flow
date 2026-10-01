@@ -38,7 +38,8 @@ const run = (cmd, args, cwd) =>
   spawnSync(cmd, args, { cwd, encoding: 'utf8', shell: isWin, timeout: 240_000 });
 
 if (back.length) {
-  const r = run(isWin ? 'gradlew.bat' : './gradlew', ['compileJava', 'compileTestJava', '-q', '--console=plain'], join(root, 'backend'));
+  // Ruta completa: cmd.exe puede no buscar en el directorio actual (NoDefaultCurrentDirectoryInExePath)
+  const r = run(isWin ? `"${join(root, 'backend', 'gradlew.bat')}"` : './gradlew',['compileJava', 'compileTestJava', '-q', '--console=plain'], join(root, 'backend'));
   if (r.status !== 0) errors.push('Backend (gradlew compileJava):\n' + tail(r.stdout + r.stderr));
 }
 if (front.length) {

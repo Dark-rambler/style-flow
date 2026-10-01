@@ -81,6 +81,8 @@ public class Venta extends BaseEntity {
     @Column(name = "motivo_anulacion")
     private String motivoAnulacion;
 
+    private String observaciones;
+
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id")
     private List<VentaItem> items = new ArrayList<>();
