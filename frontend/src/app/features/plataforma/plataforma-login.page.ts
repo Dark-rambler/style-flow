@@ -13,10 +13,7 @@ import { errorMessage } from '../../core/error.interceptor';
       <div class="w-full max-w-sm">
         <form class="card p-8" [formGroup]="form" (ngSubmit)="ingresar()">
           <div class="mb-6 flex flex-col items-center gap-2">
-            <span
-              class="flex size-12 items-center justify-center rounded-xl bg-slate-800 text-xl font-bold text-white"
-              >S</span
-            >
+            <img src="/image/logoNC-claro.png" alt="Nexus Corp" class="mb-2 h-12 w-auto" />
             <h1 class="text-xl font-semibold text-slate-900">Plataforma Stylo Flow</h1>
             <p class="text-sm text-slate-500">Administración de negocios</p>
           </div>
