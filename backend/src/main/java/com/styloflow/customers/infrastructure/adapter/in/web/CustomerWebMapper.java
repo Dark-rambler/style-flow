@@ -1,0 +1,15 @@
+package com.styloflow.customers.infrastructure.adapter.in.web;
+
+import com.styloflow.customers.application.port.in.CustomerCommand;
+import com.styloflow.customers.domain.model.Customer;
+import com.styloflow.customers.infrastructure.adapter.in.web.dto.CustomerRequest;
+import com.styloflow.customers.infrastructure.adapter.in.web.dto.CustomerResponse;
+import org.mapstruct.Mapper;
+
+@Mapper(componentModel = "spring")
+public interface CustomerWebMapper {
+
+    CustomerCommand toCommand(CustomerRequest request);
+
+    CustomerResponse toResponse(Customer customer);
+}
