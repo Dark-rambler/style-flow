@@ -17,11 +17,9 @@ const NEGOCIO_KEY = 'stylo.negocio';
       <div class="w-full max-w-sm">
         <form class="card p-8" [formGroup]="form" (ngSubmit)="ingresar()">
           <div class="mb-6 flex flex-col items-center gap-2">
-            <span
-              class="flex size-12 items-center justify-center rounded-xl bg-brand-600 text-xl font-bold text-white"
-              >S</span
-            >
-            <h1 class="text-xl font-semibold text-slate-900">Stylo Flow</h1>
+            <h1>
+              <img src="/image/StyloFlow-logo.png" alt="Stylo Flow" class="h-16 w-auto" />
+            </h1>
             <p class="text-sm text-slate-500">Ingrese con los datos de su peluquería</p>
           </div>
           <div class="flex flex-col gap-4">
@@ -70,6 +68,10 @@ const NEGOCIO_KEY = 'stylo.negocio';
             >Acceso de plataforma</a
           >
         </p>
+        <div class="mt-8 flex flex-col items-center gap-1.5">
+          <span class="text-[11px] tracking-wide text-slate-400 uppercase">Desarrollado por</span>
+          <img src="/image/logoNC-claro.png" alt="Nexus Corp" class="h-7 w-auto" />
+        </div>
       </div>
     </div>
   `,

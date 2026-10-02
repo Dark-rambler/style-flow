@@ -107,6 +107,8 @@ export interface Servicio {
   descripcion: string | null;
   duracionMin: number;
   precio: number;
+  /** URL de la imagen que se muestra en el POS (aún no la envía el backend). */
+  imagenUrl?: string | null;
   activo: boolean;
 }
 
