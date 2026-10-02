@@ -6,7 +6,6 @@ const formatter = new Intl.NumberFormat('es-BO', {
   maximumFractionDigits: 2,
 });
 
-/** `{{ 1234.5 | money }}` → `Bs 1.234,50` */
 @Pipe({ name: 'money', pure: false })
 export class MoneyPipe implements PipeTransform {
   private readonly store = inject(NegocioStore);
