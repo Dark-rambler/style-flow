@@ -49,10 +49,11 @@ const NAV: NavItem[] = [
           class="flex h-16 shrink-0 items-center gap-2 border-b border-slate-200 px-5"
           [class]="rail() ? 'lg:justify-center lg:px-0' : ''"
         >
-          <span
-            class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 font-bold text-white"
-            >S</span
-          >
+          @if (auth.esPlataforma()) {
+            <img src="/image/logoNC-icono.png" alt="Nexus Corp" class="size-8 shrink-0" />
+          } @else {
+            <img src="/image/StyloFlow-icono.png" alt="Stylo Flow" class="size-8 shrink-0" />
+          }
           <span class="min-w-0 leading-tight" [class]="rail() ? 'lg:hidden' : ''">
             <span class="block truncate font-semibold text-slate-900">{{
               auth.esPlataforma()
@@ -82,6 +83,24 @@ const NAV: NavItem[] = [
             </a>
           }
         </nav>
+        <!-- Marca del desarrollador: logo completo, o solo el ícono con el menú contraído -->
+        <div
+          class="flex shrink-0 items-center justify-center border-t border-slate-200 px-5 py-3"
+          [class]="rail() ? 'lg:px-0' : ''"
+        >
+          @if (rail()) {
+            <img
+              src="/image/logoNC-icono.png"
+              alt="Nexus Corp"
+              title="Desarrollado por Nexus Corp"
+              class="hidden size-7 lg:block"
+            />
+          }
+          <span class="flex flex-col items-center gap-1" [class]="rail() ? 'lg:hidden' : ''">
+            <span class="text-[10px] tracking-wide text-slate-400 uppercase">Desarrollado por</span>
+            <img src="/image/logoNC-claro.png" alt="Nexus Corp" class="h-6 w-auto" />
+          </span>
+        </div>
         <!-- Botón en el borde del menú (escritorio): contraer / expandir -->
         <button
           type="button"
@@ -108,7 +127,7 @@ const NAV: NavItem[] = [
           class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6 print:hidden"
         >
           <!-- Mostrar/ocultar menú: en escritorio alterna entre completo e íconos; en móvil lo abre encima -->
-          <button
+          <!-- <button
             type="button"
             class="btn-ghost -ml-2 px-2 text-slate-500 hover:text-slate-800"
             aria-label="Mostrar u ocultar menú"
@@ -116,7 +135,7 @@ const NAV: NavItem[] = [
             (click)="alternarMenu()"
           >
             <sf-icon name="panel" class="size-5" />
-          </button>
+          </button> -->
           @if (auth.hasRole('ADMIN', 'CAJERO') && cajaStore.cargada()) {
             <a
               routerLink="/caja"
@@ -139,7 +158,7 @@ const NAV: NavItem[] = [
             </a>
           }
           <div class="flex-1"></div>
-          <button type="button" class="btn-ghost" [cdkMenuTriggerFor]="userMenu">
+          <button type="button" class="btn-ghost cursor-pointer" [cdkMenuTriggerFor]="userMenu">
             <span
               class="flex size-8 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold"
             >
@@ -159,7 +178,7 @@ const NAV: NavItem[] = [
             >
               <button
                 cdkMenuItem
-                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-100"
+                class="flex w-full items-center cursor-pointer gap-2 px-4 py-2 text-left text-sm hover:bg-slate-100"
                 (cdkMenuItemTriggered)="cambiarPassword()"
               >
                 <sf-icon name="key" class="size-4 text-slate-400" />
@@ -167,7 +186,7 @@ const NAV: NavItem[] = [
               </button>
               <button
                 cdkMenuItem
-                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-100"
+                class="flex w-full items-center cursor-pointer gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-100"
                 (cdkMenuItemTriggered)="auth.logout()"
               >
                 <sf-icon name="logout" class="size-4" />
