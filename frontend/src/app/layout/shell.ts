@@ -138,7 +138,9 @@ const NAV: NavItem[] = [
               {{ cajaStore.abierta() ? 'Caja abierta' : 'Caja cerrada' }}
             </a>
           }
-          <div class="flex-1"></div>
+          <div class="flex min-w-0 flex-1 justify-center px-2">
+            <h1 class="truncate text-lg font-bold tracking-wide text-brand-700">Nexus Corp</h1>
+          </div>
           <button type="button" class="btn-ghost" [cdkMenuTriggerFor]="userMenu">
             <span
               class="flex size-8 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold"
