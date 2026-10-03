@@ -1,6 +1,8 @@
 package com.styloflow.shared.infrastructure.persistence;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -8,6 +10,7 @@ import java.util.stream.Collectors;
  * Maps an English domain enum to the value stored in the database (the schema keeps its original Spanish values,
  * e.g. {@code CASH} ↔ {@code EFECTIVO}). Subclasses are registered with {@code @Converter(autoApply = true)}.
  */
+@Converter
 public abstract class DbEnumConverter<E extends Enum<E>> implements AttributeConverter<E, String> {
 
     private final Map<E, String> toDb;

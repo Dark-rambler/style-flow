@@ -4,8 +4,11 @@ import com.styloflow.catalog.application.port.in.ProductCommand;
 import com.styloflow.catalog.application.port.in.ProductUseCase;
 import com.styloflow.catalog.application.port.out.ProductRepositoryPort;
 import com.styloflow.catalog.domain.model.Product;
+import com.styloflow.shared.application.port.out.CurrentTenantPort;
+import com.styloflow.shared.application.port.out.ImageStoragePort;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.exception.NotFoundException;
+import com.styloflow.shared.domain.model.StoredImage;
 import com.styloflow.shared.domain.model.TextUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService implements ProductUseCase {
 
     private final ProductRepositoryPort productRepository;
+    private final ImageStoragePort imageStorage;
+    private final CurrentTenantPort currentTenant;
 
     @Override
     public List<Product> list(boolean activeOnly) {
@@ -41,7 +46,18 @@ public class ProductService implements ProductUseCase {
         }
         Product product = new Product();
         apply(product, command);
-        return productRepository.save(product);
+        if (command.image() == null) {
+            return productRepository.save(product);
+        }
+        StoredImage image = imageStorage.upload(ImageFiles.bytes(command.image()), "business-" + currentTenant.businessId() + "/products");
+        product.setImageUrl(image.url());
+        product.setImagePublicId(image.publicId());
+        try {
+            return productRepository.save(product);
+        } catch (RuntimeException e) {
+            imageStorage.delete(image.publicId()); // don't leave orphan images in Cloudinary
+            throw e;
+        }
     }
 
     @Override
