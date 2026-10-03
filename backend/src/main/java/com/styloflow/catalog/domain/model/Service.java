@@ -24,8 +24,4 @@ public class Service {
     private String imagePublicId;
     @Builder.Default
     private boolean active = true;
-
-    public boolean isAvailable() {
-        return active && category.isActive();
-    }
 }

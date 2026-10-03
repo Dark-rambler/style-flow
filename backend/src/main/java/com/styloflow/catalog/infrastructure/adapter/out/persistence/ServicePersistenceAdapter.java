@@ -18,7 +18,7 @@ public class ServicePersistenceAdapter implements ServiceRepositoryPort {
 
     @Override
     public List<Service> findAllSorted(boolean activeOnly) {
-        return catalogMapper.toServiceList(serviceRepository.findAllWithCategoryByActiveOrderByCategoryNameAscNameAsc(activeOnly));
+        return catalogMapper.toServiceList(serviceRepository.findAllByActiveAndCategoryActiveIsTrueOrderByCategoryNameAscNameAsc(activeOnly));
     }
 
     @Override

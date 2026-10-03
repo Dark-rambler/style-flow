@@ -26,8 +26,4 @@ public class User {
     private BigDecimal commissionRate = BigDecimal.ZERO;
     @Builder.Default
     private boolean active = true;
-
-    public boolean isActiveAdmin() {
-        return role == Role.ADMIN && active;
-    }
 }
