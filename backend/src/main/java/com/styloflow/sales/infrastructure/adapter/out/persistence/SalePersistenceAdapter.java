@@ -1,10 +1,10 @@
 package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
-import com.styloflow.cashregister.application.port.out.SalesTotalsPort;
-import com.styloflow.cashregister.domain.model.PaymentTotal;
-import com.styloflow.cashregister.infrastructure.adapter.out.persistence.CashRegisterEntity;
+import com.styloflow.cash.application.port.out.SalesTotalsPort;
+import com.styloflow.cash.domain.model.PaymentTotal;
+import com.styloflow.cash.infrastructure.adapter.out.persistence.CashEntity;
 import com.styloflow.catalog.infrastructure.adapter.out.persistence.ProductEntity;
-import com.styloflow.catalog.infrastructure.adapter.out.persistence.SalonServiceEntity;
+import com.styloflow.catalog.infrastructure.adapter.out.persistence.ServiceEntity;
 import com.styloflow.customers.infrastructure.adapter.out.persistence.CustomerEntity;
 import com.styloflow.sales.application.port.out.SaleRepositoryPort;
 import com.styloflow.sales.domain.model.ItemType;
@@ -44,8 +44,8 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
     }
 
     @Override
-    public List<PaymentTotal> totalsByPaymentMethod(Long cashRegisterId) {
-        return saleRepository.totalsByPaymentMethod(cashRegisterId, SaleStatus.COMPLETED).stream()
+    public List<PaymentTotal> totalsByPaymentMethod(Long cashId) {
+        return saleRepository.totalsByPaymentMethod(cashId, SaleStatus.COMPLETED).stream()
                 .map(t -> new PaymentTotal(t.getPaymentMethod(), t.getCount(), t.getTotal()))
                 .toList();
     }
@@ -56,7 +56,7 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
         SaleEntity entity = sale.getId() == null ? new SaleEntity()
                 : saleRepository.findById(sale.getId()).orElseThrow(() -> new NotFoundException("Sale", sale.getId()));
         saleMapper.updateEntity(sale, entity);
-        entity.setCashRegister(entityManager.getReference(CashRegisterEntity.class, sale.getCashRegister().getId()));
+        entity.setCashRegister(entityManager.getReference(CashEntity.class, sale.getCashRegister().getId()));
         entity.setCashier(user(sale.getCashier()));
         entity.setCustomer(sale.getCustomer() != null
                 ? entityManager.getReference(CustomerEntity.class, sale.getCustomer().getId()) : null);
@@ -70,7 +70,7 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
     private SaleItemEntity toEntity(SaleItem item) {
         SaleItemEntity entity = saleMapper.toEntity(item);
         if (item.getType() == ItemType.SERVICE) {
-            entity.setService(entityManager.getReference(SalonServiceEntity.class, item.getItemId()));
+            entity.setService(entityManager.getReference(ServiceEntity.class, item.getItemId()));
         } else {
             entity.setProduct(entityManager.getReference(ProductEntity.class, item.getItemId()));
         }

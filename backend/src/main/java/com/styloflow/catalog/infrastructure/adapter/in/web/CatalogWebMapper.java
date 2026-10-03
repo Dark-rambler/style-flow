@@ -1,17 +1,13 @@
 package com.styloflow.catalog.infrastructure.adapter.in.web;
 
-import com.styloflow.catalog.application.port.in.CategoryCommand;
-import com.styloflow.catalog.application.port.in.ProductCommand;
-import com.styloflow.catalog.application.port.in.SalonServiceCommand;
+import com.styloflow.catalog.application.port.in.command.CategoryCommand;
+import com.styloflow.catalog.application.port.in.command.ProductCommand;
+import com.styloflow.catalog.application.port.in.command.ServiceCommand;
 import com.styloflow.catalog.domain.model.Category;
 import com.styloflow.catalog.domain.model.Product;
-import com.styloflow.catalog.domain.model.SalonService;
-import com.styloflow.catalog.infrastructure.adapter.in.web.dto.CategoryRequest;
-import com.styloflow.catalog.infrastructure.adapter.in.web.dto.CategoryResponse;
-import com.styloflow.catalog.infrastructure.adapter.in.web.dto.ProductRequest;
-import com.styloflow.catalog.infrastructure.adapter.in.web.dto.ProductResponse;
-import com.styloflow.catalog.infrastructure.adapter.in.web.dto.SalonServiceRequest;
-import com.styloflow.catalog.infrastructure.adapter.in.web.dto.SalonServiceResponse;
+import com.styloflow.catalog.domain.model.Service;
+import com.styloflow.catalog.infrastructure.adapter.in.web.dto.*;
+
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,13 +21,13 @@ public interface CatalogWebMapper {
 
     List<CategoryResponse> toCategoryResponseList(List<Category> categories);
 
-    SalonServiceCommand toCommand(SalonServiceRequest request);
+    ServiceCommand toCommand(ServiceRequest request);
 
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "category", source = "category.name")
-    SalonServiceResponse toResponse(SalonService service);
+    ServiceResponse toResponse(Service service);
 
-    List<SalonServiceResponse> toServiceResponseList(List<SalonService> services);
+    List<ServiceResponse> toServiceResponseList(List<Service> services);
 
     ProductCommand toCommand(ProductRequest request);
 

@@ -2,8 +2,10 @@ package com.styloflow.catalog.infrastructure.adapter.out.persistence;
 
 import com.styloflow.catalog.domain.model.Category;
 import com.styloflow.catalog.domain.model.Product;
-import com.styloflow.catalog.domain.model.SalonService;
+import com.styloflow.catalog.domain.model.Service;
+
 import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -17,13 +19,12 @@ public interface CatalogPersistenceMapper {
 
     void updateEntity(Category category, @MappingTarget CategoryEntity entity);
 
-    SalonService toDomain(SalonServiceEntity entity);
+    Service toDomain(ServiceEntity entity);
 
-    List<SalonService> toServiceList(List<SalonServiceEntity> entities);
+    List<Service> toServiceList(List<ServiceEntity> entities);
 
-    /** The category is set as a reference by the adapter. */
     @Mapping(target = "category", ignore = true)
-    void updateEntity(SalonService service, @MappingTarget SalonServiceEntity entity);
+    void updateEntity(Service service, @MappingTarget ServiceEntity entity);
 
     Product toDomain(ProductEntity entity);
 

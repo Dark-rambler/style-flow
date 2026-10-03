@@ -1,6 +1,6 @@
 package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
-import com.styloflow.cashregister.infrastructure.adapter.out.persistence.CashRegisterEntity;
+import com.styloflow.cash.infrastructure.adapter.out.persistence.CashEntity;
 import com.styloflow.customers.infrastructure.adapter.out.persistence.CustomerEntity;
 import com.styloflow.sales.domain.model.PaymentMethod;
 import com.styloflow.sales.domain.model.SaleStatus;
@@ -33,7 +33,7 @@ public class SaleEntity extends TenantScopedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "caja_id")
-    private CashRegisterEntity cashRegister;
+    private CashEntity cashRegister;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cajero_id")

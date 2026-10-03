@@ -1,6 +1,6 @@
 package com.styloflow.sales.domain.model;
 
-import com.styloflow.cashregister.domain.model.CashRegister;
+import com.styloflow.cash.domain.model.Cash;
 import com.styloflow.customers.domain.model.Customer;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.model.Money;
@@ -30,7 +30,7 @@ public class Sale {
 
     private Long id;
     private Instant date;
-    private CashRegister cashRegister;
+    private Cash cashRegister;
     private User cashier;
     private Customer customer;
     private BigDecimal subtotal;
@@ -50,9 +50,9 @@ public class Sale {
     private List<SaleItem> items = new ArrayList<>();
 
     /** Computes totals, included tax and change; validates the global discount and the amount received. */
-    public static Sale register(Instant date, CashRegister cashRegister, User cashier, Customer customer,
-            List<SaleItem> items, BigDecimal globalDiscount, PaymentMethod paymentMethod, BigDecimal amountReceived,
-            BigDecimal taxRate, String notes) {
+    public static Sale register(Instant date, Cash cashRegister, User cashier, Customer customer,
+                                List<SaleItem> items, BigDecimal globalDiscount, PaymentMethod paymentMethod, BigDecimal amountReceived,
+                                BigDecimal taxRate, String notes) {
         BigDecimal subtotal = Money.sum(items, SaleItem::getSubtotal);
         BigDecimal discount = Money.ofOrZero(globalDiscount);
         if (discount.compareTo(subtotal) > 0) {

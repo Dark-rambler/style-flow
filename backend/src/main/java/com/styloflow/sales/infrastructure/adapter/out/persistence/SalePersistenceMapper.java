@@ -1,6 +1,6 @@
 package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
-import com.styloflow.cashregister.infrastructure.adapter.out.persistence.CashRegisterPersistenceMapper;
+import com.styloflow.cash.infrastructure.adapter.out.persistence.CashPersistenceMapper;
 import com.styloflow.customers.infrastructure.adapter.out.persistence.CustomerPersistenceMapper;
 import com.styloflow.sales.domain.model.ItemType;
 import com.styloflow.sales.domain.model.Sale;
@@ -12,7 +12,7 @@ import org.mapstruct.MappingTarget;
 
 /** Associations (cash register, users, customer, service/product) are set as references by the adapter. */
 @Mapper(componentModel = "spring", imports = ItemType.class,
-        uses = {UserPersistenceMapper.class, CustomerPersistenceMapper.class, CashRegisterPersistenceMapper.class})
+        uses = {UserPersistenceMapper.class, CustomerPersistenceMapper.class, CashPersistenceMapper.class})
 public interface SalePersistenceMapper {
 
     Sale toDomain(SaleEntity entity);

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ProductJpaRepository extends JpaRepository<ProductEntity, Long> {
 
-    List<ProductEntity> findAllByOrderByNameAsc();
+    List<ProductEntity> findAllByActiveOrderByNameAsc(boolean active);
 
     boolean existsBySkuIgnoreCase(String sku);
 

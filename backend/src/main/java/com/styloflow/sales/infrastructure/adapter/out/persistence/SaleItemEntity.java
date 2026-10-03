@@ -1,7 +1,7 @@
 package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
 import com.styloflow.catalog.infrastructure.adapter.out.persistence.ProductEntity;
-import com.styloflow.catalog.infrastructure.adapter.out.persistence.SalonServiceEntity;
+import com.styloflow.catalog.infrastructure.adapter.out.persistence.ServiceEntity;
 import com.styloflow.sales.domain.model.ItemType;
 import com.styloflow.users.infrastructure.adapter.out.persistence.UserEntity;
 import jakarta.persistence.Column;
@@ -37,7 +37,7 @@ public class SaleItemEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "servicio_id")
-    private SalonServiceEntity service;
+    private ServiceEntity service;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id")

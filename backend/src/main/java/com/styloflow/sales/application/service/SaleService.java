@@ -1,13 +1,13 @@
 package com.styloflow.sales.application.service;
 
 import com.styloflow.business.application.port.in.BusinessUseCase;
-import com.styloflow.cashregister.application.port.out.CashRegisterRepositoryPort;
-import com.styloflow.cashregister.domain.exception.NoOpenCashRegisterException;
-import com.styloflow.cashregister.domain.model.CashRegister;
+import com.styloflow.cash.application.port.out.CashRepositoryPort;
+import com.styloflow.cash.domain.exception.NoOpenCashException;
+import com.styloflow.cash.domain.model.Cash;
 import com.styloflow.catalog.application.port.out.ProductRepositoryPort;
-import com.styloflow.catalog.application.port.out.SalonServiceRepositoryPort;
+import com.styloflow.catalog.application.port.out.ServiceRepositoryPort;
 import com.styloflow.catalog.domain.model.Product;
-import com.styloflow.catalog.domain.model.SalonService;
+import com.styloflow.catalog.domain.model.Service;
 import com.styloflow.customers.application.port.out.CustomerRepositoryPort;
 import com.styloflow.customers.domain.model.Customer;
 import com.styloflow.sales.application.port.in.RegisterSaleCommand;
@@ -27,18 +27,17 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Registers and voids sales, keeping product stock in sync. */
-@Service
+@org.springframework.stereotype.Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SaleService implements SaleUseCase {
 
     private final SaleRepositoryPort saleRepository;
-    private final CashRegisterRepositoryPort cashRegisterRepository;
-    private final SalonServiceRepositoryPort serviceRepository;
+    private final CashRepositoryPort cashRegisterRepository;
+    private final ServiceRepositoryPort serviceRepository;
     private final ProductRepositoryPort productRepository;
     private final UserRepositoryPort userRepository;
     private final CustomerRepositoryPort customerRepository;
@@ -49,7 +48,7 @@ public class SaleService implements SaleUseCase {
     @Override
     @Transactional
     public Sale register(RegisterSaleCommand command, Long cashierId) {
-        CashRegister cashRegister = cashRegisterRepository.findOpen().orElseThrow(NoOpenCashRegisterException::new);
+        Cash cashRegister = cashRegisterRepository.findOpen().orElseThrow(NoOpenCashException::new);
         User cashier = getUserOrThrow(cashierId);
         Customer customer = command.customerId() == null ? null
                 : customerRepository.findById(command.customerId())
@@ -63,7 +62,7 @@ public class SaleService implements SaleUseCase {
 
     private SaleItem createItem(RegisterSaleCommand.Item item) {
         if (item.type() == ItemType.SERVICE) {
-            SalonService service = serviceRepository.findById(item.itemId())
+            Service service = serviceRepository.findById(item.itemId())
                     .orElseThrow(() -> new NotFoundException("Service", item.itemId()));
             if (!service.isActive()) {
                 throw new BusinessRuleException("The service '" + service.getName() + "' is not active");

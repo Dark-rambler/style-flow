@@ -16,8 +16,8 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
     private final CatalogPersistenceMapper catalogMapper;
 
     @Override
-    public List<Product> findAllSorted() {
-        return catalogMapper.toProductList(productRepository.findAllByOrderByNameAsc());
+    public List<Product> findAllSorted(boolean activeOnly) {
+        return catalogMapper.toProductList(productRepository.findAllByActiveOrderByNameAsc(activeOnly));
     }
 
     @Override
@@ -40,11 +40,11 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
         return productRepository.existsBySkuIgnoreCase(sku);
     }
 
-    /** Inside the transaction it reuses the entity already loaded (and locked) by {@link #findByIdForUpdate}. */
     @Override
     public Product save(Product product) {
-        ProductEntity entity = product.getId() == null ? new ProductEntity()
-                : productRepository.findById(product.getId())
+        ProductEntity entity = product.getId() == null ?
+                new ProductEntity() :
+                productRepository.findById(product.getId())
                         .orElseThrow(() -> new NotFoundException("Product", product.getId()));
         catalogMapper.updateEntity(product, entity);
         return catalogMapper.toDomain(productRepository.save(entity));

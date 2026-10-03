@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Group of salon services (cut, color, nails...). */
 @Getter
 @Setter
 @Builder

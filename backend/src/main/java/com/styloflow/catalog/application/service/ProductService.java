@@ -1,8 +1,9 @@
 package com.styloflow.catalog.application.service;
 
-import com.styloflow.catalog.application.port.in.ProductCommand;
+import com.styloflow.catalog.application.port.in.command.ProductCommand;
 import com.styloflow.catalog.application.port.in.ProductUseCase;
 import com.styloflow.catalog.application.port.out.ProductRepositoryPort;
+import com.styloflow.catalog.application.utils.ImageFilesUtil;
 import com.styloflow.catalog.domain.model.Product;
 import com.styloflow.shared.application.port.out.CurrentTenantPort;
 import com.styloflow.shared.application.port.out.ImageStoragePort;
@@ -27,9 +28,7 @@ public class ProductService implements ProductUseCase {
 
     @Override
     public List<Product> list(boolean activeOnly) {
-        return productRepository.findAllSorted().stream()
-                .filter(p -> !activeOnly || p.isActive())
-                .toList();
+        return productRepository.findAllSorted(activeOnly);
     }
 
     @Override
@@ -41,21 +40,19 @@ public class ProductService implements ProductUseCase {
     @Transactional
     public Product create(ProductCommand command) {
         String sku = TextUtils.blankToNull(command.sku());
-        if (sku != null && productRepository.existsBySku(sku)) {
+        if (sku != null && productRepository.existsBySku(sku))
             throw new BusinessRuleException("A product with that SKU already exists");
-        }
         Product product = new Product();
         apply(product, command);
-        if (command.image() == null) {
+        if (command.image() == null)
             return productRepository.save(product);
-        }
-        StoredImage image = imageStorage.upload(ImageFiles.bytes(command.image()), "business-" + currentTenant.businessId() + "/products");
+        StoredImage image = imageStorage.upload(ImageFilesUtil.bytes(command.image()), "business-" + currentTenant.businessId() + "/products");
         product.setImageUrl(image.url());
         product.setImagePublicId(image.publicId());
         try {
             return productRepository.save(product);
         } catch (RuntimeException e) {
-            imageStorage.delete(image.publicId()); // don't leave orphan images in Cloudinary
+            imageStorage.delete(image.publicId());
             throw e;
         }
     }
@@ -84,8 +81,7 @@ public class ProductService implements ProductUseCase {
         product.setPrice(command.price());
         product.setStock(command.stock());
         product.setMinStock(command.minStock() != null ? command.minStock() : 0);
-        if (command.active() != null) {
+        if (command.active() != null)
             product.setActive(command.active());
-        }
     }
 }
