@@ -11,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Cash register shift: opened with a float and closed with a cash count. */
 @Getter
 @Builder
 @NoArgsConstructor
@@ -41,7 +40,6 @@ public class CashRegister {
                 .build();
     }
 
-    /** Cash count: compares the counted cash with the expected one (opening float + cash sales). */
     public void close(User by, Instant at, BigDecimal counted, String closingNotes, List<PaymentTotal> byPaymentMethod) {
         if (!isOpen()) {
             throw new BusinessRuleException("The cash register is already closed");
@@ -59,7 +57,6 @@ public class CashRegister {
         }
     }
 
-    /** Live while open; once closed, the value recorded at the cash count. */
     public BigDecimal expectedCash(List<PaymentTotal> byPaymentMethod) {
         return isOpen() ? openingAmount.add(PaymentTotal.totalOf(byPaymentMethod, PaymentMethod.CASH)) : expectedCash;
     }

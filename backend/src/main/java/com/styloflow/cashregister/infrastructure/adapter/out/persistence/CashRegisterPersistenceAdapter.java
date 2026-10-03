@@ -38,14 +38,15 @@ public class CashRegisterPersistenceAdapter implements CashRegisterRepositoryPor
 
     @Override
     public CashRegister save(CashRegister cashRegister) {
-        CashRegisterEntity entity = cashRegister.getId() == null ? new CashRegisterEntity()
-                : cashRegisterRepository.findById(cashRegister.getId())
+        CashRegisterEntity entity = cashRegister.getId() == null ?
+                new CashRegisterEntity() :
+                cashRegisterRepository.findById(cashRegister.getId())
                         .orElseThrow(() -> new NotFoundException("Cash register", cashRegister.getId()));
         cashRegisterMapper.updateEntity(cashRegister, entity);
         entity.setOpenedBy(userRepository.getReferenceById(cashRegister.getOpenedBy().getId()));
-        entity.setClosedBy(cashRegister.getClosedBy() != null
-                ? userRepository.getReferenceById(cashRegister.getClosedBy().getId()) : null);
-        // flush: the partial unique index (a single open register) is checked here, not at commit time
+        entity.setClosedBy(cashRegister.getClosedBy() != null ?
+                userRepository.getReferenceById(cashRegister.getClosedBy().getId()) :
+                null);
         return cashRegisterMapper.toDomain(cashRegisterRepository.saveAndFlush(entity));
     }
 }

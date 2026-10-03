@@ -8,7 +8,7 @@ import java.util.function.Function;
 /** Amounts always use scale 2 (NUMERIC(12,2)). */
 public final class Money {
 
-    public static final BigDecimal ZERO = BigDecimal.ZERO.setScale(2);
+    public static final BigDecimal ZERO = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN);
 
     private Money() {}
 

@@ -7,9 +7,7 @@ import com.styloflow.users.domain.model.User;
 
 public interface TokenPort {
 
-    /** Token of a user inside their business: it carries the tenant. */
     AuthToken generate(User user, Business business);
 
-    /** Platform token: no business, it can only use /api/platform/**. */
     AuthToken generatePlatform(Superadmin superadmin);
 }

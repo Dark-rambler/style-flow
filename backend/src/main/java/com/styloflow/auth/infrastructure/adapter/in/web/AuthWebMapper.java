@@ -1,7 +1,7 @@
 package com.styloflow.auth.infrastructure.adapter.in.web;
 
-import com.styloflow.auth.application.port.in.LoginCommand;
-import com.styloflow.auth.application.port.in.PlatformLoginCommand;
+import com.styloflow.auth.application.port.in.command.LoginCommand;
+import com.styloflow.auth.application.port.in.command.PlatformLoginCommand;
 import com.styloflow.auth.domain.model.BusinessSession;
 import com.styloflow.auth.domain.model.PlatformSession;
 import com.styloflow.auth.infrastructure.adapter.in.web.dto.BusinessInfo;

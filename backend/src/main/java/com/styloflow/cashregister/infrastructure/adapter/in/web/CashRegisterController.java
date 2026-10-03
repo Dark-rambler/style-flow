@@ -1,6 +1,5 @@
 package com.styloflow.cashregister.infrastructure.adapter.in.web;
 
-import com.styloflow.auth.infrastructure.security.CurrentUser;
 import com.styloflow.cashregister.application.port.in.CashRegisterUseCase;
 import com.styloflow.cashregister.infrastructure.adapter.in.web.dto.CashRegisterResponse;
 import com.styloflow.cashregister.infrastructure.adapter.in.web.dto.CloseCashRegisterRequest;
@@ -12,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +29,6 @@ public class CashRegisterController {
 
     private final CashRegisterUseCase cashRegisterUseCase;
     private final CashRegisterWebMapper cashRegisterMapper;
-    private final CurrentUser currentUser;
 
     @GetMapping("/current")
     @Operation(summary = "GET /api/cash-register/current — open cash register with live totals; 204 if none is open")
@@ -40,16 +39,16 @@ public class CashRegisterController {
 
     @PostMapping("/open")
     @Operation(summary = "POST /api/cash-register/open — open the cash register with an opening float")
-    public ResponseEntity<CashRegisterResponse> open(@Valid @RequestBody OpenCashRegisterRequest request) {
+    public ResponseEntity<CashRegisterResponse> open(@Valid @RequestBody OpenCashRegisterRequest request, Authentication auth) {
         return ResponseEntity.ok(cashRegisterMapper.toResponse(
-                cashRegisterUseCase.open(cashRegisterMapper.toCommand(request), currentUser.id())));
+                cashRegisterUseCase.open(cashRegisterMapper.toCommand(request), Long.parseLong(auth.getName()))));
     }
 
     @PostMapping("/close")
     @Operation(summary = "POST /api/cash-register/close — close the open cash register with the counted cash")
-    public ResponseEntity<CashRegisterResponse> close(@Valid @RequestBody CloseCashRegisterRequest request) {
+    public ResponseEntity<CashRegisterResponse> close(@Valid @RequestBody CloseCashRegisterRequest request, Authentication auth) {
         return ResponseEntity.ok(cashRegisterMapper.toResponse(
-                cashRegisterUseCase.close(cashRegisterMapper.toCommand(request), currentUser.id())));
+                cashRegisterUseCase.close(cashRegisterMapper.toCommand(request), Long.parseLong(auth.getName()))));
     }
 
     @GetMapping("/history")

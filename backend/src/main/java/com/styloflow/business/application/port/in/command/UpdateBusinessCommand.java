@@ -1,9 +1,8 @@
-package com.styloflow.business.infrastructure.adapter.in.web.dto;
+package com.styloflow.business.application.port.in.command;
 
 import java.math.BigDecimal;
 
-public record BusinessResponse(
-        String code,
+public record UpdateBusinessCommand(
         String name,
         String taxId,
         String address,

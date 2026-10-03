@@ -19,7 +19,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
-/** HS256 JWT with {@code uid} and {@code roles} claims and, on business tokens, {@code bid}/{@code bcode}. */
 @Component
 @RequiredArgsConstructor
 public class JwtTokenAdapter implements TokenPort {

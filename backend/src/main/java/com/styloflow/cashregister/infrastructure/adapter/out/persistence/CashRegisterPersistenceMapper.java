@@ -11,7 +11,6 @@ public interface CashRegisterPersistenceMapper {
 
     CashRegister toDomain(CashRegisterEntity entity);
 
-    /** Users are set as references by the adapter. */
     @Mapping(target = "openedBy", ignore = true)
     @Mapping(target = "closedBy", ignore = true)
     void updateEntity(CashRegister cashRegister, @MappingTarget CashRegisterEntity entity);
