@@ -41,6 +41,19 @@ function params(values: Record<string, string | number | boolean | null | undefi
   return p;
 }
 
+/** Cuerpo multipart con los campos sueltos (los enlaza `@ModelAttribute`) y la parte `image` opcional. */
+function formData(
+  values: Record<string, string | number | boolean | null | undefined>,
+  imagen?: File | null,
+): FormData {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(values)) {
+    if (v !== null && v !== undefined) fd.append(k, String(v));
+  }
+  if (imagen) fd.append('image', imagen);
+  return fd;
+}
+
 /** Cliente HTTP tipado de la API de Stylo Flow (un método por endpoint). */
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -68,20 +81,20 @@ export class ApiService {
 
     servicios: (soloActivos = false) =>
       this.http.get<Servicio[]>('/api/catalog/services', {
-        params: params({ activeOnly: soloActivos }),
+        params: params({ activeOnly: false }),
       }),
-    crearServicio: (body: ServicioRequest) =>
-      this.http.post<Servicio>('/api/catalog/services', body),
+    crearServicio: (body: ServicioRequest, imagen?: File | null) =>
+      this.http.post<Servicio>('/api/catalog/services', formData({ ...body }, imagen)),
     actualizarServicio: (id: number, body: ServicioRequest) =>
       this.http.put<Servicio>(`/api/catalog/services/${id}`, body),
 
     productos: (soloActivos = false) =>
       this.http.get<Producto[]>('/api/catalog/products', {
-        params: params({ activeOnly: soloActivos }),
+        params: params({ activeOnly: false }),
       }),
     stockBajo: () => this.http.get<Producto[]>('/api/catalog/products/low-stock'),
-    crearProducto: (body: ProductoRequest) =>
-      this.http.post<Producto>('/api/catalog/products', body),
+    crearProducto: (body: ProductoRequest, imagen?: File | null) =>
+      this.http.post<Producto>('/api/catalog/products', formData({ ...body }, imagen)),
     actualizarProducto: (id: number, body: ProductoRequest) =>
       this.http.put<Producto>(`/api/catalog/products/${id}`, body),
     ajustarStock: (id: number, cantidad: number) =>

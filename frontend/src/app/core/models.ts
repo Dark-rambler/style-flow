@@ -109,8 +109,8 @@ export interface Servicio {
   description: string | null;
   durationMinutes: number;
   price: number;
-  /** URL de la imagen que se muestra en el POS (aún no la envía el backend). */
-  imageUrl?: string | null;
+  /** URL de la foto (Cloudinary); null si no tiene. */
+  imageUrl: string | null;
   active: boolean;
 }
 
@@ -125,9 +125,11 @@ export interface Producto {
   minStock: number;
   active: boolean;
   lowStock: boolean;
+  /** URL de la foto (Cloudinary); null si no tiene. */
+  imageUrl: string | null;
 }
 
-export type ProductoRequest = Omit<Producto, 'id' | 'lowStock'>;
+export type ProductoRequest = Omit<Producto, 'id' | 'lowStock' | 'imageUrl'>;
 
 export interface Cliente {
   id: number;

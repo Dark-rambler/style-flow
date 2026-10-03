@@ -1,5 +1,5 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Producto, Servicio } from '../../core/models';
 import { MoneyPipe } from '../../shared/money.pipe';
 
@@ -11,6 +11,15 @@ export type ItemDetalleData =
   selector: 'sf-item-detalle-dialog',
   imports: [MoneyPipe],
   template: `
+    <div class="aspect-4/3 w-full overflow-hidden bg-slate-100">
+      <img
+        class="size-full"
+        [class]="usaImagen() ? 'object-cover object-center' : 'object-contain p-8'"
+        [src]="usaImagen() ? data.item.imageUrl : SIN_IMAGEN"
+        [alt]="data.item.name"
+        (error)="imagenFallida.set(true)"
+      />
+    </div>
     <div class="p-6">
       <span class="badge bg-orange-100 text-orange-700">{{
         data.tipo === 'SERVICE' ? 'Servicio' : 'Producto'
@@ -53,4 +62,11 @@ export type ItemDetalleData =
 export class ItemDetalleDialog {
   protected readonly data = inject<ItemDetalleData>(DIALOG_DATA);
   protected readonly ref = inject<DialogRef<boolean>>(DialogRef);
+
+  /** Imagen por defecto (en `public/`) si el ítem no tiene URL o esta no carga. */
+  protected readonly SIN_IMAGEN = '/image/non-image.png';
+  protected readonly imagenFallida = signal(false);
+  protected usaImagen(): boolean {
+    return !!this.data.item.imageUrl && !this.imagenFallida();
+  }
 }

@@ -54,7 +54,18 @@ type Tab = 'servicios' | 'productos' | 'categorias';
             <tbody>
               @for (s of servicios(); track s.id) {
                 <tr [class.opacity-50]="!s.active">
-                  <td class="font-medium">{{ s.name }}</td>
+                  <td class="font-medium">
+                    <div class="flex items-center gap-3">
+                      <img
+                        class="size-10 shrink-0 rounded-md border border-slate-200 bg-slate-50"
+                        [class]="s.imageUrl ? 'object-cover' : 'object-contain p-1'"
+                        [src]="s.imageUrl ?? SIN_IMAGEN"
+                        alt=""
+                        loading="lazy"
+                      />
+                      {{ s.name }}
+                    </div>
+                  </td>
                   <td>{{ s.category }}</td>
                   <td class="text-right">{{ s.durationMinutes }} min</td>
                   <td class="text-right">{{ s.price | money }}</td>
@@ -99,7 +110,18 @@ type Tab = 'servicios' | 'productos' | 'categorias';
             <tbody>
               @for (p of productos(); track p.id) {
                 <tr [class.opacity-50]="!p.active">
-                  <td class="font-medium">{{ p.name }}</td>
+                  <td class="font-medium">
+                    <div class="flex items-center gap-3">
+                      <img
+                        class="size-10 shrink-0 rounded-md border border-slate-200 bg-slate-50"
+                        [class]="p.imageUrl ? 'object-cover' : 'object-contain p-1'"
+                        [src]="p.imageUrl ?? SIN_IMAGEN"
+                        alt=""
+                        loading="lazy"
+                      />
+                      {{ p.name }}
+                    </div>
+                  </td>
                   <td class="text-slate-500">{{ p.sku ?? '—' }}</td>
                   <td class="text-right">{{ p.price | money }}</td>
                   <td class="text-right">
@@ -192,6 +214,7 @@ export class CatalogoPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastService);
   private readonly dialog = injectDialog();
+  protected readonly SIN_IMAGEN = '/image/non-image.png';
 
   protected readonly tabs: { id: Tab; label: string }[] = [
     { id: 'servicios', label: 'Servicios' },

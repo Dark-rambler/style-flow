@@ -203,6 +203,7 @@ export class PosPage implements OnInit {
       agotado: p.stock === 0,
       stock: p.stock,
       stockBajo: p.lowStock,
+      imagenUrl: p.imageUrl,
       ref: p,
     })),
   ]);
@@ -295,7 +296,7 @@ export class PosPage implements OnInit {
       this.dialog,
       ItemDetalleDialog,
       data,
-      '24rem',
+      '28rem',
     ).closed.subscribe((ok) => ok && this.agregar(it));
   }
 
