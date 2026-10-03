@@ -5,7 +5,10 @@ import com.styloflow.catalog.application.port.in.SalonServiceUseCase;
 import com.styloflow.catalog.application.port.out.CategoryRepositoryPort;
 import com.styloflow.catalog.application.port.out.SalonServiceRepositoryPort;
 import com.styloflow.catalog.domain.model.SalonService;
+import com.styloflow.shared.application.port.out.CurrentTenantPort;
+import com.styloflow.shared.application.port.out.ImageStoragePort;
 import com.styloflow.shared.domain.exception.NotFoundException;
+import com.styloflow.shared.domain.model.StoredImage;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,8 @@ public class SalonServiceService implements SalonServiceUseCase {
 
     private final SalonServiceRepositoryPort serviceRepository;
     private final CategoryRepositoryPort categoryRepository;
+    private final ImageStoragePort imageStorage;
+    private final CurrentTenantPort currentTenant;
 
     @Override
     public List<SalonService> list(boolean activeOnly) {
@@ -32,7 +37,18 @@ public class SalonServiceService implements SalonServiceUseCase {
     public SalonService create(SalonServiceCommand command) {
         SalonService service = new SalonService();
         apply(service, command);
-        return serviceRepository.save(service);
+        if (command.image() == null) {
+            return serviceRepository.save(service);
+        }
+        StoredImage image = imageStorage.upload(ImageFiles.bytes(command.image()), "business-" + currentTenant.businessId() + "/services");
+        service.setImageUrl(image.url());
+        service.setImagePublicId(image.publicId());
+        try {
+            return serviceRepository.save(service);
+        } catch (RuntimeException e) {
+            imageStorage.delete(image.publicId()); // don't leave orphan images in Cloudinary
+            throw e;
+        }
     }
 
     @Override
