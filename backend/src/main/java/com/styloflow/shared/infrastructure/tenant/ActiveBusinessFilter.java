@@ -28,7 +28,7 @@ public class ActiveBusinessFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain chain
     ) throws ServletException, IOException {
-        Long businessId = TenantContext.businessIdFromToken();
+        var businessId = TenantContext.businessIdFromToken();
         if (businessId != null && !businessStatus.isActive(businessId)) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);

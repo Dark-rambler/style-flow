@@ -16,7 +16,7 @@ public class CloudinaryImageStorageAdapter implements ImageStoragePort {
     private final Cloudinary cloudinary;
 
     public CloudinaryImageStorageAdapter(AppProperties props) {
-        String url = props.cloudinary().url();
+        var url = props.cloudinary().url();
         this.cloudinary = new Cloudinary(url);
         this.cloudinary.config.secure = true;
     }
@@ -24,7 +24,7 @@ public class CloudinaryImageStorageAdapter implements ImageStoragePort {
     @Override
     public StoredImage upload(byte[] content, String folder) {
         try {
-            Map<?, ?> result = cloudinary.uploader()
+            var result = cloudinary.uploader()
                     .upload(content, ObjectUtils.asMap("folder", folder, "resource_type", "image"));
             return new StoredImage((String) result.get("public_id"), (String) result.get("secure_url"));
         } catch (IOException e) {

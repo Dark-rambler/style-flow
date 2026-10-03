@@ -31,7 +31,7 @@ public class CustomerService implements CustomerUseCase {
     @Override
     @Transactional
     public Customer create(CustomerCommand command) {
-        Customer customer = new Customer();
+        var customer = new Customer();
         apply(customer, command);
         return customerRepository.save(customer);
     }
@@ -39,7 +39,7 @@ public class CustomerService implements CustomerUseCase {
     @Override
     @Transactional
     public Customer update(Long id, CustomerCommand command) {
-        Customer customer = get(id);
+        var customer = get(id);
         apply(customer, command);
         return customerRepository.save(customer);
     }

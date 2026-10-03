@@ -9,7 +9,6 @@ import com.styloflow.catalog.domain.model.Service;
 import com.styloflow.shared.application.port.out.CurrentTenantPort;
 import com.styloflow.shared.application.port.out.ImageStoragePort;
 import com.styloflow.shared.domain.exception.NotFoundException;
-import com.styloflow.shared.domain.model.StoredImage;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +31,11 @@ public class ServiceService implements ServiceUseCase {
     @Override
     @Transactional
     public Service create(ServiceCommand command) {
-        Service service = new Service();
+        var service = new Service();
         apply(service, command);
         if (command.image() == null)
             return serviceRepository.save(service);
-        StoredImage image = imageStorage.upload(ImageFilesUtil.bytes(command.image()), "business-" + currentTenant.businessId() + "/services");
+        var image = imageStorage.upload(ImageFilesUtil.bytes(command.image()), "business-" + currentTenant.businessId() + "/services");
         service.setImageUrl(image.url());
         service.setImagePublicId(image.publicId());
         try {
@@ -50,7 +49,7 @@ public class ServiceService implements ServiceUseCase {
     @Override
     @Transactional
     public Service update(Long id, ServiceCommand command) {
-        Service service = serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Service", id));
+        var service = serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Service", id));
         apply(service, command);
         return serviceRepository.save(service);
     }

@@ -30,7 +30,7 @@ public class ReportService implements ReportUseCase {
 
     @Override
     public DateRange range(LocalDate from, LocalDate to) {
-        DateRange range = DateRange.of(from, to, LocalDate.now(clock.withZone(zone)));
+        var range = DateRange.of(from, to, LocalDate.now(clock.withZone(zone)));
         if (range.from().plusDays(366).isBefore(range.to()))
             throw new BusinessRuleException("The maximum range is one year");
         return range;

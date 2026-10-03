@@ -42,7 +42,7 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
 
     @Override
     public Product save(Product product) {
-        ProductEntity entity = product.getId() == null ? new ProductEntity() :
+        var entity = product.getId() == null ? new ProductEntity() :
                 productRepository.findById(product.getId())
                         .orElseThrow(() -> new NotFoundException("Product", product.getId()));
         catalogMapper.updateEntity(product, entity);

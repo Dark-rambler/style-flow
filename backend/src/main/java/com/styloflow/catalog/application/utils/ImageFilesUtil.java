@@ -12,7 +12,7 @@ public final class ImageFilesUtil {
     public static byte[] bytes(MultipartFile file) {
         if (file == null || file.isEmpty())
             return null;
-        String type = file.getContentType();
+        var type = file.getContentType();
         if (type == null || !type.startsWith("image/"))
             throw new BusinessRuleException("The file must be an image");
         try {

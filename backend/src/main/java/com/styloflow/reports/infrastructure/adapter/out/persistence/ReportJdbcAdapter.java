@@ -130,7 +130,7 @@ public class ReportJdbcAdapter implements ReportQueryPort {
 
     @Override
     public List<TopItem> topItems(DateRange range, ItemType type, int limit) {
-        String column = type == ItemType.SERVICE ? "servicio_id" : "producto_id";
+        var column = type == ItemType.SERVICE ? "servicio_id" : "producto_id";
         return jdbc.sql("""
                         SELECT i.%1$s AS id,
                                MAX(i.descripcion) AS name,

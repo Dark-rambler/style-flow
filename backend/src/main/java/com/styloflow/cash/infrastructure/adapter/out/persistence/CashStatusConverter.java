@@ -1,6 +1,6 @@
 package com.styloflow.cash.infrastructure.adapter.out.persistence;
 
-import com.styloflow.cash.domain.model.CashStatus;
+import com.styloflow.cash.domain.enums.CashStatus;
 import com.styloflow.shared.infrastructure.persistence.DbEnumConverter;
 import jakarta.persistence.Converter;
 import java.util.Map;

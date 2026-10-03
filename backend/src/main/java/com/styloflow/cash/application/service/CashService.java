@@ -8,14 +8,12 @@ import com.styloflow.cash.application.port.out.SalesTotalsPort;
 import com.styloflow.cash.domain.exception.NoOpenCashException;
 import com.styloflow.cash.domain.model.Cash;
 import com.styloflow.cash.domain.model.CashSummary;
-import com.styloflow.cash.domain.model.PaymentTotal;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import com.styloflow.shared.domain.model.PageResult;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
 import com.styloflow.users.domain.model.User;
 import java.time.Clock;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,7 +39,7 @@ public class CashService implements CashUseCase {
     public CashSummary open(OpenCashCommand command, Long userId) {
         if (cashRepository.findOpen().isPresent())
             throw new BusinessRuleException("A cash register is already open");
-        Cash cashRegister = Cash.open(
+        var cashRegister = Cash.open(
                 getUserOrThrow(userId),
                 clock.instant(),
                 command.openingAmount(),
@@ -53,8 +51,8 @@ public class CashService implements CashUseCase {
     @Override
     @Transactional
     public CashSummary close(CloseCashCommand command, Long userId) {
-        Cash cashRegister = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
-        List<PaymentTotal> byPaymentMethod = salesTotals.totalsByPaymentMethod(cashRegister.getId());
+        var cashRegister = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
+        var byPaymentMethod = salesTotals.totalsByPaymentMethod(cashRegister.getId());
         cashRegister.close(
                 getUserOrThrow(userId),
                 clock.instant(),

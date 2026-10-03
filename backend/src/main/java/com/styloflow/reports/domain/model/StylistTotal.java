@@ -19,7 +19,7 @@ public record StylistTotal(
             BigDecimal total,
             BigDecimal commissionRate
     ) {
-        BigDecimal commission = total.multiply(commissionRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        var commission = total.multiply(commissionRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         return new StylistTotal(stylistId, stylist, services, total, commissionRate, commission);
     }
 }

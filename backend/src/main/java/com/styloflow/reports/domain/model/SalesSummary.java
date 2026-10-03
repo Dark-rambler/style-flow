@@ -19,8 +19,7 @@ public record SalesSummary(
         List<PaymentMethodTotal> byPaymentMethod
 ) {
     public static SalesSummary of(DateRange range, SalesTotals totals, List<PaymentMethodTotal> byPaymentMethod) {
-        BigDecimal average = totals.count() == 0 ? Money.ZERO :
-                totals.total().divide(BigDecimal.valueOf(totals.count()), 2, RoundingMode.HALF_UP);
+        var average = totals.count() == 0 ? Money.ZERO : totals.total().divide(BigDecimal.valueOf(totals.count()), 2, RoundingMode.HALF_UP);
         return new SalesSummary(
                 range.from(),
                 range.to(),

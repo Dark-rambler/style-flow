@@ -13,7 +13,7 @@ public record DateRange(LocalDate from, LocalDate to) {
     }
 
     public static DateRange of(LocalDate from, LocalDate to, LocalDate today) {
-        LocalDate start = from != null ? from : today;
+        var start = from != null ? from : today;
         return new DateRange(start, to != null ? to : start);
     }
 

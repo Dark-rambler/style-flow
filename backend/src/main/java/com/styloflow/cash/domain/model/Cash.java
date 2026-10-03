@@ -1,5 +1,6 @@
 package com.styloflow.cash.domain.model;
 
+import com.styloflow.cash.domain.enums.CashStatus;
 import com.styloflow.sales.domain.enums.PaymentMethod;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.users.domain.model.User;
@@ -43,7 +44,7 @@ public class Cash {
     public void close(User by, Instant at, BigDecimal counted, String closingNotes, List<PaymentTotal> byPaymentMethod) {
         if (!isOpen())
             throw new BusinessRuleException("The cash register is already closed");
-        BigDecimal expected = expectedCash(byPaymentMethod);
+        var expected = expectedCash(byPaymentMethod);
         status = CashStatus.CLOSED;
         closedBy = by;
         closedAt = at;

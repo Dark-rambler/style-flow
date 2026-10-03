@@ -57,13 +57,13 @@ public class Sale {
                                 BigDecimal amountReceived,
                                 BigDecimal taxRate,
                                 String notes) {
-        BigDecimal subtotal = Money.sum(items, SaleItem::getSubtotal);
-        BigDecimal discount = Money.ofOrZero(globalDiscount);
+        var subtotal = Money.sum(items, SaleItem::getSubtotal);
+        var discount = Money.ofOrZero(globalDiscount);
         if (discount.compareTo(subtotal) > 0)
             throw new BusinessRuleException("The discount cannot exceed the subtotal");
-        BigDecimal total = subtotal.subtract(discount);
-        BigDecimal received = total;
-        BigDecimal change = Money.ZERO;
+        var total = subtotal.subtract(discount);
+        var received = total;
+        var change = Money.ZERO;
         if (paymentMethod == PaymentMethod.CASH) {
             received = amountReceived != null ? Money.of(amountReceived) : total;
             if (received.compareTo(total) < 0)

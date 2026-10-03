@@ -1,6 +1,6 @@
 package com.styloflow.cash.infrastructure.adapter.in.web.dto;
 
-import com.styloflow.cash.domain.model.CashStatus;
+import com.styloflow.cash.domain.enums.CashStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;

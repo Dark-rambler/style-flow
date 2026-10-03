@@ -30,7 +30,7 @@ public class CategoryService implements CategoryUseCase {
     public Category create(CategoryCommand command) {
         if (categoryRepository.existsByName(command.name().trim()))
             throw new BusinessRuleException("A category with that name already exists");
-        Category category = new Category();
+        var category = new Category();
         apply(category, command);
         return categoryRepository.save(category);
     }
@@ -38,7 +38,7 @@ public class CategoryService implements CategoryUseCase {
     @Override
     @Transactional
     public Category update(Long id, CategoryCommand command) {
-        Category category = getCategoryOrThrow(id);
+        var category = getCategoryOrThrow(id);
         apply(category, command);
         return categoryRepository.save(category);
     }

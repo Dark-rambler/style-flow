@@ -7,7 +7,6 @@ import com.styloflow.auth.application.port.out.TokenPort;
 import com.styloflow.auth.domain.model.BusinessSession;
 import com.styloflow.auth.domain.model.PlatformSession;
 import com.styloflow.business.application.port.out.BusinessRepositoryPort;
-import com.styloflow.business.domain.model.Business;
 import com.styloflow.platform.application.port.out.SuperadminRepositoryPort;
 import com.styloflow.platform.domain.model.Superadmin;
 import com.styloflow.shared.application.port.out.PasswordHasherPort;
@@ -32,11 +31,11 @@ public class AuthService implements AuthUseCase {
     @Override
     public BusinessSession login(LoginCommand command) {
         var invalidCredentials = new UnauthorizedException("Invalid business, username or password");
-        Business business = businessRepository.findByCode(command.businessCode().trim())
+        var business = businessRepository.findByCode(command.businessCode().trim())
                 .orElseThrow(() -> invalidCredentials);
         if (!business.isActive())
             throw new ForbiddenException("This business is suspended. Please contact support.");
-        User user = userRepository.findByUsernameInBusiness(business.getId(), command.username().trim())
+        var user = userRepository.findByUsernameInBusiness(business.getId(), command.username().trim())
                 .filter(User::isActive)
                 .filter(u -> passwordHasher.matches(command.password(), u.getPasswordHash()))
                 .orElseThrow(() -> invalidCredentials);

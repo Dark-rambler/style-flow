@@ -2,7 +2,7 @@ package com.styloflow.cash.infrastructure.adapter.out.persistence;
 
 import com.styloflow.cash.application.port.out.CashRepositoryPort;
 import com.styloflow.cash.domain.model.Cash;
-import com.styloflow.cash.domain.model.CashStatus;
+import com.styloflow.cash.domain.enums.CashStatus;
 import com.styloflow.shared.domain.model.PageResult;
 import com.styloflow.shared.infrastructure.persistence.PageResults;
 import com.styloflow.users.infrastructure.adapter.out.persistence.UserJpaRepository;

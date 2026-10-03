@@ -16,15 +16,15 @@ public final class TenantContext {
     private TenantContext() {}
 
     public static long current() {
-        Long override = OVERRIDE.get();
+        var override = OVERRIDE.get();
         if (override != null)
             return override;
-        Long fromToken = businessIdFromToken();
+        var fromToken = businessIdFromToken();
         return fromToken != null ? fromToken : NO_TENANT;
     }
 
     public static <T> T runAs(long businessId, Supplier<T> action) {
-        Long previous = OVERRIDE.get();
+        var previous = OVERRIDE.get();
         OVERRIDE.set(businessId);
         try {
             return action.get();
@@ -37,7 +37,7 @@ public final class TenantContext {
     }
 
     public static Long businessIdFromToken() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt && jwt.getClaim(CLAIM_BUSINESS_ID) instanceof Number id)
             return id.longValue();
         return null;

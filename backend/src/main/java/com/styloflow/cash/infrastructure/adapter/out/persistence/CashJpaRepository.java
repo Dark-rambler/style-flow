@@ -1,6 +1,6 @@
 package com.styloflow.cash.infrastructure.adapter.out.persistence;
 
-import com.styloflow.cash.domain.model.CashStatus;
+import com.styloflow.cash.domain.enums.CashStatus;
 import java.util.Optional;
 
 import org.jspecify.annotations.NullMarked;

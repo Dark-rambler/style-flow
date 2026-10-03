@@ -43,7 +43,7 @@ public class PlatformJdbcAdapter implements PlatformRepositoryPort {
 
     @Override
     public long register(NewBusiness business) {
-        Long id = jdbc.sql("""
+        var id = jdbc.sql("""
                         INSERT INTO negocio (codigo, nombre, nit, telefono, moneda, simbolo, iva_porcentaje, mensaje_ticket)
                         VALUES (:code, :name, :taxId, :phone, 'BOB', 'Bs', 13.00, '¡Gracias por su visita!')
                         RETURNING id
@@ -64,7 +64,7 @@ public class PlatformJdbcAdapter implements PlatformRepositoryPort {
                 .param("hash", business.adminPasswordHash())
                 .update();
         for (BaseCatalog.CategorySeed category : business.catalog()) {
-            Long categoryId = jdbc.sql("INSERT INTO categorias (negocio_id, nombre) VALUES (:businessId, :name) RETURNING id")
+            var categoryId = jdbc.sql("INSERT INTO categorias (negocio_id, nombre) VALUES (:businessId, :name) RETURNING id")
                     .param("businessId", id)
                     .param("name", category.name())
                     .query(Long.class)

@@ -61,7 +61,7 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
 
     @Override
     public Sale save(Sale sale) {
-        SaleEntity entity = sale.getId() == null ? new SaleEntity()
+        var entity = sale.getId() == null ? new SaleEntity()
                 : saleRepository.findById(sale.getId()).orElseThrow(() -> new NotFoundException("Sale", sale.getId()));
         saleMapper.updateEntity(sale, entity);
         entity.setCash(cashRepository.getReferenceById(sale.getCash().getId()));
@@ -74,7 +74,7 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
     }
 
     private SaleItemEntity toEntity(SaleItem item) {
-        SaleItemEntity entity = saleMapper.toEntity(item);
+        var entity = saleMapper.toEntity(item);
         if (item.getType() == ItemType.SERVICE)
             entity.setService(serviceRepository.getReferenceById(item.getItemId()));
         else

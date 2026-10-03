@@ -33,9 +33,9 @@ public class SaleItem {
                                   BigDecimal unitPrice,
                                   BigDecimal discount,
                                   User stylist) {
-        BigDecimal price = Money.of(unitPrice);
-        BigDecimal gross = price.multiply(BigDecimal.valueOf(quantity));
-        BigDecimal lineDiscount = Money.ofOrZero(discount);
+        var price = Money.of(unitPrice);
+        var gross = price.multiply(BigDecimal.valueOf(quantity));
+        var lineDiscount = Money.ofOrZero(discount);
         if (lineDiscount.compareTo(gross) > 0)
             throw new BusinessRuleException("The discount of '" + description + "' exceeds its amount");
         return SaleItem.builder()

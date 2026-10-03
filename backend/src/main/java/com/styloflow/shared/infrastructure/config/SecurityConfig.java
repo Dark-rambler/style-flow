@@ -59,15 +59,20 @@ public class SecurityConfig {
                         .requestMatchers("/api/platform/**").hasRole("SUPERADMIN")
                         .requestMatchers("/api/**").access(SecurityConfig::businessToken)
                         .anyRequest().permitAll())
-                .oauth2ResourceServer(o -> o.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .oauth2ResourceServer(o -> o
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                )
                 .addFilterAfter(new ActiveBusinessFilter(businessStatus), BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 
-    private static AuthorizationDecision businessToken(Supplier<? extends Authentication> auth,
-            RequestAuthorizationContext ctx) {
-        return new AuthorizationDecision(auth.get().getPrincipal() instanceof Jwt jwt
-                && jwt.hasClaim(TenantContext.CLAIM_BUSINESS_ID));
+    private static AuthorizationDecision businessToken(
+            Supplier<? extends Authentication> auth,
+            RequestAuthorizationContext ctx
+    ) {
+        return new AuthorizationDecision(
+                auth.get().getPrincipal() instanceof Jwt jwt && jwt.hasClaim(TenantContext.CLAIM_BUSINESS_ID)
+        );
     }
 
     @Bean
@@ -77,7 +82,7 @@ public class SecurityConfig {
 
     @Bean
     SecretKey jwtSecretKey() {
-        byte[] bytes = props.jwt().secret().getBytes(StandardCharsets.UTF_8);
+        var bytes = props.jwt().secret().getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             throw new IllegalStateException("app.jwt.secret must be at least 32 characters long");
         }
@@ -95,22 +100,22 @@ public class SecurityConfig {
     }
 
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authorities = new JwtGrantedAuthoritiesConverter();
+        var authorities = new JwtGrantedAuthoritiesConverter();
         authorities.setAuthoritiesClaimName("roles");
         authorities.setAuthorityPrefix("ROLE_");
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        var converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(authorities);
         return converter;
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+        var config = new CorsConfiguration();
         config.setAllowedOriginPatterns(props.cors().origins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Content-Disposition"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
         return source;
     }
