@@ -2,7 +2,7 @@ package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
 import com.styloflow.cash.infrastructure.adapter.out.persistence.CashPersistenceMapper;
 import com.styloflow.customers.infrastructure.adapter.out.persistence.CustomerPersistenceMapper;
-import com.styloflow.sales.domain.model.ItemType;
+import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.sales.domain.model.Sale;
 import com.styloflow.sales.domain.model.SaleItem;
 import com.styloflow.users.infrastructure.adapter.out.persistence.UserPersistenceMapper;
@@ -10,18 +10,19 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-/** Associations (cash register, users, customer, service/product) are set as references by the adapter. */
 @Mapper(componentModel = "spring", imports = ItemType.class,
         uses = {UserPersistenceMapper.class, CustomerPersistenceMapper.class, CashPersistenceMapper.class})
 public interface SalePersistenceMapper {
 
     Sale toDomain(SaleEntity entity);
 
-    @Mapping(target = "itemId", expression = """
-            java(entity.getType() == ItemType.SERVICE ? entity.getService().getId() : entity.getProduct().getId())""")
+    @Mapping(
+            target = "itemId",
+            expression = "java(entity.getType() == ItemType.SERVICE ? entity.getService().getId() : entity.getProduct().getId())"
+    )
     SaleItem toDomain(SaleItemEntity entity);
 
-    @Mapping(target = "cashRegister", ignore = true)
+    @Mapping(target = "cash", ignore = true)
     @Mapping(target = "cashier", ignore = true)
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "voidedBy", ignore = true)

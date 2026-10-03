@@ -1,6 +1,6 @@
 package com.styloflow.users.infrastructure.adapter.out.persistence;
 
-import com.styloflow.users.domain.model.Role;
+import com.styloflow.users.domain.enums.Role;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

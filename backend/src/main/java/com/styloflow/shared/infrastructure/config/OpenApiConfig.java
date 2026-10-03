@@ -8,10 +8,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Swagger UI at {@code /swagger-ui.html}. Log in with {@code POST /api/auth/login} (or the platform login), then
- * paste the token in "Authorize".
- */
 @Configuration
 public class OpenApiConfig {
 

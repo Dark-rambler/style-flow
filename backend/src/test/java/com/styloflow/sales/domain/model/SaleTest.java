@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.styloflow.cash.domain.model.Cash;
+import com.styloflow.sales.domain.enums.ItemType;
+import com.styloflow.sales.domain.enums.PaymentMethod;
+import com.styloflow.sales.domain.enums.SaleStatus;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -136,7 +139,7 @@ class SaleTest {
         @Test
         void voidSale_should_throw_when_registerIsClosed() {
             Sale sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
-            sale.getCashRegister().close(null, NOW, new BigDecimal("100.00"), null, List.of());
+            sale.getCash().close(null, NOW, new BigDecimal("100.00"), null, List.of());
 
             assertThatThrownBy(() -> sale.voidSale(null, "x", NOW)).isInstanceOf(BusinessRuleException.class);
         }

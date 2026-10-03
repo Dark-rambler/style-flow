@@ -7,7 +7,7 @@ import com.styloflow.shared.application.port.out.PasswordHasherPort;
 import com.styloflow.shared.infrastructure.config.AppProperties;
 import com.styloflow.shared.infrastructure.tenant.TenantExecutor;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
-import com.styloflow.users.domain.model.Role;
+import com.styloflow.users.domain.enums.Role;
 import com.styloflow.users.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

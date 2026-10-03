@@ -31,8 +31,8 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
     }
 
     @Override
-    public Optional<Product> findByIdForUpdate(Long id) {
-        return productRepository.findByIdForUpdate(id).map(catalogMapper::toDomain);
+    public Optional<Product> findByIdUpdate(Long id) {
+        return productRepository.findByIdUpdate(id).map(catalogMapper::toDomain);
     }
 
     @Override
@@ -42,8 +42,7 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
 
     @Override
     public Product save(Product product) {
-        ProductEntity entity = product.getId() == null ?
-                new ProductEntity() :
+        ProductEntity entity = product.getId() == null ? new ProductEntity() :
                 productRepository.findById(product.getId())
                         .orElseThrow(() -> new NotFoundException("Product", product.getId()));
         catalogMapper.updateEntity(product, entity);

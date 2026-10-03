@@ -12,7 +12,7 @@ public interface ProductRepositoryPort {
 
     Optional<Product> findById(Long id);
 
-    Optional<Product> findByIdForUpdate(Long id);
+    Optional<Product> findByIdUpdate(Long id);
 
     boolean existsBySku(String sku);
 

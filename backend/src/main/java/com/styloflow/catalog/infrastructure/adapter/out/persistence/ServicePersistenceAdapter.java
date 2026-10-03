@@ -33,8 +33,7 @@ public class ServicePersistenceAdapter implements ServiceRepositoryPort {
 
     @Override
     public Service save(Service service) {
-        ServiceEntity entity = service.getId() == null ?
-                new ServiceEntity() :
+        ServiceEntity entity = service.getId() == null ? new ServiceEntity() :
                 serviceRepository.findById(service.getId())
                         .orElseThrow(() -> new NotFoundException("Service", service.getId()));
         catalogMapper.updateEntity(service, entity);

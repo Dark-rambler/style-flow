@@ -106,7 +106,6 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // Patterns: allows e.g. http://localhost:* in development (the ng serve port may change)
         config.setAllowedOriginPatterns(props.cors().origins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

@@ -3,10 +3,10 @@ package com.styloflow.users.application.service;
 import com.styloflow.shared.application.port.out.PasswordHasherPort;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.exception.NotFoundException;
-import com.styloflow.users.application.port.in.UserCommand;
+import com.styloflow.users.application.port.in.command.UserCommand;
 import com.styloflow.users.application.port.in.UserUseCase;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
-import com.styloflow.users.domain.model.Role;
+import com.styloflow.users.domain.enums.Role;
 import com.styloflow.users.domain.model.User;
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Manages business users and their passwords. */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -41,12 +40,10 @@ public class UserService implements UserUseCase {
     @Override
     @Transactional
     public User create(UserCommand command) {
-        if (command.password() == null || command.password().isBlank()) {
+        if (command.password() == null || command.password().isBlank())
             throw new BusinessRuleException("A password is required when creating a user");
-        }
-        if (userRepository.existsByUsername(command.username())) {
+        if (userRepository.existsByUsername(command.username()))
             throw new BusinessRuleException("The username already exists");
-        }
         User user = new User();
         apply(user, command);
         user.setPasswordHash(passwordHasher.hash(command.password()));
@@ -57,22 +54,15 @@ public class UserService implements UserUseCase {
     @Transactional
     public User update(Long id, UserCommand command, Long currentUserId) {
         User user = getUserOrThrow(id);
-        if (!user.getUsername().equalsIgnoreCase(command.username())
-                && userRepository.existsByUsername(command.username())) {
+        if (userRepository.existsByUsername(command.username()))
             throw new BusinessRuleException("The username already exists");
-        }
-        boolean stopsBeingActiveAdmin = user.isActiveAdmin()
-                && (command.role() != Role.ADMIN || Boolean.FALSE.equals(command.active()));
-        if (stopsBeingActiveAdmin && userRepository.countActiveByRole(Role.ADMIN) <= 1) {
+        if (userRepository.countActiveByRole(Role.ADMIN) <= 1)
             throw new BusinessRuleException("There must be at least one active administrator");
-        }
-        if (id.equals(currentUserId) && Boolean.FALSE.equals(command.active())) {
+        if (id.equals(currentUserId) && Boolean.FALSE.equals(command.active()))
             throw new BusinessRuleException("You cannot deactivate your own user");
-        }
         apply(user, command);
-        if (command.password() != null && !command.password().isBlank()) {
+        if (command.password() != null && !command.password().isBlank())
             user.setPasswordHash(passwordHasher.hash(command.password()));
-        }
         return userRepository.save(user);
     }
 
@@ -85,7 +75,8 @@ public class UserService implements UserUseCase {
     }
 
     private User getUserOrThrow(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User", id));
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     private static void apply(User user, UserCommand command) {

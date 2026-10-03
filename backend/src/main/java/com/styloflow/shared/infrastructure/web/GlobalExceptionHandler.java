@@ -17,10 +17,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/**
- * Turns domain exceptions into ProblemDetail responses (the frontend shows {@code detail}). It runs before Spring's
- * built-in ProblemDetail handler so validation errors keep the {@code errors} map.
- */
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {

@@ -7,13 +7,12 @@ import com.styloflow.cash.domain.model.Cash;
 import com.styloflow.catalog.application.port.out.ProductRepositoryPort;
 import com.styloflow.catalog.application.port.out.ServiceRepositoryPort;
 import com.styloflow.catalog.domain.model.Product;
-import com.styloflow.catalog.domain.model.Service;
 import com.styloflow.customers.application.port.out.CustomerRepositoryPort;
 import com.styloflow.customers.domain.model.Customer;
-import com.styloflow.sales.application.port.in.RegisterSaleCommand;
+import com.styloflow.sales.application.port.in.command.RegisterSaleCommand;
 import com.styloflow.sales.application.port.in.SaleUseCase;
 import com.styloflow.sales.application.port.out.SaleRepositoryPort;
-import com.styloflow.sales.domain.model.ItemType;
+import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.sales.domain.model.Sale;
 import com.styloflow.sales.domain.model.SaleItem;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
@@ -29,14 +28,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Registers and voids sales, keeping product stock in sync. */
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SaleService implements SaleUseCase {
 
     private final SaleRepositoryPort saleRepository;
-    private final CashRepositoryPort cashRegisterRepository;
+    private final CashRepositoryPort cashRepository;
     private final ServiceRepositoryPort serviceRepository;
     private final ProductRepositoryPort productRepository;
     private final UserRepositoryPort userRepository;
@@ -48,45 +46,62 @@ public class SaleService implements SaleUseCase {
     @Override
     @Transactional
     public Sale register(RegisterSaleCommand command, Long cashierId) {
-        Cash cashRegister = cashRegisterRepository.findOpen().orElseThrow(NoOpenCashException::new);
+        Cash cashRegister = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
         User cashier = getUserOrThrow(cashierId);
-        Customer customer = command.customerId() == null ? null
-                : customerRepository.findById(command.customerId())
+        Customer customer = command.customerId() == null ? null :
+                customerRepository.findById(command.customerId())
                         .orElseThrow(() -> new NotFoundException("Customer", command.customerId()));
         List<SaleItem> items = command.items().stream().map(this::createItem).toList();
-        Sale sale = Sale.register(clock.instant(), cashRegister, cashier, customer, items, command.discount(),
-                command.paymentMethod(), command.amountReceived(), businessUseCase.getCurrent().getTaxRate(),
+        Sale sale = Sale.register(
+                clock.instant(),
+                cashRegister,
+                cashier,
+                customer,
+                items,
+                command.discount(),
+                command.paymentMethod(),
+                command.amountReceived(),
+                businessUseCase.getCurrent().getTaxRate(),
                 command.notes());
         return saleRepository.save(sale);
     }
 
     private SaleItem createItem(RegisterSaleCommand.Item item) {
         if (item.type() == ItemType.SERVICE) {
-            Service service = serviceRepository.findById(item.itemId())
+            var service = serviceRepository.findById(item.itemId())
                     .orElseThrow(() -> new NotFoundException("Service", item.itemId()));
-            if (!service.isActive()) {
+            if (!service.isActive())
                 throw new BusinessRuleException("The service '" + service.getName() + "' is not active");
-            }
-            return SaleItem.create(ItemType.SERVICE, service.getId(), service.getName(), item.quantity(),
-                    item.unitPrice() != null ? item.unitPrice() : service.getPrice(), item.discount(),
-                    stylist(item.stylistId()));
+            return SaleItem.create(
+                    ItemType.SERVICE,
+                    service.getId(),
+                    service.getName(),
+                    item.quantity(),
+                    item.unitPrice() != null ? item.unitPrice() : service.getPrice(),
+                    item.discount(),
+                    stylist(item.stylistId())
+            );
         }
-        Product product = productRepository.findByIdForUpdate(item.itemId())
+        Product product = productRepository.findByIdUpdate(item.itemId())
                 .orElseThrow(() -> new NotFoundException("Product", item.itemId()));
-        if (!product.isActive()) {
+        if (!product.isActive())
             throw new BusinessRuleException("The product '" + product.getName() + "' is not active");
-        }
         product.decreaseStock(item.quantity());
         productRepository.save(product);
-        return SaleItem.create(ItemType.PRODUCT, product.getId(), product.getName(), item.quantity(),
-                item.unitPrice() != null ? item.unitPrice() : product.getPrice(), item.discount(),
-                stylist(item.stylistId()));
+        return SaleItem.create(
+                ItemType.PRODUCT,
+                product.getId(),
+                product.getName(),
+                item.quantity(),
+                item.unitPrice() != null ? item.unitPrice() : product.getPrice(),
+                item.discount(),
+                stylist(item.stylistId())
+        );
     }
 
     private User stylist(Long stylistId) {
-        if (stylistId == null) {
+        if (stylistId == null)
             return null;
-        }
         return userRepository.findById(stylistId)
                 .filter(User::isActive)
                 .orElseThrow(() -> new BusinessRuleException("Invalid or inactive stylist: " + stylistId));
@@ -99,9 +114,10 @@ public class SaleService implements SaleUseCase {
         sale.voidSale(getUserOrThrow(userId), reason, clock.instant());
         sale.getItems().stream()
                 .filter(item -> item.getType() == ItemType.PRODUCT)
-                .forEach(item -> productRepository.findByIdForUpdate(item.getItemId()).ifPresent(product -> {
-                    product.increaseStock(item.getQuantity());
-                    productRepository.save(product);
+                .forEach(item -> productRepository.findByIdUpdate(item.getItemId())
+                        .ifPresent(product -> {
+                            product.increaseStock(item.getQuantity());
+                            productRepository.save(product);
                 }));
         return saleRepository.save(sale);
     }

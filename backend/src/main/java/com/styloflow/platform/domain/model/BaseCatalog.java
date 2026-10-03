@@ -3,14 +3,19 @@ package com.styloflow.platform.domain.model;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** Optional starter catalog for a new business (same as the demo business, see V2__seed.sql). */
 public final class BaseCatalog {
 
-    public record ServiceSeed(String name, int durationMinutes, BigDecimal price) {}
+    public record ServiceSeed(
+            String name,
+            int durationMinutes,
+            BigDecimal price
+    ) {}
 
-    public record CategorySeed(String name, List<ServiceSeed> services) {}
+    public record CategorySeed(
+            String name,
+            List<ServiceSeed> services
+    ) {}
 
-    // Catalog content stays in Spanish: it is data shown to the salon staff
     public static final List<CategorySeed> CATEGORIES = List.of(
             new CategorySeed("Cortes", List.of(
                     service("Corte de dama", 45, "60.00"),

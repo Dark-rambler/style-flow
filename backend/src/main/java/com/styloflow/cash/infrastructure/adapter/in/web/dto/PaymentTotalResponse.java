@@ -1,6 +1,6 @@
 package com.styloflow.cash.infrastructure.adapter.in.web.dto;
 
-import com.styloflow.sales.domain.model.PaymentMethod;
+import com.styloflow.sales.domain.enums.PaymentMethod;
 import java.math.BigDecimal;
 
 public record PaymentTotalResponse(

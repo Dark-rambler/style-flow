@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.styloflow.sales.domain.model.PaymentMethod;
+import com.styloflow.sales.domain.enums.PaymentMethod;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import java.math.BigDecimal;
 import java.time.Instant;

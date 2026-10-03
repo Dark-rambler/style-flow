@@ -18,7 +18,6 @@ public class Customer {
     private String name;
     private String phone;
     private String email;
-    /** CI or NIT (identity or tax number), printed on the receipt. */
     private String taxId;
     private String notes;
     private Instant createdAt;

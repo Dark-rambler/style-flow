@@ -7,7 +7,7 @@ import com.styloflow.reports.domain.model.ExportedSale;
 import com.styloflow.reports.domain.model.SalesSummary;
 import com.styloflow.reports.domain.model.StylistTotal;
 import com.styloflow.reports.domain.model.TopItem;
-import com.styloflow.sales.domain.model.ItemType;
+import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.model.DateRange;
 import java.time.Clock;
@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Sales reports of the current business; date ranges use the business time zone. */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -32,9 +31,8 @@ public class ReportService implements ReportUseCase {
     @Override
     public DateRange range(LocalDate from, LocalDate to) {
         DateRange range = DateRange.of(from, to, LocalDate.now(clock.withZone(zone)));
-        if (range.from().plusDays(366).isBefore(range.to())) {
+        if (range.from().plusDays(366).isBefore(range.to()))
             throw new BusinessRuleException("The maximum range is one year");
-        }
         return range;
     }
 
@@ -55,7 +53,7 @@ public class ReportService implements ReportUseCase {
 
     @Override
     public List<TopItem> topItems(DateRange range, ItemType type, int limit) {
-        return reportQuery.topItems(range, type, Math.max(1, Math.min(limit, 50)));
+        return reportQuery.topItems(range, type, Math.clamp(limit, 1, 50));
     }
 
     @Override

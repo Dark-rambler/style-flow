@@ -3,7 +3,7 @@ package com.styloflow.users.infrastructure.adapter.out.persistence;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import com.styloflow.shared.infrastructure.tenant.TenantExecutor;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
-import com.styloflow.users.domain.model.Role;
+import com.styloflow.users.domain.enums.Role;
 import com.styloflow.users.domain.model.User;
 import java.util.List;
 import java.util.Optional;

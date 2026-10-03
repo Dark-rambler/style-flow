@@ -1,6 +1,6 @@
 package com.styloflow.cash.domain.model;
 
-import com.styloflow.sales.domain.model.PaymentMethod;
+import com.styloflow.sales.domain.enums.PaymentMethod;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.users.domain.model.User;
 import java.math.BigDecimal;

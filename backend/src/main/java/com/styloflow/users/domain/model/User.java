@@ -1,13 +1,14 @@
 package com.styloflow.users.domain.model;
 
 import java.math.BigDecimal;
+
+import com.styloflow.users.domain.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** A user of a business. The username is unique within the business. */
 @Getter
 @Setter
 @Builder

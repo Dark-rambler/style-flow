@@ -2,7 +2,7 @@ package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
 import com.styloflow.catalog.infrastructure.adapter.out.persistence.ProductEntity;
 import com.styloflow.catalog.infrastructure.adapter.out.persistence.ServiceEntity;
-import com.styloflow.sales.domain.model.ItemType;
+import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.users.infrastructure.adapter.out.persistence.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Belongs to {@link SaleEntity}: it inherits its business, so it does not extend TenantScopedEntity. */
 @Getter
 @Setter
 @Entity

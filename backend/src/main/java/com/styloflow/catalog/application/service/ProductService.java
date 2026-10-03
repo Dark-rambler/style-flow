@@ -68,7 +68,7 @@ public class ProductService implements ProductUseCase {
     @Override
     @Transactional
     public Product adjustStock(Long id, int quantity) {
-        Product product = productRepository.findByIdForUpdate(id)
+        Product product = productRepository.findByIdUpdate(id)
                 .orElseThrow(() -> new NotFoundException("Product", id));
         product.adjustStock(quantity);
         return productRepository.save(product);
