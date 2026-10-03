@@ -19,6 +19,8 @@ public class Product {
     private String name;
     private String sku;
     private BigDecimal price;
+    private String imageUrl;
+    private String imagePublicId;
     private int stock;
     private int minStock;
     @Builder.Default

@@ -50,7 +50,7 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
                 .toList();
     }
 
-    /** A sale is created with its items; afterwards only its status changes (void). */
+    /** A sale is created with its items; afterward only its status changes (void). */
     @Override
     public Sale save(Sale sale) {
         SaleEntity entity = sale.getId() == null ? new SaleEntity()

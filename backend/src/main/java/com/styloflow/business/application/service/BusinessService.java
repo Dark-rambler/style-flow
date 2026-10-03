@@ -1,7 +1,7 @@
 package com.styloflow.business.application.service;
 
 import com.styloflow.business.application.port.in.BusinessUseCase;
-import com.styloflow.business.application.port.in.UpdateBusinessCommand;
+import com.styloflow.business.application.port.in.command.UpdateBusinessCommand;
 import com.styloflow.business.application.port.out.BusinessRepositoryPort;
 import com.styloflow.business.domain.model.Business;
 import com.styloflow.shared.application.port.out.CurrentTenantPort;
@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Reads and updates the settings of the current business. */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,6 +28,11 @@ public class BusinessService implements BusinessUseCase {
     @Transactional
     public Business update(UpdateBusinessCommand command) {
         Business business = getCurrent();
+        apply(business, command);
+        return businessRepository.save(business);
+    }
+
+    private void apply(Business business, UpdateBusinessCommand command) {
         business.setName(command.name().trim());
         business.setTaxId(command.taxId());
         business.setAddress(command.address());
@@ -37,6 +41,5 @@ public class BusinessService implements BusinessUseCase {
         business.setCurrencySymbol(command.currencySymbol());
         business.setTaxRate(command.taxRate());
         business.setReceiptMessage(command.receiptMessage());
-        return businessRepository.save(business);
     }
 }

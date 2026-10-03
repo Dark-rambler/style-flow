@@ -1,8 +1,8 @@
 package com.styloflow.cashregister.application.service;
 
 import com.styloflow.cashregister.application.port.in.CashRegisterUseCase;
-import com.styloflow.cashregister.application.port.in.CloseCashRegisterCommand;
-import com.styloflow.cashregister.application.port.in.OpenCashRegisterCommand;
+import com.styloflow.cashregister.application.port.in.command.CloseCashRegisterCommand;
+import com.styloflow.cashregister.application.port.in.command.OpenCashRegisterCommand;
 import com.styloflow.cashregister.application.port.out.CashRegisterRepositoryPort;
 import com.styloflow.cashregister.application.port.out.SalesTotalsPort;
 import com.styloflow.cashregister.domain.exception.NoOpenCashRegisterException;
@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Opens, closes and lists cash register shifts of the current business. */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -43,8 +42,12 @@ public class CashRegisterService implements CashRegisterUseCase {
         if (cashRegisterRepository.findOpen().isPresent()) {
             throw new BusinessRuleException("A cash register is already open");
         }
-        CashRegister cashRegister = CashRegister.open(getUserOrThrow(userId), clock.instant(),
-                command.openingAmount(), command.notes());
+        CashRegister cashRegister = CashRegister.open(
+                getUserOrThrow(userId),
+                clock.instant(),
+                command.openingAmount(),
+                command.notes()
+        );
         return summary(cashRegisterRepository.save(cashRegister));
     }
 
@@ -53,8 +56,13 @@ public class CashRegisterService implements CashRegisterUseCase {
     public CashRegisterSummary close(CloseCashRegisterCommand command, Long userId) {
         CashRegister cashRegister = cashRegisterRepository.findOpen().orElseThrow(NoOpenCashRegisterException::new);
         List<PaymentTotal> byPaymentMethod = salesTotals.totalsByPaymentMethod(cashRegister.getId());
-        cashRegister.close(getUserOrThrow(userId), clock.instant(), command.countedCash(), command.notes(),
-                byPaymentMethod);
+        cashRegister.close(
+                getUserOrThrow(userId),
+                clock.instant(),
+                command.countedCash(),
+                command.notes(),
+                byPaymentMethod
+        );
         return CashRegisterSummary.of(cashRegisterRepository.save(cashRegister), byPaymentMethod);
     }
 

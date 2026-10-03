@@ -11,6 +11,7 @@ import com.styloflow.users.domain.model.Role;
 import com.styloflow.users.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ public class PlatformInitializer implements ApplicationRunner {
     private final AppProperties props;
 
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(@NonNull ApplicationArguments args) {
         if (superadminRepository.count() == 0) {
             Superadmin superadmin = superadminRepository.save(Superadmin.builder()
                     .name(props.superadmin().name())

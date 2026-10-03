@@ -1,6 +1,5 @@
 package com.styloflow.sales.infrastructure.adapter.in.web;
 
-import com.styloflow.auth.infrastructure.security.CurrentUser;
 import com.styloflow.sales.application.port.in.SaleUseCase;
 import com.styloflow.sales.infrastructure.adapter.in.web.dto.SaleRequest;
 import com.styloflow.sales.infrastructure.adapter.in.web.dto.SaleResponse;
@@ -16,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,13 +33,12 @@ public class SaleController {
 
     private final SaleUseCase saleUseCase;
     private final SaleWebMapper saleMapper;
-    private final CurrentUser currentUser;
 
     @PostMapping
     @Operation(summary = "POST /api/sales — register a sale in the open cash register")
-    public ResponseEntity<SaleResponse> register(@Valid @RequestBody SaleRequest request) {
+    public ResponseEntity<SaleResponse> register(@Valid @RequestBody SaleRequest request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(saleMapper.toResponse(saleUseCase.register(saleMapper.toCommand(request), currentUser.id())));
+                .body(saleMapper.toResponse(saleUseCase.register(saleMapper.toCommand(request), Long.parseLong(auth.getName()))));
     }
 
     @GetMapping
@@ -62,7 +61,7 @@ public class SaleController {
     @PostMapping("/{id}/void")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "POST /api/sales/{id}/void — void a sale of the open cash register and restore stock")
-    public ResponseEntity<SaleResponse> voidSale(@PathVariable Long id, @Valid @RequestBody VoidSaleRequest request) {
-        return ResponseEntity.ok(saleMapper.toResponse(saleUseCase.voidSale(id, request.reason(), currentUser.id())));
+    public ResponseEntity<SaleResponse> voidSale(@PathVariable Long id, @Valid @RequestBody VoidSaleRequest request, Authentication auth) {
+        return ResponseEntity.ok(saleMapper.toResponse(saleUseCase.voidSale(id, request.reason(), Long.parseLong(auth.getName()))));
     }
 }
