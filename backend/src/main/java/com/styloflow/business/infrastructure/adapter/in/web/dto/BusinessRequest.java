@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
-/** The {@code code} is not accepted: it identifies the business at login and never changes. */
 public record BusinessRequest(
         @NotBlank @Size(max = 120) String name,
         @Size(max = 30) String taxId,
@@ -16,4 +15,5 @@ public record BusinessRequest(
         @NotBlank @Size(min = 3, max = 3) String currency,
         @NotBlank @Size(max = 5) String currencySymbol,
         @NotNull @DecimalMin("0") @DecimalMax("100") BigDecimal taxRate,
-        @Size(max = 250) String receiptMessage) {}
+        @Size(max = 250) String receiptMessage
+) {}

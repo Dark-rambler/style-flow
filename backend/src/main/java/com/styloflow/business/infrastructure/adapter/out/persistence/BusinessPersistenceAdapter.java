@@ -7,7 +7,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/** New businesses are inserted with SQL by {@code PlatformJdbcAdapter}; here they are only read and updated. */
 @Component
 @RequiredArgsConstructor
 public class BusinessPersistenceAdapter implements BusinessRepositoryPort {

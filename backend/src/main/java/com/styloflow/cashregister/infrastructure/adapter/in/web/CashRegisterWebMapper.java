@@ -1,7 +1,7 @@
 package com.styloflow.cashregister.infrastructure.adapter.in.web;
 
-import com.styloflow.cashregister.application.port.in.CloseCashRegisterCommand;
-import com.styloflow.cashregister.application.port.in.OpenCashRegisterCommand;
+import com.styloflow.cashregister.application.port.in.command.CloseCashRegisterCommand;
+import com.styloflow.cashregister.application.port.in.command.OpenCashRegisterCommand;
 import com.styloflow.cashregister.domain.model.CashRegisterSummary;
 import com.styloflow.cashregister.infrastructure.adapter.in.web.dto.CashRegisterResponse;
 import com.styloflow.cashregister.infrastructure.adapter.in.web.dto.CloseCashRegisterRequest;

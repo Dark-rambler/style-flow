@@ -1,6 +1,5 @@
 package com.styloflow.users.infrastructure.adapter.in.web;
 
-import com.styloflow.auth.infrastructure.security.CurrentUser;
 import com.styloflow.users.application.port.in.UserUseCase;
 import com.styloflow.users.infrastructure.adapter.in.web.dto.ChangePasswordRequest;
 import com.styloflow.users.infrastructure.adapter.in.web.dto.UserRequest;
@@ -14,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +30,6 @@ public class UserController {
 
     private final UserUseCase userUseCase;
     private final UserWebMapper userMapper;
-    private final CurrentUser currentUser;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -63,15 +62,15 @@ public class UserController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "PUT /api/users/{id} — update a user")
-    public ResponseEntity<UserResponse> update(@PathVariable Long id, @Valid @RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> update(@PathVariable Long id, @Valid @RequestBody UserRequest request, Authentication auth) {
         return ResponseEntity.ok(userMapper.toResponse(
-                userUseCase.update(id, userMapper.toCommand(request), currentUser.id())));
+                userUseCase.update(id, userMapper.toCommand(request), Long.parseLong(auth.getName()))));
     }
 
     @PutMapping("/me/password")
     @Operation(summary = "PUT /api/users/me/password — change the password of the authenticated user")
-    public ResponseEntity<Void> changeMyPassword(@Valid @RequestBody ChangePasswordRequest request) {
-        userUseCase.changePassword(currentUser.id(), request.password());
+    public ResponseEntity<Void> changeMyPassword(@Valid @RequestBody ChangePasswordRequest request, Authentication auth) {
+        userUseCase.changePassword(Long.parseLong(auth.getName()), request.password());
         return ResponseEntity.noContent().build();
     }
 }

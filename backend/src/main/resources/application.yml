@@ -39,6 +39,8 @@ app:
     username: ${ADMIN_USERNAME}
     password: ${ADMIN_PASSWORD}
     name: Administrator
+  cloudinary:
+    url: ${CLOUDINARY_URL:}
   superadmin:
     username: ${SUPERADMIN_USERNAME}
     password: ${SUPERADMIN_PASSWORD}

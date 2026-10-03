@@ -1,6 +1,5 @@
 package com.styloflow.reports.infrastructure.adapter.in.web;
 
-import com.styloflow.auth.infrastructure.security.CurrentUser;
 import com.styloflow.reports.application.port.in.ReportUseCase;
 import com.styloflow.reports.infrastructure.adapter.in.web.dto.DailySalesResponse;
 import com.styloflow.reports.infrastructure.adapter.in.web.dto.SalesSummaryResponse;
@@ -21,6 +20,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,7 +35,6 @@ public class ReportController {
     private final ReportUseCase reportUseCase;
     private final ReportWebMapper reportMapper;
     private final SalesCsvWriter csvWriter;
-    private final CurrentUser currentUser;
 
     @GetMapping("/summary")
     @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
@@ -70,9 +69,10 @@ public class ReportController {
     @Operation(summary = "GET /api/reports/my-commissions — production and commission of the authenticated stylist")
     public ResponseEntity<List<StylistTotalResponse>> myCommissions(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            Authentication auth) {
         return ResponseEntity.ok(reportMapper.toStylistList(
-                reportUseCase.byStylist(reportUseCase.range(from, to), currentUser.id())));
+                reportUseCase.byStylist(reportUseCase.range(from, to), Long.parseLong(auth.getName()))));
     }
 
     @GetMapping("/top")

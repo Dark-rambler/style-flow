@@ -1,3 +1,6 @@
 package com.styloflow.auth.infrastructure.adapter.in.web.dto;
 
-public record BusinessInfo(String code, String name) {}
+public record BusinessInfo(
+        String code,
+        String name
+) {}

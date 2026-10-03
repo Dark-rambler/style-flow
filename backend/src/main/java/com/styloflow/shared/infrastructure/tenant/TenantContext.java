@@ -33,7 +33,7 @@ public final class TenantContext {
         return fromToken != null ? fromToken : NO_TENANT;
     }
 
-    /** Runs {@code action} with the given business as tenant, restoring the previous one afterwards. */
+    /** Runs {@code action} with the given business as tenant, restoring the previous one afterward. */
     public static <T> T runAs(long businessId, Supplier<T> action) {
         Long previous = OVERRIDE.get();
         OVERRIDE.set(businessId);

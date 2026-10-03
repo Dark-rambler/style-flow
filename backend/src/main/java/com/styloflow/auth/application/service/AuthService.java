@@ -1,8 +1,8 @@
 package com.styloflow.auth.application.service;
 
 import com.styloflow.auth.application.port.in.AuthUseCase;
-import com.styloflow.auth.application.port.in.LoginCommand;
-import com.styloflow.auth.application.port.in.PlatformLoginCommand;
+import com.styloflow.auth.application.port.in.command.LoginCommand;
+import com.styloflow.auth.application.port.in.command.PlatformLoginCommand;
 import com.styloflow.auth.application.port.out.TokenPort;
 import com.styloflow.auth.domain.model.BusinessSession;
 import com.styloflow.auth.domain.model.PlatformSession;
@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Authenticates business users and platform superadmins and issues their JWTs. */
 @Service
 @RequiredArgsConstructor
 public class AuthService implements AuthUseCase {
@@ -32,18 +31,15 @@ public class AuthService implements AuthUseCase {
 
     @Override
     public BusinessSession login(LoginCommand command) {
-        // Same message for any wrong value: it does not reveal which businesses or users exist
         var invalidCredentials = new UnauthorizedException("Invalid business, username or password");
         Business business = businessRepository.findByCode(command.businessCode().trim())
                 .orElseThrow(() -> invalidCredentials);
-        // The user is looked up inside its business (there is no JWT yet)
+        if (!business.isActive())
+            throw new ForbiddenException("This business is suspended. Please contact support.");
         User user = userRepository.findByUsernameInBusiness(business.getId(), command.username().trim())
                 .filter(User::isActive)
                 .filter(u -> passwordHasher.matches(command.password(), u.getPasswordHash()))
                 .orElseThrow(() -> invalidCredentials);
-        if (!business.isActive()) {
-            throw new ForbiddenException("This business is suspended. Please contact support.");
-        }
         return new BusinessSession(tokenPort.generate(user, business), user, business);
     }
 

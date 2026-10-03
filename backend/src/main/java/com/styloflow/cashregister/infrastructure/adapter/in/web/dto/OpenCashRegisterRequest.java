@@ -8,4 +8,5 @@ import java.math.BigDecimal;
 
 public record OpenCashRegisterRequest(
         @NotNull @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal openingAmount,
-        @Size(max = 500) String notes) {}
+        @Size(max = 500) String notes
+) {}
