@@ -20,6 +20,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   mvc:
     problemdetails:
       enabled: true
@@ -40,7 +44,7 @@ app:
     password: ${ADMIN_PASSWORD}
     name: Administrator
   cloudinary:
-    url: ${CLOUDINARY_URL:}
+    url: ${CLOUDINARY_URL}
   superadmin:
     username: ${SUPERADMIN_USERNAME}
     password: ${SUPERADMIN_PASSWORD}

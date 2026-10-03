@@ -21,6 +21,8 @@ public class SalonService {
     private String description;
     private int durationMinutes;
     private BigDecimal price;
+    private String imageUrl;
+    private String imagePublicId;
     @Builder.Default
     private boolean active = true;
 

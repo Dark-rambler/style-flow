@@ -33,6 +33,12 @@ public class SalonServiceEntity extends TenantScopedEntity {
     @Column(name = "precio", nullable = false)
     private BigDecimal price;
 
+    @Column(name = "imagen_url")
+    private String imageUrl;
+
+    @Column(name = "imagen_public_id")
+    private String imagePublicId;
+
     @Column(name = "activo", nullable = false)
     private boolean active = true;
 }

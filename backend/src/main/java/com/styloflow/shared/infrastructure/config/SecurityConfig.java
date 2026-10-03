@@ -48,16 +48,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, BusinessStatusUseCase businessStatus) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, BusinessStatusUseCase businessStatus) {
         http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> {})
+                .cors(_ -> {})
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/platform/auth/login").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/platform/**").hasRole("SUPERADMIN")
-                        // The rest of the API works inside a business: it requires a token with a tenant (bid claim)
                         .requestMatchers("/api/**").access(SecurityConfig::businessToken)
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(o -> o.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
