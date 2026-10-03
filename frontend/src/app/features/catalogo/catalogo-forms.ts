@@ -21,30 +21,30 @@ export interface ServicioFormData {
       <div class="mt-4 grid grid-cols-2 gap-4">
         <label class="field col-span-2">
           <span class="label">Nombre *</span>
-          <input class="input" formControlName="nombre" />
+          <input class="input" formControlName="name" />
         </label>
         <label class="field col-span-2">
           <span class="label">Categoría *</span>
-          <select class="input" formControlName="categoriaId">
+          <select class="input" formControlName="categoryId">
             @for (c of data.categorias; track c.id) {
-              <option [ngValue]="c.id">{{ c.nombre }}{{ c.activo ? '' : ' (inactiva)' }}</option>
+              <option [ngValue]="c.id">{{ c.name }}{{ c.active ? '' : ' (inactiva)' }}</option>
             }
           </select>
         </label>
         <label class="field">
           <span class="label">Precio (Bs) *</span>
-          <input class="input" type="number" min="0" step="0.5" formControlName="precio" />
+          <input class="input" type="number" min="0" step="0.5" formControlName="price" />
         </label>
         <label class="field">
           <span class="label">Duración (min) *</span>
-          <input class="input" type="number" min="1" step="5" formControlName="duracionMin" />
+          <input class="input" type="number" min="1" step="5" formControlName="durationMinutes" />
         </label>
         <label class="field col-span-2">
           <span class="label">Descripción</span>
-          <textarea class="input" rows="2" formControlName="descripcion"></textarea>
+          <textarea class="input" rows="2" formControlName="description"></textarea>
         </label>
         <label class="col-span-2 flex items-center gap-2 text-sm">
-          <input type="checkbox" formControlName="activo" class="size-4 accent-brand-600" /> Activo
+          <input type="checkbox" formControlName="active" class="size-4 accent-brand-600" /> Activo
           (visible en el POS)
         </label>
       </div>
@@ -66,17 +66,17 @@ export class ServicioFormDialog {
 
   private readonly s = this.data.servicio;
   protected readonly form = inject(NonNullableFormBuilder).group({
-    nombre: [this.s?.nombre ?? '', [Validators.required, Validators.maxLength(120)]],
-    categoriaId: [this.s?.categoriaId ?? this.data.categorias[0]?.id ?? 0, Validators.required],
-    precio: [this.s?.precio ?? 0, [Validators.required, Validators.min(0)]],
-    duracionMin: [this.s?.duracionMin ?? 30, [Validators.required, Validators.min(1)]],
-    descripcion: [this.s?.descripcion ?? ''],
-    activo: [this.s?.activo ?? true],
+    name: [this.s?.name ?? '', [Validators.required, Validators.maxLength(120)]],
+    categoryId: [this.s?.categoryId ?? this.data.categorias[0]?.id ?? 0, Validators.required],
+    price: [this.s?.price ?? 0, [Validators.required, Validators.min(0)]],
+    durationMinutes: [this.s?.durationMinutes ?? 30, [Validators.required, Validators.min(1)]],
+    description: [this.s?.description ?? ''],
+    active: [this.s?.active ?? true],
   });
 
   protected guardar(): void {
     this.saving.set(true);
-    const body = this.form.getRawValue() as ServicioRequest;
+    const body: ServicioRequest = this.form.getRawValue();
     const req = this.s
       ? this.api.catalogo.actualizarServicio(this.s.id, body)
       : this.api.catalogo.crearServicio(body);
@@ -99,7 +99,7 @@ export class ServicioFormDialog {
       <div class="mt-4 grid grid-cols-2 gap-4">
         <label class="field col-span-2">
           <span class="label">Nombre *</span>
-          <input class="input" formControlName="nombre" />
+          <input class="input" formControlName="name" />
         </label>
         <label class="field">
           <span class="label">SKU / código</span>
@@ -107,7 +107,7 @@ export class ServicioFormDialog {
         </label>
         <label class="field">
           <span class="label">Precio (Bs) *</span>
-          <input class="input" type="number" min="0" step="0.5" formControlName="precio" />
+          <input class="input" type="number" min="0" step="0.5" formControlName="price" />
         </label>
         <label class="field">
           <span class="label">Stock *</span>
@@ -115,10 +115,10 @@ export class ServicioFormDialog {
         </label>
         <label class="field">
           <span class="label">Stock mínimo</span>
-          <input class="input" type="number" min="0" formControlName="stockMinimo" />
+          <input class="input" type="number" min="0" formControlName="minStock" />
         </label>
         <label class="col-span-2 flex items-center gap-2 text-sm">
-          <input type="checkbox" formControlName="activo" class="size-4 accent-brand-600" /> Activo
+          <input type="checkbox" formControlName="active" class="size-4 accent-brand-600" /> Activo
         </label>
       </div>
       <div class="mt-6 flex justify-end gap-2">
@@ -138,17 +138,17 @@ export class ProductoFormDialog {
   protected readonly saving = signal(false);
 
   protected readonly form = inject(NonNullableFormBuilder).group({
-    nombre: [this.p?.nombre ?? '', [Validators.required, Validators.maxLength(120)]],
+    name: [this.p?.name ?? '', [Validators.required, Validators.maxLength(120)]],
     sku: [this.p?.sku ?? ''],
-    precio: [this.p?.precio ?? 0, [Validators.required, Validators.min(0)]],
+    price: [this.p?.price ?? 0, [Validators.required, Validators.min(0)]],
     stock: [this.p?.stock ?? 0, [Validators.required, Validators.min(0)]],
-    stockMinimo: [this.p?.stockMinimo ?? 0, Validators.min(0)],
-    activo: [this.p?.activo ?? true],
+    minStock: [this.p?.minStock ?? 0, Validators.min(0)],
+    active: [this.p?.active ?? true],
   });
 
   protected guardar(): void {
     this.saving.set(true);
-    const body = this.form.getRawValue() as ProductoRequest;
+    const body: ProductoRequest = this.form.getRawValue();
     const req = this.p
       ? this.api.catalogo.actualizarProducto(this.p.id, body)
       : this.api.catalogo.crearProducto(body);

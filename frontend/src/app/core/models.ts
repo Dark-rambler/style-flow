@@ -1,21 +1,23 @@
-// Tipos que reflejan los DTOs del backend (com.styloflow.*Dtos)
+// Tipos que reflejan los DTOs del backend (records en `<modulo>/infrastructure/adapter/in/web/dto`)
 
 /** SUPERADMIN es de la plataforma: no pertenece a ningún negocio. */
-export type Rol = 'ADMIN' | 'CAJERO' | 'ESTILISTA' | 'SUPERADMIN';
-export type MetodoPago = 'EFECTIVO' | 'QR' | 'TARJETA' | 'TRANSFERENCIA';
-export type TipoItem = 'SERVICIO' | 'PRODUCTO';
+export type Rol = 'ADMIN' | 'CASHIER' | 'STYLIST' | 'SUPERADMIN';
+export type MetodoPago = 'CASH' | 'QR' | 'CARD' | 'TRANSFER';
+export type TipoItem = 'SERVICE' | 'PRODUCT';
+export type EstadoVenta = 'COMPLETED' | 'VOIDED';
+export type EstadoCaja = 'OPEN' | 'CLOSED';
 
 export const METODOS_PAGO: { value: MetodoPago; label: string }[] = [
-  { value: 'EFECTIVO', label: 'Efectivo' },
+  { value: 'CASH', label: 'Efectivo' },
   { value: 'QR', label: 'QR' },
-  { value: 'TARJETA', label: 'Tarjeta' },
-  { value: 'TRANSFERENCIA', label: 'Transferencia' },
+  { value: 'CARD', label: 'Tarjeta' },
+  { value: 'TRANSFER', label: 'Transferencia' },
 ];
 
 export const ROLES: { value: Rol; label: string }[] = [
   { value: 'ADMIN', label: 'Administrador' },
-  { value: 'CAJERO', label: 'Cajero' },
-  { value: 'ESTILISTA', label: 'Estilista' },
+  { value: 'CASHIER', label: 'Cajero' },
+  { value: 'STYLIST', label: 'Estilista' },
 ];
 
 export interface Page<T> {
@@ -28,252 +30,252 @@ export interface Page<T> {
 
 export interface Usuario {
   id: number;
-  nombre: string;
+  name: string;
   username: string;
-  rol: Rol;
-  telefono: string | null;
-  comisionPorcentaje: number;
-  activo: boolean;
+  role: Rol;
+  phone: string | null;
+  commissionRate: number;
+  active: boolean;
 }
 
 export interface UsuarioRequest {
-  nombre: string;
+  name: string;
   username: string;
   password?: string | null;
-  rol: Rol;
-  telefono?: string | null;
-  comisionPorcentaje?: number | null;
-  activo?: boolean;
+  role: Rol;
+  phone?: string | null;
+  commissionRate?: number | null;
+  active?: boolean;
 }
 
 export interface UsuarioResumen {
   id: number;
-  nombre: string;
-  rol: Rol;
+  name: string;
+  role: Rol;
 }
 
 export interface NegocioInfo {
-  codigo: string;
-  nombre: string;
+  code: string;
+  name: string;
 }
 
 export interface LoginResponse {
   token: string;
   expiresAt: string;
-  usuario: Usuario;
-  negocio: NegocioInfo;
+  user: Usuario;
+  business: NegocioInfo;
 }
 
 export interface PlataformaLoginResponse {
   token: string;
   expiresAt: string;
-  nombre: string;
+  name: string;
 }
 
 /** Negocio (tenant) visto desde la plataforma. */
 export interface NegocioResumen {
   id: number;
-  codigo: string;
-  nombre: string;
-  activo: boolean;
+  code: string;
+  name: string;
+  active: boolean;
   createdAt: string;
-  usuarios: number;
-  ventas30d: number;
+  users: number;
+  sales30d: number;
   total30d: number;
 }
 
 export interface NegocioRequest {
-  nombre: string;
-  codigo: string;
-  nit?: string | null;
-  telefono?: string | null;
-  adminNombre: string;
+  name: string;
+  code: string;
+  taxId?: string | null;
+  phone?: string | null;
+  adminName: string;
   adminUsername: string;
   adminPassword: string;
-  catalogoBase: boolean;
+  baseCatalog: boolean;
 }
 
 export interface Categoria {
   id: number;
-  nombre: string;
-  activo: boolean;
+  name: string;
+  active: boolean;
 }
 
 export interface Servicio {
   id: number;
-  categoriaId: number;
-  categoria: string;
-  nombre: string;
-  descripcion: string | null;
-  duracionMin: number;
-  precio: number;
+  categoryId: number;
+  category: string;
+  name: string;
+  description: string | null;
+  durationMinutes: number;
+  price: number;
   /** URL de la imagen que se muestra en el POS (aún no la envía el backend). */
-  imagenUrl?: string | null;
-  activo: boolean;
+  imageUrl?: string | null;
+  active: boolean;
 }
 
-export type ServicioRequest = Omit<Servicio, 'id' | 'categoria'>;
+export type ServicioRequest = Omit<Servicio, 'id' | 'category' | 'imageUrl'>;
 
 export interface Producto {
   id: number;
-  nombre: string;
+  name: string;
   sku: string | null;
-  precio: number;
+  price: number;
   stock: number;
-  stockMinimo: number;
-  activo: boolean;
-  stockBajo: boolean;
+  minStock: number;
+  active: boolean;
+  lowStock: boolean;
 }
 
-export type ProductoRequest = Omit<Producto, 'id' | 'stockBajo'>;
+export type ProductoRequest = Omit<Producto, 'id' | 'lowStock'>;
 
 export interface Cliente {
   id: number;
-  nombre: string;
-  telefono: string | null;
+  name: string;
+  phone: string | null;
   email: string | null;
-  ciNit: string | null;
-  notas: string | null;
+  taxId: string | null;
+  notes: string | null;
   createdAt: string;
 }
 
 export type ClienteRequest = Omit<Cliente, 'id' | 'createdAt'>;
 
 export interface ItemRequest {
-  tipo: TipoItem;
+  type: TipoItem;
   itemId: number;
-  cantidad: number;
-  precioUnitario?: number | null;
+  quantity: number;
+  unitPrice?: number | null;
   /** Descuento de la línea (cortesía o rebaja); no puede superar precio × cantidad. */
-  descuento?: number | null;
-  estilistaId?: number | null;
+  discount?: number | null;
+  stylistId?: number | null;
 }
 
 export interface VentaRequest {
-  clienteId?: number | null;
+  customerId?: number | null;
   items: ItemRequest[];
-  descuento?: number | null;
-  metodoPago: MetodoPago;
-  montoRecibido?: number | null;
-  observaciones?: string | null;
+  discount?: number | null;
+  paymentMethod: MetodoPago;
+  amountReceived?: number | null;
+  notes?: string | null;
 }
 
 export interface VentaItem {
   id: number;
-  tipo: TipoItem;
+  type: TipoItem;
   itemId: number;
-  descripcion: string;
-  cantidad: number;
-  precioUnitario: number;
-  descuento: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
   /** Neto de la línea: precio × cantidad − descuento. */
   subtotal: number;
-  estilistaId: number | null;
-  estilista: string | null;
+  stylistId: number | null;
+  stylist: string | null;
 }
 
 export interface Venta {
   id: number;
-  fecha: string;
-  cajaId: number;
-  cajero: string;
-  clienteId: number | null;
-  cliente: string | null;
-  clienteCiNit: string | null;
+  date: string;
+  cashRegisterId: number;
+  cashier: string;
+  customerId: number | null;
+  customer: string | null;
+  customerTaxId: string | null;
   subtotal: number;
-  descuento: number;
+  discount: number;
   total: number;
-  iva: number;
-  metodoPago: MetodoPago;
-  montoRecibido: number;
-  cambio: number;
-  estado: 'COMPLETADA' | 'ANULADA';
-  anuladaPor: string | null;
-  anuladaEn: string | null;
-  motivoAnulacion: string | null;
-  observaciones: string | null;
+  tax: number;
+  paymentMethod: MetodoPago;
+  amountReceived: number;
+  change: number;
+  status: EstadoVenta;
+  voidedBy: string | null;
+  voidedAt: string | null;
+  voidReason: string | null;
+  notes: string | null;
   items: VentaItem[];
 }
 
 export interface VentaResumen {
   id: number;
-  fecha: string;
-  cajero: string;
-  clienteId: number | null;
-  cliente: string | null;
+  date: string;
+  cashier: string;
+  customerId: number | null;
+  customer: string | null;
   total: number;
-  metodoPago: MetodoPago;
-  estado: 'COMPLETADA' | 'ANULADA';
+  paymentMethod: MetodoPago;
+  status: EstadoVenta;
   /** Solo se pueden anular ventas de la caja abierta. */
-  cajaAbierta: boolean;
+  cashRegisterOpen: boolean;
 }
 
 export interface TotalMetodo {
-  metodo: MetodoPago;
-  cantidad: number;
+  method: MetodoPago;
+  count: number;
   total: number;
 }
 
 export interface Caja {
   id: number;
-  estado: 'ABIERTA' | 'CERRADA';
-  abiertaPor: string;
-  abiertaEn: string;
-  montoInicial: number;
-  cerradaPor: string | null;
-  cerradaEn: string | null;
-  cantidadVentas: number;
-  totalVentas: number;
-  efectivoEsperado: number;
-  efectivoContado: number | null;
-  diferencia: number | null;
-  porMetodo: TotalMetodo[];
-  observaciones: string | null;
+  status: EstadoCaja;
+  openedBy: string;
+  openedAt: string;
+  openingAmount: number;
+  closedBy: string | null;
+  closedAt: string | null;
+  salesCount: number;
+  salesTotal: number;
+  expectedCash: number;
+  countedCash: number | null;
+  difference: number | null;
+  byPaymentMethod: TotalMetodo[];
+  notes: string | null;
 }
 
 export interface Resumen {
-  desde: string;
-  hasta: string;
-  cantidadVentas: number;
-  totalVentas: number;
-  ticketPromedio: number;
-  totalDescuentos: number;
-  totalIva: number;
-  ventasAnuladas: number;
-  porMetodo: TotalMetodo[];
+  from: string;
+  to: string;
+  salesCount: number;
+  salesTotal: number;
+  averageTicket: number;
+  totalDiscounts: number;
+  totalTax: number;
+  voidedSales: number;
+  byPaymentMethod: TotalMetodo[];
 }
 
 export interface VentaDia {
-  fecha: string;
-  cantidad: number;
+  date: string;
+  count: number;
   total: number;
 }
 
 export interface EstilistaTotal {
-  estilistaId: number;
-  estilista: string;
-  servicios: number;
+  stylistId: number;
+  stylist: string;
+  services: number;
   total: number;
-  comisionPorcentaje: number;
-  comision: number;
+  commissionRate: number;
+  commission: number;
 }
 
 export interface ItemTop {
   id: number;
-  nombre: string;
-  cantidad: number;
+  name: string;
+  quantity: number;
   total: number;
 }
 
 export interface Negocio {
   /** Solo lectura: se usa al iniciar sesión. */
-  codigo?: string;
-  nombre: string;
-  nit: string | null;
-  direccion: string | null;
-  telefono: string | null;
-  moneda: string;
-  simbolo: string;
-  ivaPorcentaje: number;
-  mensajeTicket: string | null;
+  code?: string;
+  name: string;
+  taxId: string | null;
+  address: string | null;
+  phone: string | null;
+  currency: string;
+  currencySymbol: string;
+  taxRate: number;
+  receiptMessage: string | null;
 }

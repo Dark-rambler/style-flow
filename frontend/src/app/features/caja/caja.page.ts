@@ -2,17 +2,18 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
-import { Caja, METODOS_PAGO } from '../../core/models';
+import { Caja, METODOS_PAGO, Page } from '../../core/models';
 import { CajaStore } from '../../core/caja.store';
 import { ToastService } from '../../core/toast.service';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { ConfirmData, ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { injectDialog, openDialog } from '../../shared/ui/dialog';
+import { Paginator } from '../../shared/ui/paginator';
 import { AbrirCajaDialog } from './abrir-caja.dialog';
 
 @Component({
   selector: 'sf-caja-page',
-  imports: [FormsModule, MoneyPipe, DatePipe],
+  imports: [FormsModule, MoneyPipe, DatePipe, Paginator],
   template: `
     <h1 class="page-title mb-6">Caja</h1>
 
@@ -25,7 +26,7 @@ import { AbrirCajaDialog } from './abrir-caja.dialog';
             <div>
               <span class="badge bg-emerald-100 text-emerald-700">Abierta</span>
               <p class="mt-2 text-sm text-slate-500">
-                Por {{ c.abiertaPor }} · {{ c.abiertaEn | date: 'dd/MM/yyyy HH:mm' }}
+                Por {{ c.openedBy }} · {{ c.openedAt | date: 'dd/MM/yyyy HH:mm' }}
               </p>
             </div>
             <button type="button" class="btn-secondary btn-sm" (click)="cargar()">
@@ -35,19 +36,19 @@ import { AbrirCajaDialog } from './abrir-caja.dialog';
           <dl class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
               <dt class="text-xs text-slate-500">Fondo inicial</dt>
-              <dd class="text-lg font-semibold">{{ c.montoInicial | money }}</dd>
+              <dd class="text-lg font-semibold">{{ c.openingAmount | money }}</dd>
             </div>
             <div>
               <dt class="text-xs text-slate-500">Ventas</dt>
-              <dd class="text-lg font-semibold">{{ c.cantidadVentas }}</dd>
+              <dd class="text-lg font-semibold">{{ c.salesCount }}</dd>
             </div>
             <div>
               <dt class="text-xs text-slate-500">Total vendido</dt>
-              <dd class="text-lg font-semibold">{{ c.totalVentas | money }}</dd>
+              <dd class="text-lg font-semibold">{{ c.salesTotal | money }}</dd>
             </div>
             <div>
               <dt class="text-xs text-slate-500">Efectivo esperado</dt>
-              <dd class="text-lg font-semibold text-brand-700">{{ c.efectivoEsperado | money }}</dd>
+              <dd class="text-lg font-semibold text-brand-700">{{ c.expectedCash | money }}</dd>
             </div>
           </dl>
           <h2 class="mt-6 mb-2 text-sm font-semibold">Por método de pago</h2>
@@ -60,10 +61,10 @@ import { AbrirCajaDialog } from './abrir-caja.dialog';
               </tr>
             </thead>
             <tbody>
-              @for (m of c.porMetodo; track m.metodo) {
+              @for (m of c.byPaymentMethod; track m.method) {
                 <tr>
-                  <td>{{ etiqueta(m.metodo) }}</td>
-                  <td class="text-right">{{ m.cantidad }}</td>
+                  <td>{{ etiqueta(m.method) }}</td>
+                  <td class="text-right">{{ m.count }}</td>
                   <td class="text-right">{{ m.total | money }}</td>
                 </tr>
               } @empty {
@@ -145,20 +146,20 @@ import { AbrirCajaDialog } from './abrir-caja.dialog';
           </tr>
         </thead>
         <tbody>
-          @for (h of historial(); track h.id) {
+          @for (h of historial()?.content; track h.id) {
             <tr>
-              <td>{{ h.abiertaEn | date: 'dd/MM/yy HH:mm' }}</td>
-              <td>{{ h.cerradaEn ? (h.cerradaEn | date: 'dd/MM/yy HH:mm') : '—' }}</td>
-              <td>{{ h.cerradaPor ?? h.abiertaPor }}</td>
-              <td class="text-right">{{ h.totalVentas | money }}</td>
-              <td class="text-right">{{ h.efectivoEsperado | money }}</td>
-              <td class="text-right">{{ h.efectivoContado | money }}</td>
+              <td>{{ h.openedAt | date: 'dd/MM/yy HH:mm' }}</td>
+              <td>{{ h.closedAt ? (h.closedAt | date: 'dd/MM/yy HH:mm') : '—' }}</td>
+              <td>{{ h.closedBy ?? h.openedBy }}</td>
+              <td class="text-right">{{ h.salesTotal | money }}</td>
+              <td class="text-right">{{ h.expectedCash | money }}</td>
+              <td class="text-right">{{ h.countedCash | money }}</td>
               <td
                 class="text-right"
-                [class.text-red-600]="(h.diferencia ?? 0) < 0"
-                [class.text-emerald-600]="(h.diferencia ?? 0) > 0"
+                [class.text-red-600]="(h.difference ?? 0) < 0"
+                [class.text-emerald-600]="(h.difference ?? 0) > 0"
               >
-                {{ h.estado === 'ABIERTA' ? 'Abierta' : (h.diferencia | money) }}
+                {{ h.status === 'OPEN' ? 'Abierta' : (h.difference | money) }}
               </td>
             </tr>
           } @empty {
@@ -169,6 +170,11 @@ import { AbrirCajaDialog } from './abrir-caja.dialog';
         </tbody>
       </table>
     </div>
+    <sf-paginator
+      [page]="historial()"
+      (pagina)="cargarHistorial($event)"
+      (tamano)="cambiarTamanoHistorial($event)"
+    />
   `,
 })
 export class CajaPage implements OnInit {
@@ -180,13 +186,14 @@ export class CajaPage implements OnInit {
   protected readonly caja = this.store.caja;
   protected readonly cargando = computed(() => !this.store.cargada());
   protected readonly procesando = signal(false);
-  protected readonly historial = signal<Caja[]>([]);
+  protected readonly historial = signal<Page<Caja> | null>(null);
+  protected readonly tamanoHistorial = signal(10);
   protected readonly contado = signal<number | null>(null);
   protected readonly observaciones = signal('');
   protected readonly diferencia = computed(() => {
     const c = this.caja();
     const contado = this.contado();
-    return c && contado !== null ? Math.round((contado - c.efectivoEsperado) * 100) / 100 : null;
+    return c && contado !== null ? Math.round((contado - c.expectedCash) * 100) / 100 : null;
   });
 
   ngOnInit(): void {
@@ -195,7 +202,16 @@ export class CajaPage implements OnInit {
 
   protected cargar(): void {
     this.store.refrescar();
-    this.api.caja.historial(0, 15).subscribe((p) => this.historial.set(p.content));
+    this.cargarHistorial(0);
+  }
+
+  protected cargarHistorial(page: number): void {
+    this.api.caja.historial(page, this.tamanoHistorial()).subscribe((p) => this.historial.set(p));
+  }
+
+  protected cambiarTamanoHistorial(size: number): void {
+    this.tamanoHistorial.set(size);
+    this.cargarHistorial(0);
   }
 
   protected etiqueta(m: string): string {
@@ -223,7 +239,7 @@ export class CajaPage implements OnInit {
       this.procesando.set(true);
       this.store.cerrar(this.contado() ?? 0, this.observaciones() || undefined).subscribe({
         next: (c) => {
-          const d = c.diferencia ?? 0;
+          const d = c.difference ?? 0;
           this.toast.success(
             d === 0
               ? 'Caja cerrada: el efectivo cuadra'

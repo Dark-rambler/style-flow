@@ -24,16 +24,16 @@ import { MoneyPipe } from '../../shared/money.pipe';
     <div class="grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
       <div class="card p-5">
         <p class="text-xs text-slate-500">Servicios realizados</p>
-        <p class="mt-1 text-3xl font-semibold">{{ dato()?.servicios ?? 0 }}</p>
+        <p class="mt-1 text-3xl font-semibold">{{ dato()?.services ?? 0 }}</p>
       </div>
       <div class="card p-5">
         <p class="text-xs text-slate-500">Producción</p>
         <p class="mt-1 text-3xl font-semibold">{{ dato()?.total ?? 0 | money }}</p>
       </div>
       <div class="card p-5">
-        <p class="text-xs text-slate-500">Comisión ({{ dato()?.comisionPorcentaje ?? 0 }}%)</p>
+        <p class="text-xs text-slate-500">Comisión ({{ dato()?.commissionRate ?? 0 }}%)</p>
         <p class="mt-1 text-3xl font-semibold text-brand-700">
-          {{ dato()?.comision ?? 0 | money }}
+          {{ dato()?.commission ?? 0 | money }}
         </p>
       </div>
     </div>
@@ -52,7 +52,7 @@ export class MisComisionesPage implements OnInit {
 
   protected cargar(): void {
     this.api.reportes
-      .misComisiones({ desde: this.desde(), hasta: this.hasta() })
+      .misComisiones({ from: this.desde(), to: this.hasta() })
       .subscribe((d) => this.datos.set(d));
   }
 }

@@ -11,9 +11,9 @@ export const SILENT = new HttpContextToken<boolean>(() => false);
 export function errorMessage(err: unknown): string {
   if (err instanceof HttpErrorResponse) {
     if (err.status === 0) return 'No se pudo conectar con el servidor';
-    const body = err.error as { detail?: string; errores?: Record<string, string> } | null;
-    if (body?.errores) {
-      return Object.entries(body.errores)
+    const body = err.error as { detail?: string; errors?: Record<string, string> } | null;
+    if (body?.errors) {
+      return Object.entries(body.errors)
         .map(([campo, msg]) => `${campo}: ${msg}`)
         .join(' · ');
     }

@@ -21,28 +21,28 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
+        canActivate: [roleGuard('ADMIN', 'CASHIER')],
         loadComponent: () =>
           import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
       },
       {
         path: 'cobrar',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
+        canActivate: [roleGuard('ADMIN', 'CASHIER')],
         loadComponent: () => import('./features/pos/pos.page').then((m) => m.PosPage),
       },
       {
         path: 'caja',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
+        canActivate: [roleGuard('ADMIN', 'CASHIER')],
         loadComponent: () => import('./features/caja/caja.page').then((m) => m.CajaPage),
       },
       {
         path: 'ventas',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
+        canActivate: [roleGuard('ADMIN', 'CASHIER')],
         loadComponent: () => import('./features/ventas/ventas.page').then((m) => m.VentasPage),
       },
       {
         path: 'clientes',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
+        canActivate: [roleGuard('ADMIN', 'CASHIER')],
         loadComponent: () =>
           import('./features/clientes/clientes.page').then((m) => m.ClientesPage),
       },

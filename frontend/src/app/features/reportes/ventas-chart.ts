@@ -28,7 +28,7 @@ export class VentasChart implements OnDestroy {
   }
 
   private render(datos: VentaDia[], simbolo: string): void {
-    const labels = datos.map((d) => d.fecha.slice(8, 10) + '/' + d.fecha.slice(5, 7));
+    const labels = datos.map((d) => d.date.slice(8, 10) + '/' + d.date.slice(5, 7));
     const values = datos.map((d) => d.total);
     if (this.chart) {
       this.chart.data.labels = labels;
@@ -61,7 +61,7 @@ export class VentasChart implements OnDestroy {
             callbacks: {
               label: (ctx) => {
                 const d = datos[ctx.dataIndex];
-                return ` ${simbolo} ${fmt.format(d.total)} · ${d.cantidad} ventas`;
+                return ` ${simbolo} ${fmt.format(d.total)} · ${d.count} ventas`;
               },
             },
           },

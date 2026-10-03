@@ -21,16 +21,16 @@ interface NavItem {
 const SIDEBAR_KEY = 'stylo.sidebar';
 
 const NAV: NavItem[] = [
-  { path: '/dashboard', label: 'Inicio', icon: 'dashboard', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/cobrar', label: 'Cobrar', icon: 'cart', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/caja', label: 'Caja', icon: 'wallet', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/ventas', label: 'Historial de ventas', icon: 'receipt', roles: ['ADMIN', 'CAJERO'] },
-  { path: '/clientes', label: 'Clientes', icon: 'users', roles: ['ADMIN', 'CAJERO'] },
+  { path: '/dashboard', label: 'Inicio', icon: 'dashboard', roles: ['ADMIN', 'CASHIER'] },
+  { path: '/cobrar', label: 'Cobrar', icon: 'cart', roles: ['ADMIN', 'CASHIER'] },
+  { path: '/caja', label: 'Caja', icon: 'wallet', roles: ['ADMIN', 'CASHIER'] },
+  { path: '/ventas', label: 'Historial de ventas', icon: 'receipt', roles: ['ADMIN', 'CASHIER'] },
+  { path: '/clientes', label: 'Clientes', icon: 'users', roles: ['ADMIN', 'CASHIER'] },
   { path: '/catalogo', label: 'Catálogo', icon: 'scissors', roles: ['ADMIN'] },
   { path: '/reportes', label: 'Reportes', icon: 'chart', roles: ['ADMIN'] },
   { path: '/usuarios', label: 'Usuarios', icon: 'shield', roles: ['ADMIN'] },
   { path: '/configuracion', label: 'Configuración', icon: 'settings', roles: ['ADMIN'] },
-  { path: '/mis-comisiones', label: 'Mis comisiones', icon: 'percent', roles: ['ESTILISTA'] },
+  { path: '/mis-comisiones', label: 'Mis comisiones', icon: 'percent', roles: ['STYLIST'] },
   { path: '/plataforma', label: 'Negocios', icon: 'building', roles: ['SUPERADMIN'] },
 ];
 
@@ -58,10 +58,10 @@ const NAV: NavItem[] = [
             <span class="block truncate font-semibold text-slate-900">{{
               auth.esPlataforma()
                 ? 'Plataforma'
-                : (negocio.negocio()?.nombre ?? auth.negocio()?.nombre ?? 'Stylo Flow')
+                : (negocio.negocio()?.name ?? auth.negocio()?.name ?? 'Stylo Flow')
             }}</span>
             @if (auth.negocio(); as n) {
-              <span class="block truncate text-xs text-slate-400">{{ n.codigo }}</span>
+              <span class="block truncate text-xs text-slate-400">{{ n.code }}</span>
             }
           </span>
         </div>
@@ -101,16 +101,19 @@ const NAV: NavItem[] = [
             <img src="/image/logoNC-claro.png" alt="Nexus Corp" class="h-6 w-auto" />
           </span>
         </div>
-        <!-- Botón en el borde del menú (escritorio): contraer / expandir -->
+        <!-- Botón en el borde del menú. Escritorio: contraer / expandir. Móvil: con el menú
+             cerrado asoma 2/3 de la bolita en el borde izquierdo de la pantalla para abrirlo. -->
         <button
           type="button"
-          class="absolute top-20 -right-3 z-10 hidden size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 shadow-sm transition hover:border-brand-300 hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-brand-500 lg:flex"
-          [attr.aria-label]="rail() ? 'Expandir menú' : 'Contraer menú'"
-          [attr.title]="rail() ? 'Expandir menú' : 'Contraer menú'"
-          [attr.aria-expanded]="!rail()"
+          class="absolute top-20 z-10 flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 shadow-sm transition hover:border-brand-300 hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-brand-500 lg:-right-3"
+          [class.-right-3]="menuAbierto()"
+          [class.-right-4]="!menuAbierto()"
+          [attr.aria-label]="expandido() ? 'Contraer menú' : 'Expandir menú'"
+          [attr.title]="expandido() ? 'Contraer menú' : 'Expandir menú'"
+          [attr.aria-expanded]="expandido()"
           (click)="alternarMenu()"
         >
-          <sf-icon [name]="rail() ? 'chevronRight' : 'chevronLeft'" class="size-4" />
+          <sf-icon [name]="expandido() ? 'chevronLeft' : 'chevronRight'" class="size-4" />
         </button>
       </aside>
 
@@ -136,7 +139,7 @@ const NAV: NavItem[] = [
           >
             <sf-icon name="panel" class="size-5" />
           </button> -->
-          @if (auth.hasRole('ADMIN', 'CAJERO') && cajaStore.cargada()) {
+          @if (auth.hasRole('ADMIN', 'CASHIER') && cajaStore.cargada()) {
             <a
               routerLink="/caja"
               class="ml-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium transition"
@@ -166,7 +169,7 @@ const NAV: NavItem[] = [
             </span>
             <span class="hidden text-left sm:block">
               <span class="block text-sm font-medium text-slate-800">{{
-                auth.usuario()?.nombre
+                auth.usuario()?.name
               }}</span>
               <span class="block text-xs text-slate-500">{{ rolLabel() }}</span>
             </span>
@@ -211,7 +214,10 @@ export class Shell implements OnInit {
 
   private readonly router = inject(Router);
 
+  /** Menú desplegado encima del contenido (solo pantallas menores a lg). */
   protected readonly menuAbierto = signal(false);
+  private readonly mediaLg = matchMedia('(min-width: 64rem)');
+  private readonly esLg = signal(this.mediaLg.matches);
 
   /** Preferencia del usuario fuera del POS (persistida). */
   private readonly colapsado = signal(leerPreferencia());
@@ -229,7 +235,15 @@ export class Shell implements OnInit {
     this.enPos() ? !this.expandidoEnPos() : this.colapsado(),
   );
 
+  /** Si el menú se ve completo: en escritorio, sin contraer; en móvil, desplegado. */
+  protected readonly expandido = computed(() => (this.esLg() ? !this.rail() : this.menuAbierto()));
+
   constructor() {
+    // Al pasar a escritorio el menú móvil deja de tener sentido: se cierra junto con su fondo.
+    this.mediaLg.addEventListener('change', (e) => {
+      this.esLg.set(e.matches);
+      if (e.matches) this.menuAbierto.set(false);
+    });
     // Al salir del POS se olvida la expansión manual: la próxima visita vuelve a contraerse.
     effect(() => {
       if (!this.enPos()) this.expandidoEnPos.set(false);
@@ -237,16 +251,16 @@ export class Shell implements OnInit {
   }
 
   protected readonly nav = computed(() => {
-    const rol = this.auth.usuario()?.rol;
+    const rol = this.auth.usuario()?.role;
     return NAV.filter((i) => rol && i.roles.includes(rol));
   });
   protected readonly rolLabel = computed(() =>
     this.auth.esPlataforma()
       ? 'Superadministrador'
-      : (ROLES.find((r) => r.value === this.auth.usuario()?.rol)?.label ?? ''),
+      : (ROLES.find((r) => r.value === this.auth.usuario()?.role)?.label ?? ''),
   );
   protected readonly iniciales = computed(() =>
-    (this.auth.usuario()?.nombre ?? '?')
+    (this.auth.usuario()?.name ?? '?')
       .split(' ')
       .slice(0, 2)
       .map((p) => p[0]?.toUpperCase())
@@ -256,11 +270,11 @@ export class Shell implements OnInit {
   ngOnInit(): void {
     // El superadmin no pertenece a ningún negocio: no hay configuración ni caja que cargar
     if (!this.auth.esPlataforma()) this.negocio.cargar();
-    if (this.auth.hasRole('ADMIN', 'CAJERO')) this.cajaStore.refrescar();
+    if (this.auth.hasRole('ADMIN', 'CASHIER')) this.cajaStore.refrescar();
   }
 
   protected alternarMenu(): void {
-    if (matchMedia('(min-width: 64rem)').matches) {
+    if (this.esLg()) {
       this.alternarSidebar();
     } else {
       this.menuAbierto.update((v) => !v);

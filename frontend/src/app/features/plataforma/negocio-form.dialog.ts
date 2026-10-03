@@ -19,11 +19,11 @@ import { ToastService } from '../../core/toast.service';
         </legend>
         <label class="field sm:col-span-2">
           <span class="label">Nombre *</span>
-          <input class="input" formControlName="nombre" (input)="sugerirCodigo()" />
+          <input class="input" formControlName="name" (input)="sugerirCodigo()" />
         </label>
         <label class="field sm:col-span-2">
           <span class="label">Código de acceso *</span>
-          <input class="input lowercase" formControlName="codigo" spellcheck="false" />
+          <input class="input lowercase" formControlName="code" spellcheck="false" />
           <span class="text-xs text-slate-500">
             Lo escriben sus usuarios al iniciar sesión. Minúsculas, números y guiones; no se puede
             cambiar.
@@ -31,11 +31,11 @@ import { ToastService } from '../../core/toast.service';
         </label>
         <label class="field">
           <span class="label">NIT</span>
-          <input class="input" formControlName="nit" />
+          <input class="input" formControlName="taxId" />
         </label>
         <label class="field">
           <span class="label">Teléfono</span>
-          <input class="input" formControlName="telefono" />
+          <input class="input" formControlName="phone" />
         </label>
       </fieldset>
 
@@ -45,7 +45,7 @@ import { ToastService } from '../../core/toast.service';
         </legend>
         <label class="field sm:col-span-2">
           <span class="label">Nombre *</span>
-          <input class="input" formControlName="adminNombre" />
+          <input class="input" formControlName="adminName" />
         </label>
         <label class="field">
           <span class="label">Usuario *</span>
@@ -63,7 +63,7 @@ import { ToastService } from '../../core/toast.service';
       </fieldset>
 
       <label class="mt-5 flex items-center gap-2 text-sm">
-        <input type="checkbox" formControlName="catalogoBase" class="size-4 accent-brand-600" />
+        <input type="checkbox" formControlName="baseCatalog" class="size-4 accent-brand-600" />
         Cargar catálogo base de servicios (cortes, color, tratamientos, peinados y uñas)
       </label>
 
@@ -84,43 +84,43 @@ export class NegocioFormDialog {
   private codigoEditado = false;
 
   protected readonly form = inject(NonNullableFormBuilder).group({
-    nombre: ['', [Validators.required, Validators.maxLength(120)]],
-    codigo: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]{3,40}$/)]],
-    nit: [''],
-    telefono: [''],
-    adminNombre: ['', Validators.required],
+    name: ['', [Validators.required, Validators.maxLength(120)]],
+    code: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]{3,40}$/)]],
+    taxId: [''],
+    phone: [''],
+    adminName: ['', Validators.required],
     adminUsername: [
       'admin',
       [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9._-]+$/)],
     ],
     adminPassword: ['', [Validators.required, Validators.minLength(6)]],
-    catalogoBase: [true],
+    baseCatalog: [true],
   });
 
   constructor() {
-    this.form.controls.codigo.valueChanges.subscribe(() => {
-      if (this.form.controls.codigo.dirty) this.codigoEditado = true;
+    this.form.controls.code.valueChanges.subscribe(() => {
+      if (this.form.controls.code.dirty) this.codigoEditado = true;
     });
   }
 
   /** Propone el código a partir del nombre mientras el usuario no lo haya escrito a mano. */
   protected sugerirCodigo(): void {
     if (this.codigoEditado) return;
-    const codigo = this.form.controls.nombre.value
+    const codigo = this.form.controls.name.value
       .normalize('NFD')
       .replace(/[̀-ͯ]/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .slice(0, 40);
-    this.form.controls.codigo.setValue(codigo);
+    this.form.controls.code.setValue(codigo);
   }
 
   protected guardar(): void {
     this.saving.set(true);
     this.api.plataforma.crearNegocio(this.form.getRawValue()).subscribe({
       next: (n) => {
-        this.toast.success(`Negocio "${n.nombre}" creado`);
+        this.toast.success(`Negocio "${n.name}" creado`);
         this.ref.close(n);
       },
       error: () => this.saving.set(false),

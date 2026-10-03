@@ -5,7 +5,7 @@ import { Component, output } from '@angular/core';
   selector: 'sf-caja-cerrada-aviso',
   host: {
     class:
-      'flex shrink-0 items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800',
+      'flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800',
   },
   template: `
     <span>La caja está cerrada. Ábrala para empezar a cobrar.</span>

@@ -18,7 +18,9 @@ import { round2 } from '../pos.models';
       />
     </div>
 
-    <div class="grid grid-cols-4 items-end gap-3 border-t border-slate-200 px-3 pt-3 text-center">
+    <div
+      class="grid grid-cols-4 items-end gap-3 border-t border-slate-200 px-3 pt-3 text-center @max-lg:grid-cols-2"
+    >
       <div>
         <p class="text-[11px] font-semibold text-slate-500 uppercase">Subtotal</p>
         <p class="mt-1 text-xl text-slate-700">{{ subtotal() | money }}</p>

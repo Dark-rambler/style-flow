@@ -13,8 +13,10 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
   imports: [FormsModule, MoneyPipe],
   host: { class: 'block min-h-40 flex-1 overflow-auto border-y border-slate-200' },
   template: `
-    <table class="w-full text-sm">
-      <thead class="sticky top-0 z-1 bg-slate-100 text-xs font-semibold text-slate-500 uppercase">
+    <table class="w-full text-sm @max-lg:block">
+      <thead
+        class="sticky top-0 z-1 bg-slate-100 text-xs font-semibold text-slate-500 uppercase @max-lg:hidden"
+      >
         <tr>
           <th class="px-2 py-2 text-left">Detalle</th>
           <th class="w-14 px-1 py-2 text-left">Cant</th>
@@ -24,12 +26,14 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
           <th class="w-16"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="@max-lg:block">
         @for (l of lineas(); track l.key) {
-          <tr class="border-b border-slate-100 align-middle">
-            <td class="px-2 py-1.5">
+          <tr
+            class="border-b border-slate-100 align-middle @max-lg:grid @max-lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] @max-lg:items-end @max-lg:gap-x-2 @max-lg:gap-y-1 @max-lg:px-2 @max-lg:py-2"
+          >
+            <td class="px-2 py-1.5 @max-lg:col-span-3 @max-lg:p-0">
               <p class="text-xs font-medium text-slate-700 uppercase">{{ l.nombre }}</p>
-              @if (l.tipo === 'SERVICIO') {
+              @if (l.tipo === 'SERVICE') {
                 @if (editando() === l.key) {
                   <select
                     class="input mt-1 py-0.5 text-xs"
@@ -41,7 +45,7 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
                   >
                     <option [ngValue]="null">— Estilista —</option>
                     @for (e of estilistas(); track e.id) {
-                      <option [ngValue]="e.id">{{ e.nombre }}</option>
+                      <option [ngValue]="e.id">{{ e.name }}</option>
                     }
                   </select>
                 } @else {
@@ -54,7 +58,11 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
                 }
               }
             </td>
-            <td class="px-1">
+            <td class="px-1 @max-lg:p-0">
+              <span
+                class="mb-0.5 hidden text-[10px] font-semibold text-slate-400 uppercase @max-lg:block"
+                >Cant</span
+              >
               <input
                 class="input px-1.5 py-1 text-right"
                 type="number"
@@ -65,7 +73,11 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
                 (ngModelChange)="cambiarCantidad.emit({ linea: l, valor: +$event })"
               />
             </td>
-            <td class="px-1">
+            <td class="px-1 @max-lg:p-0">
+              <span
+                class="mb-0.5 hidden text-[10px] font-semibold text-slate-400 uppercase @max-lg:block"
+                >P.U.</span
+              >
               <input
                 class="input px-1.5 py-1 text-right"
                 type="number"
@@ -76,7 +88,11 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
                 (ngModelChange)="cambiarPrecio.emit({ linea: l, valor: +$event })"
               />
             </td>
-            <td class="px-1">
+            <td class="px-1 @max-lg:p-0">
+              <span
+                class="mb-0.5 hidden text-[10px] font-semibold text-slate-400 uppercase @max-lg:block"
+                >Desc</span
+              >
               <input
                 class="input px-1.5 py-1 text-right"
                 type="number"
@@ -87,11 +103,13 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
                 (ngModelChange)="cambiarDescuento.emit({ linea: l, valor: +$event })"
               />
             </td>
-            <td class="px-1 text-right font-medium whitespace-nowrap">
+            <td
+              class="px-1 text-right font-medium whitespace-nowrap @max-lg:col-start-4 @max-lg:row-start-2 @max-lg:self-center @max-lg:p-0"
+            >
               {{ totalLinea(l) | money }}
             </td>
-            <td class="px-1">
-              <div class="flex items-center justify-end gap-1.5">
+            <td class="px-1 @max-lg:col-start-4 @max-lg:row-start-1 @max-lg:self-start @max-lg:p-0">
+              <div class="flex items-center justify-end gap-1.5 @max-lg:gap-3">
                 <button
                   type="button"
                   class="text-red-500 hover:text-red-700"
@@ -116,7 +134,7 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
                   class="text-orange-500 hover:text-orange-700 disabled:invisible"
                   title="Cambiar estilista"
                   aria-label="Cambiar estilista"
-                  [disabled]="l.tipo !== 'SERVICIO'"
+                  [disabled]="l.tipo !== 'SERVICE'"
                   (click)="editando.set(editando() === l.key ? null : l.key)"
                 >
                   <svg
@@ -158,7 +176,7 @@ import { CambioLinea, CartLine, esCortesia, totalLinea } from '../pos.models';
           </tr>
         } @empty {
           <tr>
-            <td colspan="6" class="p-8 text-center text-sm text-slate-400">
+            <td colspan="6" class="p-8 text-center text-sm text-slate-400 @max-lg:block">
               Toque un servicio o producto para agregarlo.
             </td>
           </tr>
@@ -185,6 +203,6 @@ export class CarritoTablaComponent {
   protected readonly esCortesia = esCortesia;
 
   protected nombreEstilista(id: number | null): string {
-    return this.estilistas().find((e) => e.id === id)?.nombre ?? 'Sin estilista';
+    return this.estilistas().find((e) => e.id === id)?.name ?? 'Sin estilista';
   }
 }

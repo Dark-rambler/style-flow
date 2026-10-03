@@ -15,14 +15,14 @@ describe('MoneyPipe', () => {
   it('usa el símbolo configurado del negocio', () => {
     TestBed.configureTestingModule({ providers: [provideHttpClient(), MoneyPipe] });
     TestBed.inject(NegocioStore).negocio.set({
-      nombre: 'X',
-      nit: null,
-      direccion: null,
-      telefono: null,
-      moneda: 'USD',
-      simbolo: '$',
-      ivaPorcentaje: 0,
-      mensajeTicket: null,
+      name: 'X',
+      taxId: null,
+      address: null,
+      phone: null,
+      currency: 'USD',
+      currencySymbol: '$',
+      taxRate: 0,
+      receiptMessage: null,
     });
     expect(TestBed.inject(MoneyPipe).transform(10)).toBe('$ 10,00');
   });

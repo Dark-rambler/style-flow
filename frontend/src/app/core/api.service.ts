@@ -27,9 +27,10 @@ import {
   VentaResumen,
 } from './models';
 
+/** Rango de fechas (yyyy-MM-dd) tal como lo reciben los endpoints: `from` y `to`. */
 export interface RangoFechas {
-  desde?: string | null;
-  hasta?: string | null;
+  from?: string | null;
+  to?: string | null;
 }
 
 function params(values: Record<string, string | number | boolean | null | undefined>): HttpParams {
@@ -47,101 +48,109 @@ export class ApiService {
 
   // ---- Usuarios ----
   usuarios = {
-    listar: () => this.http.get<Usuario[]>('/api/usuarios'),
-    estilistas: () => this.http.get<UsuarioResumen[]>('/api/usuarios/estilistas'),
-    crear: (body: UsuarioRequest) => this.http.post<Usuario>('/api/usuarios', body),
+    listar: () => this.http.get<Usuario[]>('/api/users'),
+    estilistas: () => this.http.get<UsuarioResumen[]>('/api/users/stylists'),
+    crear: (body: UsuarioRequest) => this.http.post<Usuario>('/api/users', body),
     actualizar: (id: number, body: UsuarioRequest) =>
-      this.http.put<Usuario>(`/api/usuarios/${id}`, body),
+      this.http.put<Usuario>(`/api/users/${id}`, body),
     cambiarMiPassword: (password: string) =>
-      this.http.put<void>('/api/usuarios/me/password', { password }),
+      this.http.put<void>('/api/users/me/password', { password }),
   };
 
   // ---- Catálogo ----
   catalogo = {
-    categorias: () => this.http.get<Categoria[]>('/api/catalogo/categorias'),
+    categorias: () => this.http.get<Categoria[]>('/api/catalog/categories'),
     crearCategoria: (body: Partial<Categoria>) =>
-      this.http.post<Categoria>('/api/catalogo/categorias', body),
+      this.http.post<Categoria>('/api/catalog/categories', body),
     actualizarCategoria: (id: number, body: Partial<Categoria>) =>
-      this.http.put<Categoria>(`/api/catalogo/categorias/${id}`, body),
-    eliminarCategoria: (id: number) => this.http.delete<void>(`/api/catalogo/categorias/${id}`),
+      this.http.put<Categoria>(`/api/catalog/categories/${id}`, body),
+    eliminarCategoria: (id: number) => this.http.delete<void>(`/api/catalog/categories/${id}`),
 
     servicios: (soloActivos = false) =>
-      this.http.get<Servicio[]>('/api/catalogo/servicios', { params: params({ soloActivos }) }),
+      this.http.get<Servicio[]>('/api/catalog/services', {
+        params: params({ activeOnly: soloActivos }),
+      }),
     crearServicio: (body: ServicioRequest) =>
-      this.http.post<Servicio>('/api/catalogo/servicios', body),
+      this.http.post<Servicio>('/api/catalog/services', body),
     actualizarServicio: (id: number, body: ServicioRequest) =>
-      this.http.put<Servicio>(`/api/catalogo/servicios/${id}`, body),
+      this.http.put<Servicio>(`/api/catalog/services/${id}`, body),
 
     productos: (soloActivos = false) =>
-      this.http.get<Producto[]>('/api/catalogo/productos', { params: params({ soloActivos }) }),
-    stockBajo: () => this.http.get<Producto[]>('/api/catalogo/productos/stock-bajo'),
+      this.http.get<Producto[]>('/api/catalog/products', {
+        params: params({ activeOnly: soloActivos }),
+      }),
+    stockBajo: () => this.http.get<Producto[]>('/api/catalog/products/low-stock'),
     crearProducto: (body: ProductoRequest) =>
-      this.http.post<Producto>('/api/catalogo/productos', body),
+      this.http.post<Producto>('/api/catalog/products', body),
     actualizarProducto: (id: number, body: ProductoRequest) =>
-      this.http.put<Producto>(`/api/catalogo/productos/${id}`, body),
+      this.http.put<Producto>(`/api/catalog/products/${id}`, body),
     ajustarStock: (id: number, cantidad: number) =>
-      this.http.post<Producto>(`/api/catalogo/productos/${id}/ajuste-stock`, { cantidad }),
+      this.http.post<Producto>(`/api/catalog/products/${id}/stock-adjustment`, {
+        quantity: cantidad,
+      }),
   };
 
   // ---- Clientes ----
   clientes = {
     buscar: (q: string, page = 0, size = 20) =>
-      this.http.get<Page<Cliente>>('/api/clientes', { params: params({ q, page, size }) }),
-    crear: (body: ClienteRequest) => this.http.post<Cliente>('/api/clientes', body),
+      this.http.get<Page<Cliente>>('/api/customers', { params: params({ q, page, size }) }),
+    crear: (body: ClienteRequest) => this.http.post<Cliente>('/api/customers', body),
     actualizar: (id: number, body: ClienteRequest) =>
-      this.http.put<Cliente>(`/api/clientes/${id}`, body),
+      this.http.put<Cliente>(`/api/customers/${id}`, body),
   };
 
   // ---- Ventas ----
   ventas = {
-    crear: (body: VentaRequest) => this.http.post<Venta>('/api/ventas', body),
-    buscar: (rango: RangoFechas & { clienteId?: number | null; page?: number; size?: number }) =>
-      this.http.get<Page<VentaResumen>>('/api/ventas', { params: params({ ...rango }) }),
-    obtener: (id: number) => this.http.get<Venta>(`/api/ventas/${id}`),
+    crear: (body: VentaRequest) => this.http.post<Venta>('/api/sales', body),
+    buscar: (rango: RangoFechas & { customerId?: number | null; page?: number; size?: number }) =>
+      this.http.get<Page<VentaResumen>>('/api/sales', { params: params({ ...rango }) }),
+    obtener: (id: number) => this.http.get<Venta>(`/api/sales/${id}`),
     anular: (id: number, motivo: string) =>
-      this.http.post<Venta>(`/api/ventas/${id}/anular`, { motivo }),
+      this.http.post<Venta>(`/api/sales/${id}/void`, { reason: motivo }),
   };
 
   // ---- Caja ----
   caja = {
     /** null cuando no hay caja abierta (204). */
-    actual: () => this.http.get<Caja | null>('/api/caja/actual'),
-    abrir: (montoInicial: number, observaciones?: string) =>
-      this.http.post<Caja>('/api/caja/abrir', { montoInicial, observaciones }),
-    cerrar: (efectivoContado: number, observaciones?: string) =>
-      this.http.post<Caja>('/api/caja/cerrar', { efectivoContado, observaciones }),
+    actual: () => this.http.get<Caja | null>('/api/cash-register/current'),
+    abrir: (openingAmount: number, notes?: string) =>
+      this.http.post<Caja>('/api/cash-register/open', { openingAmount, notes }),
+    cerrar: (countedCash: number, notes?: string) =>
+      this.http.post<Caja>('/api/cash-register/close', { countedCash, notes }),
     historial: (page = 0, size = 20) =>
-      this.http.get<Page<Caja>>('/api/caja/historial', { params: params({ page, size }) }),
+      this.http.get<Page<Caja>>('/api/cash-register/history', { params: params({ page, size }) }),
   };
 
   // ---- Reportes ----
   reportes = {
     resumen: (r: RangoFechas) =>
-      this.http.get<Resumen>('/api/reportes/resumen', { params: params({ ...r }) }),
+      this.http.get<Resumen>('/api/reports/summary', { params: params({ ...r }) }),
     ventasPorDia: (r: RangoFechas) =>
-      this.http.get<VentaDia[]>('/api/reportes/ventas-por-dia', { params: params({ ...r }) }),
+      this.http.get<VentaDia[]>('/api/reports/sales-by-day', { params: params({ ...r }) }),
     estilistas: (r: RangoFechas) =>
-      this.http.get<EstilistaTotal[]>('/api/reportes/estilistas', { params: params({ ...r }) }),
+      this.http.get<EstilistaTotal[]>('/api/reports/stylists', { params: params({ ...r }) }),
     misComisiones: (r: RangoFechas) =>
-      this.http.get<EstilistaTotal[]>('/api/reportes/mis-comisiones', { params: params({ ...r }) }),
+      this.http.get<EstilistaTotal[]>('/api/reports/my-commissions', { params: params({ ...r }) }),
     top: (tipo: TipoItem, r: RangoFechas, limite = 10) =>
-      this.http.get<ItemTop[]>('/api/reportes/top', { params: params({ tipo, limite, ...r }) }),
+      this.http.get<ItemTop[]>('/api/reports/top', {
+        params: params({ type: tipo, limit: limite, ...r }),
+      }),
     ventasCsv: (r: RangoFechas): Observable<Blob> =>
-      this.http.get('/api/reportes/ventas.csv', { params: params({ ...r }), responseType: 'blob' }),
+      this.http.get('/api/reports/sales.csv', { params: params({ ...r }), responseType: 'blob' }),
   };
 
   // ---- Plataforma (solo SUPERADMIN) ----
   plataforma = {
-    negocios: () => this.http.get<NegocioResumen[]>('/api/plataforma/negocios'),
+    negocios: () => this.http.get<NegocioResumen[]>('/api/platform/businesses'),
     crearNegocio: (body: NegocioRequest) =>
-      this.http.post<NegocioResumen>('/api/plataforma/negocios', body),
+      this.http.post<NegocioResumen>('/api/platform/businesses', body),
     cambiarEstado: (id: number, activo: boolean) =>
-      this.http.put<void>(`/api/plataforma/negocios/${id}/estado`, { activo }),
+      this.http.put<void>(`/api/platform/businesses/${id}/status`, { active: activo }),
   };
 
   // ---- Negocio ----
   negocio = {
-    obtener: () => this.http.get<Negocio>('/api/negocio'),
-    actualizar: (body: Negocio) => this.http.put<Negocio>('/api/negocio', body),
+    obtener: () => this.http.get<Negocio>('/api/business'),
+    actualizar: (body: Negocio) => this.http.put<Negocio>('/api/business', body),
   };
 }

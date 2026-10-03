@@ -8,7 +8,7 @@ export class NegocioStore {
   private readonly api = inject(ApiService);
 
   readonly negocio = signal<Negocio | null>(null);
-  readonly simbolo = computed(() => this.negocio()?.simbolo ?? 'Bs');
+  readonly simbolo = computed(() => this.negocio()?.currencySymbol ?? 'Bs');
 
   cargar(): void {
     this.api.negocio.obtener().subscribe((n) => this.negocio.set(n));

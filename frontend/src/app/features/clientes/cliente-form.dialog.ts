@@ -15,15 +15,15 @@ import { ToastService } from '../../core/toast.service';
       <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label class="field sm:col-span-2">
           <span class="label">Nombre *</span>
-          <input class="input" formControlName="nombre" />
+          <input class="input" formControlName="name" />
         </label>
         <label class="field">
           <span class="label">Teléfono</span>
-          <input class="input" formControlName="telefono" inputmode="tel" />
+          <input class="input" formControlName="phone" inputmode="tel" />
         </label>
         <label class="field">
           <span class="label">CI / NIT</span>
-          <input class="input" formControlName="ciNit" />
+          <input class="input" formControlName="taxId" />
         </label>
         <label class="field sm:col-span-2">
           <span class="label">Email</span>
@@ -34,7 +34,7 @@ import { ToastService } from '../../core/toast.service';
           <textarea
             class="input"
             rows="3"
-            formControlName="notas"
+            formControlName="notes"
             placeholder="Alergias, preferencias, fórmula de color…"
           ></textarea>
         </label>
@@ -56,16 +56,16 @@ export class ClienteFormDialog {
   protected readonly saving = signal(false);
 
   protected readonly form = inject(NonNullableFormBuilder).group({
-    nombre: [this.data?.nombre ?? '', [Validators.required, Validators.maxLength(120)]],
-    telefono: [this.data?.telefono ?? ''],
+    name: [this.data?.name ?? '', [Validators.required, Validators.maxLength(120)]],
+    phone: [this.data?.phone ?? ''],
     email: [this.data?.email ?? '', Validators.email],
-    ciNit: [this.data?.ciNit ?? ''],
-    notas: [this.data?.notas ?? '', Validators.maxLength(500)],
+    taxId: [this.data?.taxId ?? ''],
+    notes: [this.data?.notes ?? '', Validators.maxLength(500)],
   });
 
   protected guardar(): void {
     this.saving.set(true);
-    const body = this.form.getRawValue() as ClienteRequest;
+    const body: ClienteRequest = this.form.getRawValue();
     const req = this.data
       ? this.api.clientes.actualizar(this.data.id, body)
       : this.api.clientes.crear(body);

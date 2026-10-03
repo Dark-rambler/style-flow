@@ -88,10 +88,12 @@ const PRODUCTOS = '__productos__';
 
           <!-- Venta -->
           <aside class="card flex min-h-0 flex-col">
-            <div class="grid grid-cols-[1fr_auto_minmax(0,12rem)] gap-2 p-3">
+            <div
+              class="grid grid-cols-[1fr_auto_minmax(0,12rem)] gap-2 p-3 @max-lg:grid-cols-[minmax(0,1fr)_auto]"
+            >
               <sf-cliente-selector [(cliente)]="cliente" />
               <select
-                class="input"
+                class="input @max-lg:col-span-2"
                 aria-label="Estilista por defecto"
                 title="Estilista que se asigna a los servicios agregados"
                 [ngModel]="estilistaDefecto()"
@@ -99,7 +101,7 @@ const PRODUCTOS = '__productos__';
               >
                 <option [ngValue]="null">— Estilista —</option>
                 @for (e of estilistas(); track e.id) {
-                  <option [ngValue]="e.id">{{ e.nombre }}</option>
+                  <option [ngValue]="e.id">{{ e.name }}</option>
                 }
               </select>
               <div class="input col-span-2 flex items-center gap-2 text-slate-600">
@@ -181,33 +183,33 @@ export class PosPage implements OnInit {
 
   private readonly items = computed<ItemPos[]>(() => [
     ...this.servicios().map((s) => ({
-      tipo: 'SERVICIO' as const,
+      tipo: 'SERVICE' as const,
       id: s.id,
       codigo: `S-${s.id}`,
-      nombre: s.nombre,
-      precio: s.precio,
-      categoria: s.categoria,
+      nombre: s.name,
+      precio: s.price,
+      categoria: s.category,
       agotado: false,
-      imagenUrl: s.imagenUrl,
+      imagenUrl: s.imageUrl,
       ref: s,
     })),
     ...this.productos().map((p) => ({
-      tipo: 'PRODUCTO' as const,
+      tipo: 'PRODUCT' as const,
       id: p.id,
       codigo: p.sku ?? `P-${p.id}`,
-      nombre: p.nombre,
-      precio: p.precio,
+      nombre: p.name,
+      precio: p.price,
       categoria: PRODUCTOS,
       agotado: p.stock === 0,
       stock: p.stock,
-      stockBajo: p.stockBajo,
+      stockBajo: p.lowStock,
       ref: p,
     })),
   ]);
 
   protected readonly categoriasVisibles = computed(() => {
     const q = this.qCategoria().trim().toLowerCase();
-    const nombres = [...new Set(this.servicios().map((s) => s.categoria))].sort();
+    const nombres = [...new Set(this.servicios().map((s) => s.category))].sort();
     return [
       { id: GENERAL, nombre: 'General' },
       ...nombres.map((n) => ({ id: n, nombre: n })),
@@ -247,7 +249,7 @@ export class PosPage implements OnInit {
     round2(Math.max(0, this.subtotal() - this.descuento())),
   );
   protected readonly faltaEstilista = computed(() =>
-    this.carrito().some((l) => l.tipo === 'SERVICIO' && !l.estilistaId),
+    this.carrito().some((l) => l.tipo === 'SERVICE' && !l.estilistaId),
   );
   protected readonly puedeCobrar = computed(
     () =>
@@ -281,8 +283,8 @@ export class PosPage implements OnInit {
         precio: it.precio,
         cantidad: 1,
         descuento: 0,
-        estilistaId: it.tipo === 'SERVICIO' ? this.estilistaDefecto() : null,
-        stock: it.tipo === 'PRODUCTO' ? (it.ref as Producto).stock : undefined,
+        estilistaId: it.tipo === 'SERVICE' ? this.estilistaDefecto() : null,
+        stock: it.tipo === 'PRODUCT' ? (it.ref as Producto).stock : undefined,
       },
     ]);
   }
@@ -337,7 +339,7 @@ export class PosPage implements OnInit {
     this.estilistaDefecto.set(id);
     if (id === null) return;
     this.carrito.update((c) =>
-      c.map((l) => (l.tipo === 'SERVICIO' && !l.estilistaId ? { ...l, estilistaId: id } : l)),
+      c.map((l) => (l.tipo === 'SERVICE' && !l.estilistaId ? { ...l, estilistaId: id } : l)),
     );
   }
 
@@ -376,20 +378,20 @@ export class PosPage implements OnInit {
 
   private registrar(r: CobroResult): void {
     // Cada línea viaja con su propio descuento (así las comisiones se calculan sobre lo realmente
-    // cobrado por cada servicio) y `descuento` es solo el descuento global de la venta.
+    // cobrado por cada servicio) y `discount` es solo el descuento global de la venta.
     const body: VentaRequest = {
-      clienteId: this.cliente()?.id ?? null,
-      descuento: this.descuento(),
-      metodoPago: r.metodoPago,
-      montoRecibido: r.montoRecibido,
-      observaciones: this.observaciones().trim() || null,
+      customerId: this.cliente()?.id ?? null,
+      discount: this.descuento(),
+      paymentMethod: r.metodoPago,
+      amountReceived: r.montoRecibido,
+      notes: this.observaciones().trim() || null,
       items: this.carrito().map((l) => ({
-        tipo: l.tipo,
+        type: l.tipo,
         itemId: l.itemId,
-        cantidad: l.cantidad,
-        precioUnitario: l.precio,
-        descuento: l.descuento,
-        estilistaId: l.estilistaId,
+        quantity: l.cantidad,
+        unitPrice: l.precio,
+        discount: l.descuento,
+        stylistId: l.estilistaId,
       })),
     };
     this.guardando.set(true);

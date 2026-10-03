@@ -42,7 +42,7 @@ export interface CobroResult {
         </div>
       </fieldset>
 
-      @if (metodo() === 'EFECTIVO') {
+      @if (metodo() === 'CASH') {
         <label class="field mt-5">
           <span class="label">Monto recibido</span>
           <input
@@ -84,10 +84,10 @@ export class CobroDialog {
   protected readonly ref = inject<DialogRef<CobroResult>>(DialogRef);
   protected readonly metodos = METODOS_PAGO;
 
-  protected readonly metodo = signal<MetodoPago>('EFECTIVO');
+  protected readonly metodo = signal<MetodoPago>('CASH');
   protected readonly recibido = signal<number>(this.data.total);
   protected readonly cambio = computed(() => round2((this.recibido() || 0) - this.data.total));
-  protected readonly valido = computed(() => this.metodo() !== 'EFECTIVO' || this.cambio() >= 0);
+  protected readonly valido = computed(() => this.metodo() !== 'CASH' || this.cambio() >= 0);
 
   /** Sugerencias de billetes (Bs 10, 20, 50, 100, 200) que cubren el total. */
   protected readonly billetes = computed(() => {
@@ -104,7 +104,7 @@ export class CobroDialog {
     if (!this.valido()) return;
     this.ref.close({
       metodoPago: this.metodo(),
-      montoRecibido: this.metodo() === 'EFECTIVO' ? this.recibido() : null,
+      montoRecibido: this.metodo() === 'CASH' ? this.recibido() : null,
     });
   }
 }

@@ -45,23 +45,23 @@ import { VentasChart } from './ventas-chart';
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div class="card p-4">
           <p class="text-xs text-slate-500">Total vendido</p>
-          <p class="mt-1 text-2xl font-semibold">{{ r.totalVentas | money }}</p>
+          <p class="mt-1 text-2xl font-semibold">{{ r.salesTotal | money }}</p>
         </div>
         <div class="card p-4">
           <p class="text-xs text-slate-500">Ventas</p>
-          <p class="mt-1 text-2xl font-semibold">{{ r.cantidadVentas }}</p>
-          @if (r.ventasAnuladas) {
-            <p class="text-xs text-red-600">{{ r.ventasAnuladas }} anuladas</p>
+          <p class="mt-1 text-2xl font-semibold">{{ r.salesCount }}</p>
+          @if (r.voidedSales) {
+            <p class="text-xs text-red-600">{{ r.voidedSales }} anuladas</p>
           }
         </div>
         <div class="card p-4">
           <p class="text-xs text-slate-500">Ticket promedio</p>
-          <p class="mt-1 text-2xl font-semibold">{{ r.ticketPromedio | money }}</p>
+          <p class="mt-1 text-2xl font-semibold">{{ r.averageTicket | money }}</p>
         </div>
         <div class="card p-4">
           <p class="text-xs text-slate-500">IVA incluido</p>
-          <p class="mt-1 text-2xl font-semibold">{{ r.totalIva | money }}</p>
-          <p class="text-xs text-slate-500">Descuentos: {{ r.totalDescuentos | money }}</p>
+          <p class="mt-1 text-2xl font-semibold">{{ r.totalTax | money }}</p>
+          <p class="text-xs text-slate-500">Descuentos: {{ r.totalDiscounts | money }}</p>
         </div>
       </div>
 
@@ -77,12 +77,12 @@ import { VentasChart } from './ventas-chart';
         <div class="card p-5">
           <h2 class="mb-3 text-sm font-semibold">Por método de pago</h2>
           <ul class="flex flex-col gap-3">
-            @for (m of r.porMetodo; track m.metodo) {
+            @for (m of r.byPaymentMethod; track m.method) {
               <li>
                 <div class="flex justify-between text-sm">
                   <span
-                    >{{ metodo(m.metodo) }}
-                    <span class="text-slate-400">({{ m.cantidad }})</span></span
+                    >{{ metodo(m.method) }}
+                    <span class="text-slate-400">({{ m.count }})</span></span
                   ><span class="font-medium">{{ m.total | money }}</span>
                 </div>
                 <div class="mt-1 h-2 rounded-full bg-slate-100">
@@ -111,13 +111,13 @@ import { VentasChart } from './ventas-chart';
             </tr>
           </thead>
           <tbody>
-            @for (e of estilistas(); track e.estilistaId) {
+            @for (e of estilistas(); track e.stylistId) {
               <tr>
-                <td class="font-medium">{{ e.estilista }}</td>
-                <td class="text-right">{{ e.servicios }}</td>
+                <td class="font-medium">{{ e.stylist }}</td>
+                <td class="text-right">{{ e.services }}</td>
                 <td class="text-right">{{ e.total | money }}</td>
-                <td class="text-right">{{ e.comisionPorcentaje }}%</td>
-                <td class="text-right font-semibold">{{ e.comision | money }}</td>
+                <td class="text-right">{{ e.commissionRate }}%</td>
+                <td class="text-right font-semibold">{{ e.commission | money }}</td>
               </tr>
             } @empty {
               <tr>
@@ -138,8 +138,8 @@ import { VentasChart } from './ventas-chart';
             (ngModelChange)="tipoTop.set($event); cargarTop()"
             aria-label="Tipo"
           >
-            <option value="SERVICIO">Servicios</option>
-            <option value="PRODUCTO">Productos</option>
+            <option value="SERVICE">Servicios</option>
+            <option value="PRODUCT">Productos</option>
           </select>
         </div>
         <table class="data-table">
@@ -155,8 +155,8 @@ import { VentasChart } from './ventas-chart';
             @for (t of top(); track t.id; let i = $index) {
               <tr>
                 <td class="text-slate-400">{{ i + 1 }}</td>
-                <td class="font-medium">{{ t.nombre }}</td>
-                <td class="text-right">{{ t.cantidad }}</td>
+                <td class="font-medium">{{ t.name }}</td>
+                <td class="text-right">{{ t.quantity }}</td>
                 <td class="text-right">{{ t.total | money }}</td>
               </tr>
             } @empty {
@@ -183,9 +183,9 @@ export class ReportesPage implements OnInit {
   protected readonly porDia = signal<VentaDia[]>([]);
   protected readonly estilistas = signal<EstilistaTotal[]>([]);
   protected readonly top = signal<ItemTop[]>([]);
-  protected readonly tipoTop = signal<'SERVICIO' | 'PRODUCTO'>('SERVICIO');
+  protected readonly tipoTop = signal<'SERVICE' | 'PRODUCT'>('SERVICE');
   private readonly maxMetodo = computed(() =>
-    Math.max(1, ...(this.resumen()?.porMetodo.map((m) => m.total) ?? [])),
+    Math.max(1, ...(this.resumen()?.byPaymentMethod.map((m) => m.total) ?? [])),
   );
 
   ngOnInit(): void {
@@ -199,7 +199,7 @@ export class ReportesPage implements OnInit {
   }
 
   protected cargar(): void {
-    const r = { desde: this.desde(), hasta: this.hasta() };
+    const r = { from: this.desde(), to: this.hasta() };
     forkJoin({
       resumen: this.api.reportes.resumen(r),
       porDia: this.api.reportes.ventasPorDia(r),
@@ -214,13 +214,13 @@ export class ReportesPage implements OnInit {
 
   protected cargarTop(): void {
     this.api.reportes
-      .top(this.tipoTop(), { desde: this.desde(), hasta: this.hasta() })
+      .top(this.tipoTop(), { from: this.desde(), to: this.hasta() })
       .subscribe((t) => this.top.set(t));
   }
 
   protected exportar(): void {
     this.api.reportes
-      .ventasCsv({ desde: this.desde(), hasta: this.hasta() })
+      .ventasCsv({ from: this.desde(), to: this.hasta() })
       .subscribe((blob) => descargar(blob, `ventas_${this.desde()}_${this.hasta()}.csv`));
   }
 

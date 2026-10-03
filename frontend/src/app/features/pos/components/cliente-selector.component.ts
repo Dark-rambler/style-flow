@@ -19,7 +19,7 @@ import { ClienteFormDialog } from '../../clientes/cliente-form.dialog';
     <div class="relative">
       @if (cliente(); as c) {
         <div class="input flex items-center justify-between gap-2 uppercase">
-          <span class="truncate">{{ c.ciNit ? c.ciNit + ' - ' : '' }}{{ c.nombre }}</span>
+          <span class="truncate">{{ c.taxId ? c.taxId + ' - ' : '' }}{{ c.name }}</span>
           <button
             type="button"
             class="text-slate-400 hover:text-slate-700"
@@ -47,8 +47,8 @@ import { ClienteFormDialog } from '../../clientes/cliente-form.dialog';
                   class="w-full px-3 py-2 text-left text-sm hover:bg-slate-100"
                   (click)="elegir(c)"
                 >
-                  {{ c.nombre }}
-                  <span class="text-slate-400">{{ c.ciNit ?? c.telefono }}</span>
+                  {{ c.name }}
+                  <span class="text-slate-400">{{ c.taxId ?? c.phone }}</span>
                 </button>
               </li>
             }

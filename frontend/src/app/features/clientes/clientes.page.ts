@@ -6,11 +6,12 @@ import { debounceTime, Subject } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { Cliente, Page } from '../../core/models';
 import { injectDialog, openDialog } from '../../shared/ui/dialog';
+import { Paginator } from '../../shared/ui/paginator';
 import { ClienteFormDialog } from './cliente-form.dialog';
 
 @Component({
   selector: 'sf-clientes-page',
-  imports: [FormsModule, CdkTableModule, RouterLink],
+  imports: [FormsModule, CdkTableModule, RouterLink, Paginator],
   template: `
     <div class="mb-6 flex flex-wrap items-center gap-3">
       <h1 class="page-title mr-auto">Clientes</h1>
@@ -27,20 +28,20 @@ import { ClienteFormDialog } from './cliente-form.dialog';
       <table cdk-table [dataSource]="page()?.content ?? []" class="data-table">
         <ng-container cdkColumnDef="nombre">
           <th cdk-header-cell *cdkHeaderCellDef>Nombre</th>
-          <td cdk-cell *cdkCellDef="let c" class="font-medium">{{ c.nombre }}</td>
+          <td cdk-cell *cdkCellDef="let c" class="font-medium">{{ c.name }}</td>
         </ng-container>
         <ng-container cdkColumnDef="telefono">
           <th cdk-header-cell *cdkHeaderCellDef>Teléfono</th>
-          <td cdk-cell *cdkCellDef="let c">{{ c.telefono ?? '—' }}</td>
+          <td cdk-cell *cdkCellDef="let c">{{ c.phone ?? '—' }}</td>
         </ng-container>
         <ng-container cdkColumnDef="ciNit">
           <th cdk-header-cell *cdkHeaderCellDef>CI / NIT</th>
-          <td cdk-cell *cdkCellDef="let c">{{ c.ciNit ?? '—' }}</td>
+          <td cdk-cell *cdkCellDef="let c">{{ c.taxId ?? '—' }}</td>
         </ng-container>
         <ng-container cdkColumnDef="notas">
           <th cdk-header-cell *cdkHeaderCellDef>Notas</th>
           <td cdk-cell *cdkCellDef="let c" class="max-w-xs truncate text-slate-500">
-            {{ c.notas ?? '' }}
+            {{ c.notes ?? '' }}
           </td>
         </ng-container>
         <ng-container cdkColumnDef="acciones">
@@ -49,7 +50,7 @@ import { ClienteFormDialog } from './cliente-form.dialog';
             <a
               class="btn-ghost btn-sm"
               routerLink="/ventas"
-              [queryParams]="{ clienteId: c.id, cliente: c.nombre }"
+              [queryParams]="{ clienteId: c.id, cliente: c.name }"
               >Ver ventas</a
             >
             <button type="button" class="btn-ghost btn-sm" (click)="editar(c)">Editar</button>
@@ -63,29 +64,7 @@ import { ClienteFormDialog } from './cliente-form.dialog';
       </table>
     </div>
 
-    @if (page(); as p) {
-      @if (p.totalPages > 1) {
-        <div class="mt-4 flex items-center justify-end gap-2 text-sm">
-          <button
-            type="button"
-            class="btn-secondary btn-sm"
-            [disabled]="p.page === 0"
-            (click)="cargar(p.page - 1)"
-          >
-            Anterior
-          </button>
-          <span>Página {{ p.page + 1 }} de {{ p.totalPages }}</span>
-          <button
-            type="button"
-            class="btn-secondary btn-sm"
-            [disabled]="p.page + 1 >= p.totalPages"
-            (click)="cargar(p.page + 1)"
-          >
-            Siguiente
-          </button>
-        </div>
-      }
-    }
+    <sf-paginator [page]="page()" (pagina)="cargar($event)" (tamano)="cambiarTamano($event)" />
   `,
 })
 export class ClientesPage implements OnInit {
@@ -96,6 +75,7 @@ export class ClientesPage implements OnInit {
   protected readonly columnas = ['nombre', 'telefono', 'ciNit', 'notas', 'acciones'];
   protected readonly q = signal('');
   protected readonly page = signal<Page<Cliente> | null>(null);
+  protected readonly tamano = signal(20);
 
   constructor() {
     this.busqueda$.pipe(debounceTime(250)).subscribe(() => this.cargar(0));
@@ -111,7 +91,12 @@ export class ClientesPage implements OnInit {
   }
 
   protected cargar(page: number): void {
-    this.api.clientes.buscar(this.q(), page, 20).subscribe((p) => this.page.set(p));
+    this.api.clientes.buscar(this.q(), page, this.tamano()).subscribe((p) => this.page.set(p));
+  }
+
+  protected cambiarTamano(size: number): void {
+    this.tamano.set(size);
+    this.cargar(0);
   }
 
   protected editar(c?: Cliente): void {

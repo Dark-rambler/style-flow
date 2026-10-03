@@ -45,30 +45,30 @@ import { NegocioFormDialog } from './negocio-form.dialog';
         </thead>
         <tbody>
           @for (n of filtrados(); track n.id) {
-            <tr [class.opacity-60]="!n.activo">
-              <td class="font-medium">{{ n.nombre }}</td>
+            <tr [class.opacity-60]="!n.active">
+              <td class="font-medium">{{ n.name }}</td>
               <td>
-                <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs">{{ n.codigo }}</code>
+                <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs">{{ n.code }}</code>
               </td>
               <td>{{ n.createdAt | date: 'dd/MM/yyyy' }}</td>
-              <td class="text-right">{{ n.usuarios }}</td>
-              <td class="text-right">{{ n.ventas30d }}</td>
+              <td class="text-right">{{ n.users }}</td>
+              <td class="text-right">{{ n.sales30d }}</td>
               <td class="text-right">{{ n.total30d | money }}</td>
               <td>
                 <span
                   class="badge"
-                  [class]="n.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
-                  >{{ n.activo ? 'Activo' : 'Suspendido' }}</span
+                  [class]="n.active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
+                  >{{ n.active ? 'Activo' : 'Suspendido' }}</span
                 >
               </td>
               <td class="text-right">
                 <button
                   type="button"
                   class="btn-ghost btn-sm"
-                  [class.text-red-600]="n.activo"
+                  [class.text-red-600]="n.active"
                   (click)="cambiarEstado(n)"
                 >
-                  {{ n.activo ? 'Suspender' : 'Reactivar' }}
+                  {{ n.active ? 'Suspender' : 'Reactivar' }}
                 </button>
               </td>
             </tr>
@@ -89,11 +89,11 @@ export class NegociosPage implements OnInit {
 
   protected readonly negocios = signal<NegocioResumen[]>([]);
   protected readonly q = signal('');
-  protected readonly activos = computed(() => this.negocios().filter((n) => n.activo).length);
+  protected readonly activos = computed(() => this.negocios().filter((n) => n.active).length);
   protected readonly filtrados = computed(() => {
     const q = this.q().trim().toLowerCase();
     return this.negocios().filter(
-      (n) => !q || n.nombre.toLowerCase().includes(q) || n.codigo.includes(q),
+      (n) => !q || n.name.toLowerCase().includes(q) || n.code.includes(q),
     );
   });
 
@@ -111,9 +111,9 @@ export class NegociosPage implements OnInit {
   }
 
   protected cambiarEstado(n: NegocioResumen): void {
-    const suspender = n.activo;
+    const suspender = n.active;
     const data: ConfirmData = {
-      title: suspender ? `Suspender "${n.nombre}"` : `Reactivar "${n.nombre}"`,
+      title: suspender ? `Suspender "${n.name}"` : `Reactivar "${n.name}"`,
       message: suspender
         ? 'Sus usuarios no podrán ingresar ni operar hasta que se reactive. Los datos se conservan.'
         : 'Sus usuarios podrán volver a ingresar y operar normalmente.',

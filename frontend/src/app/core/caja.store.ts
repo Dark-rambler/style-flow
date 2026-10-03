@@ -13,7 +13,7 @@ export class CajaStore {
 
   readonly caja = signal<Caja | null>(null);
   readonly cargada = signal(false);
-  readonly abierta = computed(() => this.caja()?.estado === 'ABIERTA');
+  readonly abierta = computed(() => this.caja()?.status === 'OPEN');
 
   refrescar(): void {
     this.api.caja.actual().subscribe((c) => {
