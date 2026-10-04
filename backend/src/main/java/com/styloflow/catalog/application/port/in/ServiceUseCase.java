@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ServiceUseCase {
 
-    List<Service> list(boolean activeOnly);
+    List<Service> list(boolean active);
 
     Service create(ServiceCommand command);
 

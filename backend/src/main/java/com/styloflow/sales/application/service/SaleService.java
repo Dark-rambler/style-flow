@@ -42,7 +42,7 @@ public class SaleService implements SaleUseCase {
     @Override
     @Transactional
     public Sale register(RegisterSaleCommand command, Long cashierId) {
-        var cashRegister = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
+        var cash = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
         var cashier = getUserOrThrow(cashierId);
         var customer = command.customerId() == null ? null :
                 customerRepository.findById(command.customerId())
@@ -50,7 +50,7 @@ public class SaleService implements SaleUseCase {
         var items = command.items().stream().map(this::createItem).toList();
         var sale = Sale.register(
                 clock.instant(),
-                cashRegister,
+                cash,
                 cashier,
                 customer,
                 items,

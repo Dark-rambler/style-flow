@@ -17,23 +17,23 @@ public class CashPersistenceAdapter implements CashRepositoryPort {
 
     private final CashJpaRepository cashRepository;
     private final UserJpaRepository userRepository;
-    private final CashPersistenceMapper cashRegisterMapper;
+    private final CashPersistenceMapper cashMapper;
 
     @Override
     public Optional<Cash> findOpen() {
-        return cashRepository.findFirstByStatus(CashStatus.OPEN).map(cashRegisterMapper::toDomain);
+        return cashRepository.findFirstByStatus(CashStatus.OPEN).map(cashMapper::toDomain);
     }
 
     @Override
     public Optional<Cash> findById(Long id) {
-        return cashRepository.findById(id).map(cashRegisterMapper::toDomain);
+        return cashRepository.findById(id).map(cashMapper::toDomain);
     }
 
     @Override
     public PageResult<Cash> findHistory(int page, int size) {
         return PageResults.of(
                 cashRepository.findAllByOrderByOpenedAtDesc(PageRequest.of(page, size)),
-                cashRegisterMapper::toDomain
+                cashMapper::toDomain
         );
     }
 
@@ -42,13 +42,13 @@ public class CashPersistenceAdapter implements CashRepositoryPort {
         CashEntity entity;
         if(cash.getId() == null){
             entity = new CashEntity();
-            cashRegisterMapper.updateEntity(cash, entity);
+            cashMapper.updateEntity(cash, entity);
             entity.setOpenedBy(userRepository.getReferenceById(cash.getOpenedBy().getId()));
         }else{
             entity = cashRepository.getReferenceById(cash.getId());
             entity.setClosedBy(userRepository.getReferenceById(cash.getClosedBy().getId()));
-            cashRegisterMapper.updateEntity(cash, entity);
+            cashMapper.updateEntity(cash, entity);
         }
-        return cashRegisterMapper.toDomain(cashRepository.saveAndFlush(entity));
+        return cashMapper.toDomain(cashRepository.saveAndFlush(entity));
     }
 }

@@ -24,8 +24,11 @@ public class ServiceService implements ServiceUseCase {
     private final CurrentTenantPort currentTenant;
 
     @Override
-    public List<Service> list(boolean activeOnly) {
-        return serviceRepository.findAllSorted(activeOnly);
+    public List<Service> list(boolean active) {
+        return serviceRepository.findAllSorted()
+                .stream()
+                .filter( s -> !active || s.isAvailable())
+                .toList();
     }
 
     @Override

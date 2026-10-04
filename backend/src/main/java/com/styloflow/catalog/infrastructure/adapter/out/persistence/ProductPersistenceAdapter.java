@@ -16,8 +16,8 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
     private final CatalogPersistenceMapper catalogMapper;
 
     @Override
-    public List<Product> findAllSorted(boolean activeOnly) {
-        return catalogMapper.toProductList(productRepository.findAllByActiveOrderByNameAsc(activeOnly));
+    public List<Product> findAllSorted() {
+        return catalogMapper.toProductList(productRepository.findAllByOrderByNameAsc());
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ServiceJpaRepository extends JpaRepository<ServiceEntity, Long> {
 
     @EntityGraph(attributePaths = "category")
-    List<ServiceEntity> findAllByActiveAndCategoryActiveIsTrueOrderByCategoryNameAscNameAsc(boolean active);
+    List<ServiceEntity> findAllByOrderByCategoryNameAscNameAsc();
 
     @NullMarked
     @Override

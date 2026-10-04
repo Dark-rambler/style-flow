@@ -22,18 +22,18 @@ public interface SaleJpaRepository extends JpaRepository<SaleEntity, Long> {
 
     @Query("select s.paymentMethod as paymentMethod, count(s) as count, sum(s.total) as total " +
             "from SaleEntity s " +
-            "where s.cash.id = :cashRegisterId and s.status = :status " +
+            "where s.cash.id = :cashId and s.status = :status " +
             "group by s.paymentMethod")
-    List<PaymentTotalView> totalsByPaymentMethod(Long cashRegisterId, SaleStatus status);
+    List<PaymentTotalView> totalsByPaymentMethod(Long cashId, SaleStatus status);
 
-    @EntityGraph(attributePaths = {"cashier", "customer", "cashRegister", "cashRegister.openedBy", "cashRegister.closedBy"})
+    @EntityGraph(attributePaths = {"cashier", "customer", "cash", "cash.openedBy", "cash.closedBy"})
     @Query("select s from SaleEntity s " +
             "where s.date >= :from and s.date < :to " +
             "and (:customerId is null or s.customer.id = :customerId) " +
             "order by s.date desc")
     Page<SaleEntity> search(Instant from, Instant to, Long customerId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"cashier", "customer", "voidedBy", "items", "items.stylist", "cashRegister", "cashRegister.openedBy", "cashRegister.closedBy"})
+    @EntityGraph(attributePaths = {"cashier", "customer", "voidedBy", "items", "items.stylist", "cash", "cash.openedBy", "cash.closedBy"})
     @Query("select s from SaleEntity s where s.id = :id")
     Optional<SaleEntity> findDetail(Long id);
 }

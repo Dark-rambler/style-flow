@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("Cash register cash count")
-class CashRegisterTest {
+class CashTest {
 
     private static final Instant NOW = Instant.parse("2026-10-02T22:00:00Z");
     private static final List<PaymentTotal> SALES = List.of(

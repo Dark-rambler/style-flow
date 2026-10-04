@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface ProductRepositoryPort {
 
-    List<Product> findAllSorted(boolean activeOnly);
+    List<Product> findAllSorted();
 
     List<Product> findLowStock();
 

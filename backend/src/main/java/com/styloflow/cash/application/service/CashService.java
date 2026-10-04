@@ -39,28 +39,28 @@ public class CashService implements CashUseCase {
     public CashSummary open(OpenCashCommand command, Long userId) {
         if (cashRepository.findOpen().isPresent())
             throw new BusinessRuleException("A cash register is already open");
-        var cashRegister = Cash.open(
+        var cash = Cash.open(
                 getUserOrThrow(userId),
                 clock.instant(),
                 command.openingAmount(),
                 command.notes()
         );
-        return summary(cashRepository.save(cashRegister));
+        return summary(cashRepository.save(cash));
     }
 
     @Override
     @Transactional
     public CashSummary close(CloseCashCommand command, Long userId) {
-        var cashRegister = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
-        var byPaymentMethod = salesTotals.totalsByPaymentMethod(cashRegister.getId());
-        cashRegister.close(
+        var cash = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
+        var byPaymentMethod = salesTotals.totalsByPaymentMethod(cash.getId());
+        cash.close(
                 getUserOrThrow(userId),
                 clock.instant(),
                 command.countedCash(),
                 command.notes(),
                 byPaymentMethod
         );
-        return CashSummary.of(cashRepository.save(cashRegister), byPaymentMethod);
+        return CashSummary.of(cashRepository.save(cash), byPaymentMethod);
     }
 
     @Override

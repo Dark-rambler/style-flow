@@ -26,7 +26,10 @@ public class ProductService implements ProductUseCase {
 
     @Override
     public List<Product> list(boolean activeOnly) {
-        return productRepository.findAllSorted(activeOnly);
+        return productRepository.findAllSorted()
+                .stream()
+                .filter(p -> !activeOnly || p.isActive())
+                .toList();
     }
 
     @Override

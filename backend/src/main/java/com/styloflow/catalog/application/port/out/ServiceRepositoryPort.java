@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface ServiceRepositoryPort {
 
-    List<Service> findAllSorted(boolean activeOnly);
+    List<Service> findAllSorted();
 
     Optional<Service> findById(Long id);
 
