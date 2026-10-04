@@ -4,7 +4,7 @@ import com.styloflow.catalog.application.port.in.command.ProductCommand;
 import com.styloflow.catalog.application.port.in.ProductUseCase;
 import com.styloflow.catalog.application.port.out.ProductRepositoryPort;
 import com.styloflow.catalog.application.utils.ImageFilesUtil;
-import com.styloflow.catalog.domain.model.Product;
+import com.styloflow.catalog.domain.model.ProductModel;
 import com.styloflow.shared.application.port.out.CurrentTenantPort;
 import com.styloflow.shared.application.port.out.ImageStoragePort;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
@@ -25,7 +25,7 @@ public class ProductService implements ProductUseCase {
     private final CurrentTenantPort currentTenant;
 
     @Override
-    public List<Product> list(boolean activeOnly) {
+    public List<ProductModel> list(boolean activeOnly) {
         return productRepository.findAllSorted()
                 .stream()
                 .filter(p -> !activeOnly || p.isActive())
@@ -33,17 +33,17 @@ public class ProductService implements ProductUseCase {
     }
 
     @Override
-    public List<Product> lowStock() {
+    public List<ProductModel> lowStock() {
         return productRepository.findLowStock();
     }
 
     @Override
     @Transactional
-    public Product create(ProductCommand command) {
+    public ProductModel create(ProductCommand command) {
         var sku = TextUtils.blankToNull(command.sku());
         if (sku != null && productRepository.existsBySku(sku))
             throw new BusinessRuleException("A product with that SKU already exists");
-        var product = new Product();
+        var product = new ProductModel();
         apply(product, command);
         if (command.image() == null)
             return productRepository.save(product);
@@ -60,7 +60,7 @@ public class ProductService implements ProductUseCase {
 
     @Override
     @Transactional
-    public Product update(Long id, ProductCommand command) {
+    public ProductModel update(Long id, ProductCommand command) {
         var product = productRepository.findById(id).orElseThrow(() -> new NotFoundException("Product", id));
         apply(product, command);
         return productRepository.save(product);
@@ -68,14 +68,14 @@ public class ProductService implements ProductUseCase {
 
     @Override
     @Transactional
-    public Product adjustStock(Long id, int quantity) {
+    public ProductModel adjustStock(Long id, int quantity) {
         var product = productRepository.findByIdUpdate(id)
                 .orElseThrow(() -> new NotFoundException("Product", id));
         product.adjustStock(quantity);
         return productRepository.save(product);
     }
 
-    private static void apply(Product product, ProductCommand command) {
+    private static void apply(ProductModel product, ProductCommand command) {
         var sku = TextUtils.blankToNull(command.sku());
         product.setName(command.name().trim());
         product.setSku(sku != null ? sku.toUpperCase() : null);

@@ -20,7 +20,7 @@ class CashTest {
             new PaymentTotal(PaymentMethod.CASH, 3, new BigDecimal("150.00")),
             new PaymentTotal(PaymentMethod.QR, 2, new BigDecimal("80.00")));
 
-    private final Cash register = Cash.open(null, NOW, new BigDecimal("100.00"), "morning");
+    private final CashModel register = CashModel.open(null, NOW, new BigDecimal("100.00"), "morning");
 
     @Test
     void expectedCash_should_beFloatPlusCashSales_when_open() {

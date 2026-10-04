@@ -1,7 +1,7 @@
 package com.styloflow.customers.infrastructure.adapter.out.persistence;
 
 import com.styloflow.customers.application.port.out.CustomerRepositoryPort;
-import com.styloflow.customers.domain.model.Customer;
+import com.styloflow.customers.domain.model.CustomerModel;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import com.styloflow.shared.domain.model.PageResult;
 import com.styloflow.shared.infrastructure.persistence.PageResults;
@@ -19,18 +19,18 @@ public class CustomerPersistenceAdapter implements CustomerRepositoryPort {
     private final CustomerPersistenceMapper customerMapper;
 
     @Override
-    public PageResult<Customer> search(String q, int page, int size) {
+    public PageResult<CustomerModel> search(String q, int page, int size) {
         return PageResults.of(customerRepository.search(q, PageRequest.of(page, size, Sort.by("name"))),
                 customerMapper::toDomain);
     }
 
     @Override
-    public Optional<Customer> findById(Long id) {
+    public Optional<CustomerModel> findById(Long id) {
         return customerRepository.findById(id).map(customerMapper::toDomain);
     }
 
     @Override
-    public Customer save(Customer customer) {
+    public CustomerModel save(CustomerModel customer) {
         var entity = customer.getId() == null ? new CustomerEntity() :
                 customerRepository.findById(customer.getId())
                         .orElseThrow(() -> new NotFoundException("Customer", customer.getId()));

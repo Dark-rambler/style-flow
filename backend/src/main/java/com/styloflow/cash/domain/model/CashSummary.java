@@ -4,14 +4,14 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record CashSummary(
-        Cash cash,
+        CashModel cash,
         List<PaymentTotal> byPaymentMethod,
         long salesCount,
         BigDecimal salesTotal,
         BigDecimal expectedCash
 ) {
 
-    public static CashSummary of(Cash cash, List<PaymentTotal> byPaymentMethod) {
+    public static CashSummary of(CashModel cash, List<PaymentTotal> byPaymentMethod) {
         return new CashSummary(
                 cash,
                 byPaymentMethod,

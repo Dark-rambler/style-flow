@@ -1,4 +1,4 @@
-package com.styloflow.catalog.domain.model;
+package com.styloflow.platform.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,12 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
+public class SuperadminModel {
 
     private Long id;
     private String name;
+    private String username;
+    private String passwordHash;
     @Builder.Default
     private boolean active = true;
 }

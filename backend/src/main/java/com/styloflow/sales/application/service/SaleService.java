@@ -10,21 +10,22 @@ import com.styloflow.sales.application.port.in.command.RegisterSaleCommand;
 import com.styloflow.sales.application.port.in.SaleUseCase;
 import com.styloflow.sales.application.port.out.SaleRepositoryPort;
 import com.styloflow.sales.domain.enums.ItemType;
-import com.styloflow.sales.domain.model.Sale;
-import com.styloflow.sales.domain.model.SaleItem;
+import com.styloflow.sales.domain.model.SaleModel;
+import com.styloflow.sales.domain.model.SaleItemModel;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import com.styloflow.shared.domain.model.DateRange;
 import com.styloflow.shared.domain.model.PageResult;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@org.springframework.stereotype.Service
+@Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SaleService implements SaleUseCase {
@@ -41,14 +42,14 @@ public class SaleService implements SaleUseCase {
 
     @Override
     @Transactional
-    public Sale register(RegisterSaleCommand command, Long cashierId) {
+    public SaleModel register(RegisterSaleCommand command, Long cashierId) {
         var cash = cashRepository.findOpen().orElseThrow(NoOpenCashException::new);
         var cashier = getUserOrThrow(cashierId);
         var customer = command.customerId() == null ? null :
                 customerRepository.findById(command.customerId())
                         .orElseThrow(() -> new NotFoundException("Customer", command.customerId()));
         var items = command.items().stream().map(this::createItem).toList();
-        var sale = Sale.register(
+        var sale = SaleModel.register(
                 clock.instant(),
                 cash,
                 cashier,
@@ -62,13 +63,13 @@ public class SaleService implements SaleUseCase {
         return saleRepository.save(sale);
     }
 
-    private SaleItem createItem(RegisterSaleCommand.Item item) {
+    private SaleItemModel createItem(RegisterSaleCommand.Item item) {
         if (item.type() == ItemType.SERVICE) {
             var service = serviceRepository.findById(item.itemId())
                     .orElseThrow(() -> new NotFoundException("Service", item.itemId()));
             if (!service.isActive())
                 throw new BusinessRuleException("The service '" + service.getName() + "' is not active");
-            return SaleItem.create(
+            return SaleItemModel.create(
                     ItemType.SERVICE,
                     service.getId(),
                     service.getName(),
@@ -84,7 +85,7 @@ public class SaleService implements SaleUseCase {
             throw new BusinessRuleException("The product '" + product.getName() + "' is not active");
         product.decreaseStock(item.quantity());
         productRepository.save(product);
-        return SaleItem.create(
+        return SaleItemModel.create(
                 ItemType.PRODUCT,
                 product.getId(),
                 product.getName(),
@@ -95,17 +96,17 @@ public class SaleService implements SaleUseCase {
         );
     }
 
-    private User stylist(Long stylistId) {
+    private UserModel stylist(Long stylistId) {
         if (stylistId == null)
             return null;
         return userRepository.findById(stylistId)
-                .filter(User::isActive)
+                .filter(UserModel::isActive)
                 .orElseThrow(() -> new BusinessRuleException("Invalid or inactive stylist: " + stylistId));
     }
 
     @Override
     @Transactional
-    public Sale voidSale(Long id, String reason, Long userId) {
+    public SaleModel voidSale(Long id, String reason, Long userId) {
         var sale = getSaleOrThrow(id);
         sale.voidSale(getUserOrThrow(userId), reason, clock.instant());
         sale.getItems().stream()
@@ -119,21 +120,21 @@ public class SaleService implements SaleUseCase {
     }
 
     @Override
-    public Sale get(Long id) {
+    public SaleModel get(Long id) {
         return getSaleOrThrow(id);
     }
 
     @Override
-    public PageResult<Sale> search(LocalDate from, LocalDate to, Long customerId, int page, int size) {
+    public PageResult<SaleModel> search(LocalDate from, LocalDate to, Long customerId, int page, int size) {
         var range = DateRange.of(from, to, LocalDate.now(clock.withZone(zone)));
         return saleRepository.search(range.start(zone), range.end(zone), customerId, page, Math.min(size, 100));
     }
 
-    private Sale getSaleOrThrow(Long id) {
+    private SaleModel getSaleOrThrow(Long id) {
         return saleRepository.findDetail(id).orElseThrow(() -> new NotFoundException("Sale", id));
     }
 
-    private User getUserOrThrow(Long id) {
+    private UserModel getUserOrThrow(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User", id));
     }
 }

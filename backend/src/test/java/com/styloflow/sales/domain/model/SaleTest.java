@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.styloflow.cash.domain.model.Cash;
+import com.styloflow.cash.domain.model.CashModel;
 import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.sales.domain.enums.PaymentMethod;
 import com.styloflow.sales.domain.enums.SaleStatus;
@@ -24,17 +24,17 @@ class SaleTest {
     private static final Instant NOW = Instant.parse("2026-10-02T15:00:00Z");
     private static final BigDecimal TAX_13 = new BigDecimal("13");
 
-    private static Cash openRegister() {
-        return Cash.open(null, NOW, new BigDecimal("100.00"), null);
+    private static CashModel openRegister() {
+        return CashModel.open(null, NOW, new BigDecimal("100.00"), null);
     }
 
-    private static SaleItem service(String price, String discount) {
-        return SaleItem.create(ItemType.SERVICE, 1L, "Cut", 1, new BigDecimal(price),
+    private static SaleItemModel service(String price, String discount) {
+        return SaleItemModel.create(ItemType.SERVICE, 1L, "Cut", 1, new BigDecimal(price),
                 discount == null ? null : new BigDecimal(discount), null);
     }
 
-    private static Sale register(List<SaleItem> items, String discount, PaymentMethod method, String received) {
-        return Sale.register(NOW, openRegister(), null, null, items, discount == null ? null : new BigDecimal(discount),
+    private static SaleModel register(List<SaleItemModel> items, String discount, PaymentMethod method, String received) {
+        return SaleModel.register(NOW, openRegister(), null, null, items, discount == null ? null : new BigDecimal(discount),
                 method, received == null ? null : new BigDecimal(received), TAX_13, "  ");
     }
 
@@ -44,7 +44,7 @@ class SaleTest {
 
         @Test
         void create_should_computeNetSubtotal_when_lineHasDiscount() {
-            SaleItem item = SaleItem.create(ItemType.PRODUCT, 7L, "Shampoo", 3, new BigDecimal("20"),
+            SaleItemModel item = SaleItemModel.create(ItemType.PRODUCT, 7L, "Shampoo", 3, new BigDecimal("20"),
                     new BigDecimal("5"), null);
 
             assertAll(
@@ -72,7 +72,7 @@ class SaleTest {
 
         @Test
         void register_should_computeTotalsTaxAndChange_when_paidInCash() {
-            Sale sale = register(List.of(service("100", "10"), service("50", null)), "40", PaymentMethod.CASH, "200");
+            SaleModel sale = register(List.of(service("100", "10"), service("50", null)), "40", PaymentMethod.CASH, "200");
 
             assertAll(
                     () -> assertThat(sale.getSubtotal()).isEqualTo("140.00"),
@@ -87,7 +87,7 @@ class SaleTest {
 
         @Test
         void register_should_receiveExactTotal_when_cashAmountMissing() {
-            Sale sale = register(List.of(service("80", null)), null, PaymentMethod.CASH, null);
+            SaleModel sale = register(List.of(service("80", null)), null, PaymentMethod.CASH, null);
 
             assertThat(sale.getAmountReceived()).isEqualTo("80.00");
             assertThat(sale.getChange()).isEqualTo("0.00");
@@ -95,7 +95,7 @@ class SaleTest {
 
         @Test
         void register_should_ignoreAmountReceived_when_notCash() {
-            Sale sale = register(List.of(service("80", null)), null, PaymentMethod.QR, "500");
+            SaleModel sale = register(List.of(service("80", null)), null, PaymentMethod.QR, "500");
 
             assertThat(sale.getAmountReceived()).isEqualTo("80.00");
             assertThat(sale.getChange()).isEqualTo("0.00");
@@ -120,7 +120,7 @@ class SaleTest {
 
         @Test
         void voidSale_should_markVoided_when_registerIsOpen() {
-            Sale sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
+            SaleModel sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
 
             sale.voidSale(null, "  wrong item ", NOW);
 
@@ -130,7 +130,7 @@ class SaleTest {
 
         @Test
         void voidSale_should_throw_when_alreadyVoided() {
-            Sale sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
+            SaleModel sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
             sale.voidSale(null, "x", NOW);
 
             assertThatThrownBy(() -> sale.voidSale(null, "x", NOW)).isInstanceOf(BusinessRuleException.class);
@@ -138,7 +138,7 @@ class SaleTest {
 
         @Test
         void voidSale_should_throw_when_registerIsClosed() {
-            Sale sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
+            SaleModel sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
             sale.getCash().close(null, NOW, new BigDecimal("100.00"), null, List.of());
 
             assertThatThrownBy(() -> sale.voidSale(null, "x", NOW)).isInstanceOf(BusinessRuleException.class);
@@ -148,6 +148,6 @@ class SaleTest {
     @ParameterizedTest(name = "total {0} at {1}% contains {2} of tax")
     @CsvSource({ "113.00, 13, 13.00", "100.00, 13, 11.50", "100.00, 0, 0.00", "0.00, 13, 0.00" })
     void includedTax_should_extractTaxFromGrossTotal(BigDecimal total, BigDecimal rate, BigDecimal expected) {
-        assertThat(Sale.includedTax(total, rate)).isEqualTo(expected);
+        assertThat(SaleModel.includedTax(total, rate)).isEqualTo(expected);
     }
 }

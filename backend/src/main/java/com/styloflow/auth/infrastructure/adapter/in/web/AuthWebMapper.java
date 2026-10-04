@@ -9,7 +9,7 @@ import com.styloflow.auth.infrastructure.adapter.in.web.dto.LoginRequest;
 import com.styloflow.auth.infrastructure.adapter.in.web.dto.LoginResponse;
 import com.styloflow.auth.infrastructure.adapter.in.web.dto.PlatformLoginRequest;
 import com.styloflow.auth.infrastructure.adapter.in.web.dto.PlatformLoginResponse;
-import com.styloflow.business.domain.model.Business;
+import com.styloflow.business.domain.model.BusinessModel;
 import com.styloflow.users.infrastructure.adapter.in.web.UserWebMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,7 +25,7 @@ public interface AuthWebMapper {
     @Mapping(target = "expiresAt", source = "token.expiresAt")
     LoginResponse toResponse(BusinessSession session);
 
-    BusinessInfo toBusinessInfo(Business business);
+    BusinessInfo toBusinessInfo(BusinessModel business);
 
     @Mapping(target = "token", source = "token.value")
     @Mapping(target = "expiresAt", source = "token.expiresAt")

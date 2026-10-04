@@ -1,13 +1,14 @@
 package com.styloflow.platform.application.port.out;
 
-import com.styloflow.platform.domain.model.Superadmin;
+import com.styloflow.platform.domain.model.SuperadminModel;
+
 import java.util.Optional;
 
 public interface SuperadminRepositoryPort {
 
-    Optional<Superadmin> findByUsername(String username);
+    Optional<SuperadminModel> findByUsername(String username);
 
     long count();
 
-    Superadmin save(Superadmin superadmin);
+    SuperadminModel save(SuperadminModel superadmin);
 }

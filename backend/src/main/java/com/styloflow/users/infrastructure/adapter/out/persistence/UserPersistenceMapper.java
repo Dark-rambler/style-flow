@@ -1,16 +1,17 @@
 package com.styloflow.users.infrastructure.adapter.out.persistence;
 
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserPersistenceMapper {
 
-    User toDomain(UserEntity entity);
+    UserModel toDomain(UserEntity entity);
 
-    List<User> toDomainList(List<UserEntity> entities);
+    List<UserModel> toDomainList(List<UserEntity> entities);
 
-    void updateEntity(User user, @MappingTarget UserEntity entity);
+    void updateEntity(UserModel user, @MappingTarget UserEntity entity);
 }

@@ -1,18 +1,19 @@
 package com.styloflow.catalog.application.port.in;
 
 import com.styloflow.catalog.application.port.in.command.ProductCommand;
-import com.styloflow.catalog.domain.model.Product;
+import com.styloflow.catalog.domain.model.ProductModel;
+
 import java.util.List;
 
 public interface ProductUseCase {
 
-    List<Product> list(boolean activeOnly);
+    List<ProductModel> list(boolean activeOnly);
 
-    List<Product> lowStock();
+    List<ProductModel> lowStock();
 
-    Product create(ProductCommand command);
+    ProductModel create(ProductCommand command);
 
-    Product update(Long id, ProductCommand command);
+    ProductModel update(Long id, ProductCommand command);
 
-    Product adjustStock(Long id, int quantity);
+    ProductModel adjustStock(Long id, int quantity);
 }

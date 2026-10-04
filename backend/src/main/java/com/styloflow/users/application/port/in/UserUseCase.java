@@ -1,20 +1,21 @@
 package com.styloflow.users.application.port.in;
 
 import com.styloflow.users.application.port.in.command.UserCommand;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
+
 import java.util.List;
 
 public interface UserUseCase {
 
-    List<User> list();
+    List<UserModel> list();
 
-    List<User> stylists();
+    List<UserModel> stylists();
 
-    User get(Long id);
+    UserModel get(Long id);
 
-    User create(UserCommand command);
+    UserModel create(UserCommand command);
 
-    User update(Long id, UserCommand command, Long currentUserId);
+    UserModel update(Long id, UserCommand command, Long currentUserId);
 
     void changePassword(Long id, String password);
 }

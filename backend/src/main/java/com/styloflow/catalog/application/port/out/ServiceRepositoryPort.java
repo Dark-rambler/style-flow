@@ -1,17 +1,17 @@
 package com.styloflow.catalog.application.port.out;
 
-import com.styloflow.catalog.domain.model.Service;
+import com.styloflow.catalog.domain.model.ServiceModel;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ServiceRepositoryPort {
 
-    List<Service> findAllSorted();
+    List<ServiceModel> findAllSorted();
 
-    Optional<Service> findById(Long id);
+    Optional<ServiceModel> findById(Long id);
 
     long countByCategory(Long categoryId);
 
-    Service save(Service service);
+    ServiceModel save(ServiceModel service);
 }

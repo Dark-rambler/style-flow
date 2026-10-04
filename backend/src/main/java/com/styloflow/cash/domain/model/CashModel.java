@@ -3,10 +3,11 @@ package com.styloflow.cash.domain.model;
 import com.styloflow.cash.domain.enums.CashStatus;
 import com.styloflow.sales.domain.enums.PaymentMethod;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,14 +17,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cash {
+public class CashModel {
 
     private Long id;
     private CashStatus status;
-    private User openedBy;
+    private UserModel openedBy;
     private Instant openedAt;
     private BigDecimal openingAmount;
-    private User closedBy;
+    private UserModel closedBy;
     private Instant closedAt;
     private BigDecimal expectedCash;
     private BigDecimal countedCash;
@@ -31,8 +32,8 @@ public class Cash {
     private BigDecimal salesTotal;
     private String notes;
 
-    public static Cash open(User by, Instant at, BigDecimal openingAmount, String notes) {
-        return Cash.builder()
+    public static CashModel open(UserModel by, Instant at, BigDecimal openingAmount, String notes) {
+        return CashModel.builder()
                 .status(CashStatus.OPEN)
                 .openedBy(by)
                 .openedAt(at)
@@ -41,7 +42,7 @@ public class Cash {
                 .build();
     }
 
-    public void close(User by, Instant at, BigDecimal counted, String closingNotes, List<PaymentTotal> byPaymentMethod) {
+    public void close(UserModel by, Instant at, BigDecimal counted, String closingNotes, List<PaymentTotal> byPaymentMethod) {
         if (!isOpen())
             throw new BusinessRuleException("The cash register is already closed");
         var expected = expectedCash(byPaymentMethod);

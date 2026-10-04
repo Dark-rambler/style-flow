@@ -4,7 +4,7 @@ import com.styloflow.catalog.application.port.in.command.CategoryCommand;
 import com.styloflow.catalog.application.port.in.CategoryUseCase;
 import com.styloflow.catalog.application.port.out.CategoryRepositoryPort;
 import com.styloflow.catalog.application.port.out.ServiceRepositoryPort;
-import com.styloflow.catalog.domain.model.Category;
+import com.styloflow.catalog.domain.model.CategoryModel;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import java.util.List;
@@ -21,23 +21,23 @@ public class CategoryService implements CategoryUseCase {
     private final ServiceRepositoryPort serviceRepository;
 
     @Override
-    public List<Category> list() {
+    public List<CategoryModel> list() {
         return categoryRepository.findAllSorted();
     }
 
     @Override
     @Transactional
-    public Category create(CategoryCommand command) {
+    public CategoryModel create(CategoryCommand command) {
         if (categoryRepository.existsByName(command.name().trim()))
             throw new BusinessRuleException("A category with that name already exists");
-        var category = new Category();
+        var category = new CategoryModel();
         apply(category, command);
         return categoryRepository.save(category);
     }
 
     @Override
     @Transactional
-    public Category update(Long id, CategoryCommand command) {
+    public CategoryModel update(Long id, CategoryCommand command) {
         var category = getCategoryOrThrow(id);
         apply(category, command);
         return categoryRepository.save(category);
@@ -51,12 +51,12 @@ public class CategoryService implements CategoryUseCase {
         categoryRepository.deleteById(getCategoryOrThrow(id).getId());
     }
 
-    private Category getCategoryOrThrow(Long id) {
+    private CategoryModel getCategoryOrThrow(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category", id));
     }
 
-    private static void apply(Category category, CategoryCommand command) {
+    private static void apply(CategoryModel category, CategoryCommand command) {
         category.setName(command.name().trim());
         if (command.active() != null)
             category.setActive(command.active());

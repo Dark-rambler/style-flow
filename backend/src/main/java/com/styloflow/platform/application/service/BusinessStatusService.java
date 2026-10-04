@@ -1,7 +1,7 @@
 package com.styloflow.platform.application.service;
 
 import com.styloflow.business.application.port.out.BusinessRepositoryPort;
-import com.styloflow.business.domain.model.Business;
+import com.styloflow.business.domain.model.BusinessModel;
 import com.styloflow.platform.application.port.in.BusinessStatusUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,7 +22,7 @@ public class BusinessStatusService implements BusinessStatusUseCase {
     @Transactional(readOnly = true)
     public boolean isActive(Long businessId) {
         return businessRepository.findById(businessId)
-                .map(Business::isActive)
+                .map(BusinessModel::isActive)
                 .orElse(false);
     }
 

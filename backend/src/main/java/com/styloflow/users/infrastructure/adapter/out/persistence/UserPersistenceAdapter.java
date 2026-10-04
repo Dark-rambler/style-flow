@@ -4,9 +4,10 @@ import com.styloflow.shared.domain.exception.NotFoundException;
 import com.styloflow.shared.infrastructure.tenant.TenantExecutor;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
 import com.styloflow.users.domain.enums.Role;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import java.util.List;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,12 +20,12 @@ public class UserPersistenceAdapter implements UserRepositoryPort {
     private final TenantExecutor tenantExecutor;
 
     @Override
-    public Optional<User> findById(Long id) {
+    public Optional<UserModel> findById(Long id) {
         return userRepository.findById(id).map(userMapper::toDomain);
     }
 
     @Override
-    public Optional<User> findByUsernameInBusiness(long businessId, String username) {
+    public Optional<UserModel> findByUsernameInBusiness(long businessId, String username) {
         return tenantExecutor.runAs(businessId,
                 () -> userRepository.findByUsernameIgnoreCase(username).map(userMapper::toDomain));
     }
@@ -35,12 +36,12 @@ public class UserPersistenceAdapter implements UserRepositoryPort {
     }
 
     @Override
-    public List<User> findAllSorted() {
+    public List<UserModel> findAllSorted() {
         return userMapper.toDomainList(userRepository.findAllByOrderByNameAsc());
     }
 
     @Override
-    public List<User> findActiveByRole(Role role) {
+    public List<UserModel> findActiveByRole(Role role) {
         return userMapper.toDomainList(userRepository.findByRoleAndActiveTrueOrderByNameAsc(role));
     }
 
@@ -55,9 +56,10 @@ public class UserPersistenceAdapter implements UserRepositoryPort {
     }
 
     @Override
-    public User save(User user) {
-        UserEntity entity = user.getId() == null ? new UserEntity()
-                : userRepository.findById(user.getId()).orElseThrow(() -> new NotFoundException("User", user.getId()));
+    public UserModel save(UserModel user) {
+        UserEntity entity = user.getId() == null ? new UserEntity() :
+                userRepository.findById(user.getId())
+                        .orElseThrow(() -> new NotFoundException("User", user.getId()));
         userMapper.updateEntity(user, entity);
         return userMapper.toDomain(userRepository.save(entity));
     }

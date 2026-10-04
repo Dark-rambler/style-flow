@@ -2,13 +2,13 @@ package com.styloflow.platform.infrastructure.config;
 
 import com.styloflow.business.application.port.out.BusinessRepositoryPort;
 import com.styloflow.platform.application.port.out.SuperadminRepositoryPort;
-import com.styloflow.platform.domain.model.Superadmin;
+import com.styloflow.platform.domain.model.SuperadminModel;
 import com.styloflow.shared.application.port.out.PasswordHasherPort;
 import com.styloflow.shared.infrastructure.config.AppProperties;
 import com.styloflow.shared.infrastructure.tenant.TenantExecutor;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
 import com.styloflow.users.domain.enums.Role;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -33,7 +33,7 @@ public class PlatformInitializer implements ApplicationRunner {
     @Override
     public void run(@NonNull ApplicationArguments args) {
         if (superadminRepository.count() == 0) {
-            var superadmin = superadminRepository.save(Superadmin.builder()
+            var superadmin = superadminRepository.save(SuperadminModel.builder()
                     .name(props.superadmin().name())
                     .username(props.superadmin().username())
                     .passwordHash(passwordHasher.hash(props.superadmin().password()))
@@ -43,7 +43,7 @@ public class PlatformInitializer implements ApplicationRunner {
 
         businessRepository.findByCode(DEMO_BUSINESS).ifPresent(demo -> tenantExecutor.runAs(demo.getId(), () -> {
             if (userRepository.count() == 0) {
-                var admin = userRepository.save(User.builder()
+                var admin = userRepository.save(UserModel.builder()
                         .name(props.admin().name())
                         .username(props.admin().username())
                         .passwordHash(passwordHasher.hash(props.admin().password()))

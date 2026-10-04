@@ -1,7 +1,7 @@
 package com.styloflow.catalog.infrastructure.adapter.out.persistence;
 
 import com.styloflow.catalog.application.port.out.ServiceRepositoryPort;
-import com.styloflow.catalog.domain.model.Service;
+import com.styloflow.catalog.domain.model.ServiceModel;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +17,12 @@ public class ServicePersistenceAdapter implements ServiceRepositoryPort {
     private final CatalogPersistenceMapper catalogMapper;
 
     @Override
-    public List<Service> findAllSorted() {
+    public List<ServiceModel> findAllSorted() {
         return catalogMapper.toServiceList(serviceRepository.findAllByOrderByCategoryNameAscNameAsc());
     }
 
     @Override
-    public Optional<Service> findById(Long id) {
+    public Optional<ServiceModel> findById(Long id) {
         return serviceRepository.findById(id).map(catalogMapper::toDomain);
     }
 
@@ -32,7 +32,7 @@ public class ServicePersistenceAdapter implements ServiceRepositoryPort {
     }
 
     @Override
-    public Service save(Service service) {
+    public ServiceModel save(ServiceModel service) {
         var entity = service.getId() == null ? new ServiceEntity() :
                 serviceRepository.findById(service.getId())
                         .orElseThrow(() -> new NotFoundException("Service", service.getId()));

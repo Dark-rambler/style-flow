@@ -12,7 +12,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Customer {
+public class CustomerModel {
 
     private Long id;
     private String name;

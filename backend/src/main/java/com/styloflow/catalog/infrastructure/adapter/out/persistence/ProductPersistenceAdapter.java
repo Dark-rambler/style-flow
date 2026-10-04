@@ -1,7 +1,7 @@
 package com.styloflow.catalog.infrastructure.adapter.out.persistence;
 
 import com.styloflow.catalog.application.port.out.ProductRepositoryPort;
-import com.styloflow.catalog.domain.model.Product;
+import com.styloflow.catalog.domain.model.ProductModel;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -16,22 +16,22 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
     private final CatalogPersistenceMapper catalogMapper;
 
     @Override
-    public List<Product> findAllSorted() {
+    public List<ProductModel> findAllSorted() {
         return catalogMapper.toProductList(productRepository.findAllByOrderByNameAsc());
     }
 
     @Override
-    public List<Product> findLowStock() {
+    public List<ProductModel> findLowStock() {
         return catalogMapper.toProductList(productRepository.findLowStock());
     }
 
     @Override
-    public Optional<Product> findById(Long id) {
+    public Optional<ProductModel> findById(Long id) {
         return productRepository.findById(id).map(catalogMapper::toDomain);
     }
 
     @Override
-    public Optional<Product> findByIdUpdate(Long id) {
+    public Optional<ProductModel> findByIdUpdate(Long id) {
         return productRepository.findByIdUpdate(id).map(catalogMapper::toDomain);
     }
 
@@ -41,7 +41,7 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
     }
 
     @Override
-    public Product save(Product product) {
+    public ProductModel save(ProductModel product) {
         var entity = product.getId() == null ? new ProductEntity() :
                 productRepository.findById(product.getId())
                         .orElseThrow(() -> new NotFoundException("Product", product.getId()));

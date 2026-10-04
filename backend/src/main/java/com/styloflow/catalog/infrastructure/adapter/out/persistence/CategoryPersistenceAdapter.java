@@ -1,7 +1,7 @@
 package com.styloflow.catalog.infrastructure.adapter.out.persistence;
 
 import com.styloflow.catalog.application.port.out.CategoryRepositoryPort;
-import com.styloflow.catalog.domain.model.Category;
+import com.styloflow.catalog.domain.model.CategoryModel;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +16,12 @@ public class CategoryPersistenceAdapter implements CategoryRepositoryPort {
     private final CatalogPersistenceMapper catalogMapper;
 
     @Override
-    public List<Category> findAllSorted() {
+    public List<CategoryModel> findAllSorted() {
         return catalogMapper.toCategoryList(categoryRepository.findAllByOrderByNameAsc());
     }
 
     @Override
-    public Optional<Category> findById(Long id) {
+    public Optional<CategoryModel> findById(Long id) {
         return categoryRepository.findById(id).map(catalogMapper::toDomain);
     }
 
@@ -31,7 +31,7 @@ public class CategoryPersistenceAdapter implements CategoryRepositoryPort {
     }
 
     @Override
-    public Category save(Category category) {
+    public CategoryModel save(CategoryModel category) {
         var entity = category.getId() == null ? new CategoryEntity() :
                 categoryRepository.findById(category.getId())
                         .orElseThrow(() -> new NotFoundException("Category", category.getId()));

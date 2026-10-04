@@ -5,15 +5,16 @@ import com.styloflow.catalog.application.port.in.ServiceUseCase;
 import com.styloflow.catalog.application.port.out.CategoryRepositoryPort;
 import com.styloflow.catalog.application.port.out.ServiceRepositoryPort;
 import com.styloflow.catalog.application.utils.ImageFilesUtil;
-import com.styloflow.catalog.domain.model.Service;
+import com.styloflow.catalog.domain.model.ServiceModel;
 import com.styloflow.shared.application.port.out.CurrentTenantPort;
 import com.styloflow.shared.application.port.out.ImageStoragePort;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@org.springframework.stereotype.Service
+@Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ServiceService implements ServiceUseCase {
@@ -24,7 +25,7 @@ public class ServiceService implements ServiceUseCase {
     private final CurrentTenantPort currentTenant;
 
     @Override
-    public List<Service> list(boolean active) {
+    public List<ServiceModel> list(boolean active) {
         return serviceRepository.findAllSorted()
                 .stream()
                 .filter( s -> !active || s.isAvailable())
@@ -33,8 +34,8 @@ public class ServiceService implements ServiceUseCase {
 
     @Override
     @Transactional
-    public Service create(ServiceCommand command) {
-        var service = new Service();
+    public ServiceModel create(ServiceCommand command) {
+        var service = new ServiceModel();
         apply(service, command);
         if (command.image() == null)
             return serviceRepository.save(service);
@@ -51,13 +52,13 @@ public class ServiceService implements ServiceUseCase {
 
     @Override
     @Transactional
-    public Service update(Long id, ServiceCommand command) {
+    public ServiceModel update(Long id, ServiceCommand command) {
         var service = serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Service", id));
         apply(service, command);
         return serviceRepository.save(service);
     }
 
-    private void apply(Service service, ServiceCommand command) {
+    private void apply(ServiceModel service, ServiceCommand command) {
         service.setCategory(categoryRepository.findById(command.categoryId())
                 .orElseThrow(() -> new NotFoundException("Category", command.categoryId())));
         service.setName(command.name().trim());

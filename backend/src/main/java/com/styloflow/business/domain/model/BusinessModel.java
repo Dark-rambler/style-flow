@@ -13,7 +13,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Business {
+public class BusinessModel {
 
     private Long id;
     private String code;

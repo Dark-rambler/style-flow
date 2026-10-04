@@ -1,7 +1,7 @@
 package com.styloflow.platform.infrastructure.adapter.out.persistence;
 
 import com.styloflow.platform.application.port.out.SuperadminRepositoryPort;
-import com.styloflow.platform.domain.model.Superadmin;
+import com.styloflow.platform.domain.model.SuperadminModel;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class SuperadminPersistenceAdapter implements SuperadminRepositoryPort {
     private final SuperadminPersistenceMapper superadminMapper;
 
     @Override
-    public Optional<Superadmin> findByUsername(String username) {
+    public Optional<SuperadminModel> findByUsername(String username) {
         return superadminRepository.findByUsernameIgnoreCase(username).map(superadminMapper::toDomain);
     }
 
@@ -25,7 +25,7 @@ public class SuperadminPersistenceAdapter implements SuperadminRepositoryPort {
     }
 
     @Override
-    public Superadmin save(Superadmin superadmin) {
+    public SuperadminModel save(SuperadminModel superadmin) {
         var entity = superadmin.getId() == null ? new SuperadminEntity() :
                 superadminRepository.findById(superadmin.getId())
                         .orElseThrow(() -> new NotFoundException("Superadmin", superadmin.getId()));

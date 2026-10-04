@@ -6,13 +6,13 @@ import com.styloflow.cash.application.port.in.command.OpenCashCommand;
 import com.styloflow.cash.application.port.out.CashRepositoryPort;
 import com.styloflow.cash.application.port.out.SalesTotalsPort;
 import com.styloflow.cash.domain.exception.NoOpenCashException;
-import com.styloflow.cash.domain.model.Cash;
+import com.styloflow.cash.domain.model.CashModel;
 import com.styloflow.cash.domain.model.CashSummary;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import com.styloflow.shared.domain.model.PageResult;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import java.time.Clock;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class CashService implements CashUseCase {
     public CashSummary open(OpenCashCommand command, Long userId) {
         if (cashRepository.findOpen().isPresent())
             throw new BusinessRuleException("A cash register is already open");
-        var cash = Cash.open(
+        var cash = CashModel.open(
                 getUserOrThrow(userId),
                 clock.instant(),
                 command.openingAmount(),
@@ -76,11 +76,11 @@ public class CashService implements CashUseCase {
                 .orElseThrow(() -> new NotFoundException("Cash register", id));
     }
 
-    private CashSummary summary(Cash cash) {
+    private CashSummary summary(CashModel cash) {
         return CashSummary.of(cash, salesTotals.totalsByPaymentMethod(cash.getId()));
     }
 
-    private User getUserOrThrow(Long id) {
+    private UserModel getUserOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
     }

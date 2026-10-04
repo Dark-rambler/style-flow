@@ -12,10 +12,10 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Service {
+public class ServiceModel {
 
     private Long id;
-    private Category category;
+    private CategoryModel category;
     private String name;
     private String description;
     private int durationMinutes;

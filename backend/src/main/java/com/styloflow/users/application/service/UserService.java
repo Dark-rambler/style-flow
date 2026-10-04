@@ -7,9 +7,10 @@ import com.styloflow.users.application.port.in.command.UserCommand;
 import com.styloflow.users.application.port.in.UserUseCase;
 import com.styloflow.users.application.port.out.UserRepositoryPort;
 import com.styloflow.users.domain.enums.Role;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import java.math.BigDecimal;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,28 +24,28 @@ public class UserService implements UserUseCase {
     private final PasswordHasherPort passwordHasher;
 
     @Override
-    public List<User> list() {
+    public List<UserModel> list() {
         return userRepository.findAllSorted();
     }
 
     @Override
-    public List<User> stylists() {
+    public List<UserModel> stylists() {
         return userRepository.findActiveByRole(Role.STYLIST);
     }
 
     @Override
-    public User get(Long id) {
+    public UserModel get(Long id) {
         return getUserOrThrow(id);
     }
 
     @Override
     @Transactional
-    public User create(UserCommand command) {
+    public UserModel create(UserCommand command) {
         if (command.password() == null || command.password().isBlank())
             throw new BusinessRuleException("A password is required when creating a user");
         if (userRepository.existsByUsername(command.username()))
             throw new BusinessRuleException("The username already exists");
-        User user = new User();
+        UserModel user = new UserModel();
         apply(user, command);
         user.setPasswordHash(passwordHasher.hash(command.password()));
         return userRepository.save(user);
@@ -52,14 +53,16 @@ public class UserService implements UserUseCase {
 
     @Override
     @Transactional
-    public User update(Long id, UserCommand command, Long currentUserId) {
-        User user = getUserOrThrow(id);
-        if (userRepository.existsByUsername(command.username()))
+    public UserModel update(Long id, UserCommand command, Long currentUserId) {
+        UserModel user = getUserOrThrow(id);
+        if (!user.getUsername().equals(command.username()) && userRepository.existsByUsername(command.username()))
             throw new BusinessRuleException("The username already exists");
-        if (userRepository.countActiveByRole(Role.ADMIN) <= 1)
+        if (userRepository.countActiveByRole(Role.ADMIN) < 1)
             throw new BusinessRuleException("There must be at least one active administrator");
-        if (id.equals(currentUserId) && Boolean.FALSE.equals(command.active()))
+        if (id.equals(currentUserId) && !command.active())
             throw new BusinessRuleException("You cannot deactivate your own user");
+        if (id.equals(currentUserId) && Role.ADMIN.equals(user.getRole()) && !command.role().equals(user.getRole()))
+            throw new BusinessRuleException("You cannot change your own role");
         apply(user, command);
         if (command.password() != null && !command.password().isBlank())
             user.setPasswordHash(passwordHasher.hash(command.password()));
@@ -69,17 +72,17 @@ public class UserService implements UserUseCase {
     @Override
     @Transactional
     public void changePassword(Long id, String password) {
-        User user = getUserOrThrow(id);
+        UserModel user = getUserOrThrow(id);
         user.setPasswordHash(passwordHasher.hash(password));
         userRepository.save(user);
     }
 
-    private User getUserOrThrow(Long id) {
+    private UserModel getUserOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
     }
 
-    private static void apply(User user, UserCommand command) {
+    private static void apply(UserModel user, UserCommand command) {
         user.setName(command.name().trim());
         user.setUsername(command.username().trim().toLowerCase());
         user.setRole(command.role());

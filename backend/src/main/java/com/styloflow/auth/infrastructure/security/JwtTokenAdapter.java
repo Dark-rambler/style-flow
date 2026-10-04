@@ -2,11 +2,11 @@ package com.styloflow.auth.infrastructure.security;
 
 import com.styloflow.auth.application.port.out.TokenPort;
 import com.styloflow.auth.domain.model.AuthToken;
-import com.styloflow.business.domain.model.Business;
-import com.styloflow.platform.domain.model.Superadmin;
+import com.styloflow.business.domain.model.BusinessModel;
+import com.styloflow.platform.domain.model.SuperadminModel;
 import com.styloflow.shared.infrastructure.config.AppProperties;
 import com.styloflow.shared.infrastructure.tenant.TenantContext;
-import com.styloflow.users.domain.model.User;
+import com.styloflow.users.domain.model.UserModel;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
@@ -22,31 +22,28 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JwtTokenAdapter implements TokenPort {
 
-    static final String CLAIM_UID = "uid";
-    static final String CLAIM_ROLES = "roles";
-
     private final JwtEncoder encoder;
     private final AppProperties props;
     private final Clock clock;
 
     @Override
-    public AuthToken generate(User user, Business business) {
-        return issue(base(user.getUsername(), user.getId(), user.getName(), user.getRole().name())
+    public AuthToken generate(UserModel user, BusinessModel business) {
+        return issue(base(user.getId(), user.getUsername(), user.getName(), user.getRole().name())
                 .claim(TenantContext.CLAIM_BUSINESS_ID, business.getId())
                 .claim(TenantContext.CLAIM_BUSINESS_CODE, business.getCode()));
     }
 
     @Override
-    public AuthToken generatePlatform(Superadmin superadmin) {
-        return issue(base(superadmin.getUsername(), superadmin.getId(), superadmin.getName(), "SUPERADMIN"));
+    public AuthToken generatePlatform(SuperadminModel superadmin) {
+        return issue(base(superadmin.getId(), superadmin.getUsername(), superadmin.getName(), "SUPERADMIN"));
     }
 
-    private JwtClaimsSet.Builder base(String subject, Long uid, String name, String role) {
+    private JwtClaimsSet.Builder base(Long subject, String username, String name, String role) {
         return JwtClaimsSet.builder()
-                .subject(subject)
-                .claim(CLAIM_UID, uid)
+                .subject(subject.toString())
+                .claim("username", username)
                 .claim("name", name)
-                .claim(CLAIM_ROLES, List.of(role));
+                .claim("roles", List.of(role));
     }
 
     private AuthToken issue(JwtClaimsSet.Builder builder) {

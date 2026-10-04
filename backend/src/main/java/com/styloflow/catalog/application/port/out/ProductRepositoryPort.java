@@ -1,20 +1,20 @@
 package com.styloflow.catalog.application.port.out;
 
-import com.styloflow.catalog.domain.model.Product;
+import com.styloflow.catalog.domain.model.ProductModel;
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepositoryPort {
 
-    List<Product> findAllSorted();
+    List<ProductModel> findAllSorted();
 
-    List<Product> findLowStock();
+    List<ProductModel> findLowStock();
 
-    Optional<Product> findById(Long id);
+    Optional<ProductModel> findById(Long id);
 
-    Optional<Product> findByIdUpdate(Long id);
+    Optional<ProductModel> findByIdUpdate(Long id);
 
     boolean existsBySku(String sku);
 
-    Product save(Product product);
+    ProductModel save(ProductModel product);
 }

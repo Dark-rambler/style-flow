@@ -3,7 +3,7 @@ package com.styloflow.business.application.service;
 import com.styloflow.business.application.port.in.BusinessUseCase;
 import com.styloflow.business.application.port.in.command.UpdateBusinessCommand;
 import com.styloflow.business.application.port.out.BusinessRepositoryPort;
-import com.styloflow.business.domain.model.Business;
+import com.styloflow.business.domain.model.BusinessModel;
 import com.styloflow.shared.application.port.out.CurrentTenantPort;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,20 +19,20 @@ public class BusinessService implements BusinessUseCase {
     private final CurrentTenantPort currentTenant;
 
     @Override
-    public Business getCurrent() {
+    public BusinessModel getCurrent() {
         var id = currentTenant.businessId();
         return businessRepository.findById(id).orElseThrow(() -> new NotFoundException("Business", id));
     }
 
     @Override
     @Transactional
-    public Business update(UpdateBusinessCommand command) {
+    public BusinessModel update(UpdateBusinessCommand command) {
         var business = getCurrent();
         apply(business, command);
         return businessRepository.save(business);
     }
 
-    private void apply(Business business, UpdateBusinessCommand command) {
+    private void apply(BusinessModel business, UpdateBusinessCommand command) {
         business.setName(command.name().trim());
         business.setTaxId(command.taxId());
         business.setAddress(command.address());

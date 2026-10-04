@@ -1,7 +1,7 @@
 package com.styloflow.cash.infrastructure.adapter.out.persistence;
 
 import com.styloflow.cash.application.port.out.CashRepositoryPort;
-import com.styloflow.cash.domain.model.Cash;
+import com.styloflow.cash.domain.model.CashModel;
 import com.styloflow.cash.domain.enums.CashStatus;
 import com.styloflow.shared.domain.model.PageResult;
 import com.styloflow.shared.infrastructure.persistence.PageResults;
@@ -20,17 +20,17 @@ public class CashPersistenceAdapter implements CashRepositoryPort {
     private final CashPersistenceMapper cashMapper;
 
     @Override
-    public Optional<Cash> findOpen() {
+    public Optional<CashModel> findOpen() {
         return cashRepository.findFirstByStatus(CashStatus.OPEN).map(cashMapper::toDomain);
     }
 
     @Override
-    public Optional<Cash> findById(Long id) {
+    public Optional<CashModel> findById(Long id) {
         return cashRepository.findById(id).map(cashMapper::toDomain);
     }
 
     @Override
-    public PageResult<Cash> findHistory(int page, int size) {
+    public PageResult<CashModel> findHistory(int page, int size) {
         return PageResults.of(
                 cashRepository.findAllByOrderByOpenedAtDesc(PageRequest.of(page, size)),
                 cashMapper::toDomain
@@ -38,7 +38,7 @@ public class CashPersistenceAdapter implements CashRepositoryPort {
     }
 
     @Override
-    public Cash save(Cash cash) {
+    public CashModel save(CashModel cash) {
         CashEntity entity;
         if(cash.getId() == null){
             entity = new CashEntity();

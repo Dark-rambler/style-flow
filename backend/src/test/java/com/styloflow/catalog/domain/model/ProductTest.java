@@ -12,14 +12,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 @DisplayName("Product stock")
 class ProductTest {
 
-    private static Product withStock(int stock) {
-        return Product.builder().name("Gel").stock(stock).minStock(2).build();
+    private static ProductModel withStock(int stock) {
+        return ProductModel.builder().name("Gel").stock(stock).minStock(2).build();
     }
 
     @ParameterizedTest(name = "stock {0} adjusted by {1} = {2}")
     @CsvSource({ "5, 3, 8", "5, -5, 0", "0, 0, 0" })
     void adjustStock_should_addOrRemoveUnits(int stock, int delta, int expected) {
-        Product product = withStock(stock);
+        ProductModel product = withStock(stock);
 
         product.adjustStock(delta);
 
