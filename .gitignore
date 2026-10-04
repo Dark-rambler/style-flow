@@ -1,11 +1,8 @@
 # Env
-.env
-.env.*
 !.env.example
 
 # IDE / OS
 .idea/
-.vscode/*
 !.vscode/extensions.json
 *.iml
 .DS_Store
@@ -29,3 +26,4 @@ node_modules/
 
 # Claude Code
 .claude/.cache/
+config.bat

@@ -85,7 +85,7 @@ import { TicketDialog } from './ticket.dialog';
                 <button type="button" class="btn-ghost btn-sm" (click)="verTicket(v)">
                   Ticket
                 </button>
-                @if (esAdmin && v.status === 'COMPLETED' && v.cashRegisterOpen) {
+                @if (esAdmin && v.status === 'COMPLETED' && v.cashOpen) {
                   <button type="button" class="btn-ghost btn-sm text-red-600" (click)="anular(v)">
                     Anular
                   </button>
