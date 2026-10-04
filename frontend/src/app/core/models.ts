@@ -179,7 +179,7 @@ export interface VentaItem {
 export interface Venta {
   id: number;
   date: string;
-  cashRegisterId: number;
+  cashId: number;
   cashier: string;
   customerId: number | null;
   customer: string | null;
@@ -209,7 +209,7 @@ export interface VentaResumen {
   paymentMethod: MetodoPago;
   status: EstadoVenta;
   /** Solo se pueden anular ventas de la caja abierta. */
-  cashRegisterOpen: boolean;
+  cashOpen: boolean;
 }
 
 export interface TotalMetodo {

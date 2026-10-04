@@ -81,7 +81,7 @@ export class ApiService {
 
     servicios: (soloActivos = false) =>
       this.http.get<Servicio[]>('/api/catalog/services', {
-        params: params({ activeOnly: false }),
+        params: params({ activeOnly: soloActivos }),
       }),
     crearServicio: (body: ServicioRequest, imagen?: File | null) =>
       this.http.post<Servicio>('/api/catalog/services', formData({ ...body }, imagen)),
@@ -90,7 +90,7 @@ export class ApiService {
 
     productos: (soloActivos = false) =>
       this.http.get<Producto[]>('/api/catalog/products', {
-        params: params({ activeOnly: false }),
+        params: params({ activeOnly: soloActivos }),
       }),
     stockBajo: () => this.http.get<Producto[]>('/api/catalog/products/low-stock'),
     crearProducto: (body: ProductoRequest, imagen?: File | null) =>
