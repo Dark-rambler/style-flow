@@ -4,7 +4,7 @@ import { catchError, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 
 /** Título del ProblemDetail que envía el backend cuando el negocio del token está suspendido. */
-export const NEGOCIO_SUSPENDIDO = 'Negocio suspendido';
+export const NEGOCIO_SUSPENDIDO = 'Business suspended';
 
 /**
  * Agrega el JWT a las llamadas /api y cierra la sesión si el token ya no sirve: 401 (vencido o inválido)

@@ -7,18 +7,18 @@ import { AuthService } from './auth.service';
 
 function sesion(rol: string): void {
   localStorage.setItem(
-    'stylo.session',
+    'stylo.session.v2',
     JSON.stringify({
       token: 't',
       expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
-      usuario: {
+      user: {
         id: 1,
-        nombre: 'X',
+        name: 'X',
         username: 'x',
-        rol,
-        telefono: null,
-        comisionPorcentaje: 0,
-        activo: true,
+        role: rol,
+        phone: null,
+        commissionRate: 0,
+        active: true,
       },
     }),
   );
@@ -42,7 +42,7 @@ describe('roleGuard', () => {
   });
 
   it('redirige a la página del rol cuando no tiene permiso', () => {
-    sesion('ESTILISTA');
+    sesion('STYLIST');
     const router = setup();
     const result = TestBed.runInInjectionContext(() =>
       roleGuard('ADMIN')({} as never, {} as never),
@@ -54,15 +54,15 @@ describe('roleGuard', () => {
     sesion('SUPERADMIN');
     const router = setup();
     const result = TestBed.runInInjectionContext(() =>
-      roleGuard('ADMIN', 'CAJERO')({} as never, {} as never),
+      roleGuard('ADMIN', 'CASHIER')({} as never, {} as never),
     );
     expect(router.serializeUrl(result as UrlTree)).toBe('/plataforma');
   });
 
   it('descarta una sesión expirada', () => {
     localStorage.setItem(
-      'stylo.session',
-      JSON.stringify({ token: 't', expiresAt: '2000-01-01T00:00:00Z', usuario: {} }),
+      'stylo.session.v2',
+      JSON.stringify({ token: 't', expiresAt: '2000-01-01T00:00:00Z', user: {} }),
     );
     setup();
     expect(TestBed.inject(AuthService).isLoggedIn()).toBe(false);

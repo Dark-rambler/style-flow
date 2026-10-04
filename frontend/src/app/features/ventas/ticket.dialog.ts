@@ -13,72 +13,72 @@ import { MoneyPipe } from '../../shared/money.pipe';
     <div class="p-6">
       <div class="print-area mx-auto max-w-xs font-mono text-xs text-slate-800">
         <div class="text-center">
-          <p class="text-sm font-bold">{{ negocio()?.nombre }}</p>
-          @if (negocio()?.nit) {
-            <p>NIT: {{ negocio()?.nit }}</p>
+          <p class="text-sm font-bold">{{ negocio()?.name }}</p>
+          @if (negocio()?.taxId) {
+            <p>NIT: {{ negocio()?.taxId }}</p>
           }
-          @if (negocio()?.direccion) {
-            <p>{{ negocio()?.direccion }}</p>
+          @if (negocio()?.address) {
+            <p>{{ negocio()?.address }}</p>
           }
-          @if (negocio()?.telefono) {
-            <p>Tel: {{ negocio()?.telefono }}</p>
+          @if (negocio()?.phone) {
+            <p>Tel: {{ negocio()?.phone }}</p>
           }
         </div>
         <hr class="my-2 border-dashed border-slate-400" />
         <p>Venta N° {{ v.id }}</p>
-        <p>{{ v.fecha | date: 'dd/MM/yyyy HH:mm' }}</p>
-        <p>Atendió: {{ v.cajero }}</p>
-        @if (v.cliente) {
-          <p>Cliente: {{ v.cliente }}{{ v.clienteCiNit ? ' (' + v.clienteCiNit + ')' : '' }}</p>
+        <p>{{ v.date | date: 'dd/MM/yyyy HH:mm' }}</p>
+        <p>Atendió: {{ v.cashier }}</p>
+        @if (v.customer) {
+          <p>Cliente: {{ v.customer }}{{ v.customerTaxId ? ' (' + v.customerTaxId + ')' : '' }}</p>
         }
         <hr class="my-2 border-dashed border-slate-400" />
         @for (i of v.items; track i.id) {
           <div class="flex justify-between gap-2">
-            <span>{{ i.cantidad }} x {{ i.descripcion }}</span>
-            <span class="whitespace-nowrap">{{ i.precioUnitario * i.cantidad | money }}</span>
+            <span>{{ i.quantity }} x {{ i.description }}</span>
+            <span class="whitespace-nowrap">{{ i.unitPrice * i.quantity | money }}</span>
           </div>
-          @if (i.descuento > 0) {
+          @if (i.discount > 0) {
             <div class="flex justify-between gap-2 pl-4 text-slate-500">
               <span>{{ i.subtotal === 0 ? 'Cortesía' : 'Descuento' }}</span>
-              <span class="whitespace-nowrap">-{{ i.descuento | money }}</span>
+              <span class="whitespace-nowrap">-{{ i.discount | money }}</span>
             </div>
           }
-          @if (i.estilista) {
-            <p class="pl-4 text-slate-500">({{ i.estilista }})</p>
+          @if (i.stylist) {
+            <p class="pl-4 text-slate-500">({{ i.stylist }})</p>
           }
         }
         <hr class="my-2 border-dashed border-slate-400" />
         <div class="flex justify-between">
           <span>Subtotal</span><span>{{ v.subtotal | money }}</span>
         </div>
-        @if (v.descuento > 0) {
+        @if (v.discount > 0) {
           <div class="flex justify-between">
-            <span>Descuento</span><span>-{{ v.descuento | money }}</span>
+            <span>Descuento</span><span>-{{ v.discount | money }}</span>
           </div>
         }
         <div class="flex justify-between text-sm font-bold">
           <span>TOTAL</span><span>{{ v.total | money }}</span>
         </div>
         <div class="flex justify-between text-slate-500">
-          <span>IVA incluido</span><span>{{ v.iva | money }}</span>
+          <span>IVA incluido</span><span>{{ v.tax | money }}</span>
         </div>
         <div class="mt-1 flex justify-between">
           <span>{{ metodo() }}</span
-          ><span>{{ v.montoRecibido | money }}</span>
+          ><span>{{ v.amountReceived | money }}</span>
         </div>
-        @if (v.cambio > 0) {
+        @if (v.change > 0) {
           <div class="flex justify-between">
-            <span>Cambio</span><span>{{ v.cambio | money }}</span>
+            <span>Cambio</span><span>{{ v.change | money }}</span>
           </div>
         }
-        @if (v.observaciones) {
-          <p class="mt-2 text-slate-600">Obs.: {{ v.observaciones }}</p>
+        @if (v.notes) {
+          <p class="mt-2 text-slate-600">Obs.: {{ v.notes }}</p>
         }
-        @if (v.estado === 'ANULADA') {
+        @if (v.status === 'VOIDED') {
           <p class="mt-2 text-center font-bold text-red-600">*** ANULADA ***</p>
         }
-        @if (negocio()?.mensajeTicket) {
-          <p class="mt-3 text-center">{{ negocio()?.mensajeTicket }}</p>
+        @if (negocio()?.receiptMessage) {
+          <p class="mt-3 text-center">{{ negocio()?.receiptMessage }}</p>
         }
       </div>
       <div class="mt-6 flex justify-end gap-2 print:hidden">
@@ -94,7 +94,9 @@ export class TicketDialog {
   protected readonly negocio = inject(NegocioStore).negocio;
 
   protected metodo(): string {
-    return METODOS_PAGO.find((m) => m.value === this.v.metodoPago)?.label ?? this.v.metodoPago;
+    return (
+      METODOS_PAGO.find((m) => m.value === this.v.paymentMethod)?.label ?? this.v.paymentMethod
+    );
   }
 
   protected imprimir(): void {

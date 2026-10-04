@@ -13,7 +13,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
   template: `
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="page-title">Hola, {{ auth.usuario()?.nombre }}</h1>
+        <h1 class="page-title">Hola, {{ auth.usuario()?.name }}</h1>
         <p class="text-sm text-slate-500">Resumen de hoy</p>
       </div>
       <a routerLink="/cobrar" class="btn-primary">Cobrar</a>
@@ -22,21 +22,21 @@ import { MoneyPipe } from '../../shared/money.pipe';
     <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <div class="card p-4">
         <p class="text-xs text-slate-500">Vendido hoy</p>
-        <p class="mt-1 text-2xl font-semibold">{{ resumen()?.totalVentas | money }}</p>
+        <p class="mt-1 text-2xl font-semibold">{{ resumen()?.salesTotal | money }}</p>
       </div>
       <div class="card p-4">
         <p class="text-xs text-slate-500">Ventas hoy</p>
-        <p class="mt-1 text-2xl font-semibold">{{ resumen()?.cantidadVentas ?? 0 }}</p>
+        <p class="mt-1 text-2xl font-semibold">{{ resumen()?.salesCount ?? 0 }}</p>
       </div>
       <div class="card p-4">
         <p class="text-xs text-slate-500">Ticket promedio</p>
-        <p class="mt-1 text-2xl font-semibold">{{ resumen()?.ticketPromedio | money }}</p>
+        <p class="mt-1 text-2xl font-semibold">{{ resumen()?.averageTicket | money }}</p>
       </div>
       <a routerLink="/caja" class="card p-4 hover:border-brand-300">
         <p class="text-xs text-slate-500">Caja</p>
         @if (caja(); as c) {
           <p class="mt-1 text-2xl font-semibold text-emerald-600">Abierta</p>
-          <p class="text-xs text-slate-500">Efectivo esperado: {{ c.efectivoEsperado | money }}</p>
+          <p class="text-xs text-slate-500">Efectivo esperado: {{ c.expectedCash | money }}</p>
         } @else {
           <p class="mt-1 text-2xl font-semibold text-amber-600">Cerrada</p>
           <p class="text-xs text-slate-500">Abrir para vender →</p>
@@ -58,10 +58,10 @@ import { MoneyPipe } from '../../shared/money.pipe';
           </thead>
           <tbody>
             @for (v of ultimas(); track v.id) {
-              <tr [class.line-through]="v.estado === 'ANULADA'">
+              <tr [class.line-through]="v.status === 'VOIDED'">
                 <td>{{ v.id }}</td>
-                <td>{{ v.fecha | date: 'HH:mm' }}</td>
-                <td>{{ v.cliente ?? '—' }}</td>
+                <td>{{ v.date | date: 'HH:mm' }}</td>
+                <td>{{ v.customer ?? '—' }}</td>
                 <td class="text-right">{{ v.total | money }}</td>
               </tr>
             } @empty {
@@ -77,7 +77,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
         <ul class="flex flex-col gap-2 text-sm">
           @for (p of stockBajo(); track p.id) {
             <li class="flex justify-between">
-              <span>{{ p.nombre }}</span
+              <span>{{ p.name }}</span
               ><span class="font-semibold text-amber-600">⚠ {{ p.stock }}</span>
             </li>
           } @empty {

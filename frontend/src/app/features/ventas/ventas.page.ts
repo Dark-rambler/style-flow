@@ -11,11 +11,12 @@ import { haceDias, isoDate } from '../../shared/dates';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { ConfirmData, ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { injectDialog, openDialog } from '../../shared/ui/dialog';
+import { Paginator } from '../../shared/ui/paginator';
 import { TicketDialog } from './ticket.dialog';
 
 @Component({
   selector: 'sf-ventas-page',
-  imports: [FormsModule, MoneyPipe, DatePipe],
+  imports: [FormsModule, MoneyPipe, DatePipe, Paginator],
   template: `
     <div class="mb-6 flex flex-wrap items-end gap-3">
       <div class="mr-auto">
@@ -61,30 +62,30 @@ import { TicketDialog } from './ticket.dialog';
         </thead>
         <tbody>
           @for (v of page()?.content; track v.id) {
-            <tr [class.opacity-60]="v.estado === 'ANULADA'">
+            <tr [class.opacity-60]="v.status === 'VOIDED'">
               <td class="font-medium">{{ v.id }}</td>
-              <td>{{ v.fecha | date: 'dd/MM/yy HH:mm' }}</td>
-              <td>{{ v.cliente ?? '—' }}</td>
-              <td>{{ v.cajero }}</td>
-              <td>{{ metodo(v.metodoPago) }}</td>
+              <td>{{ v.date | date: 'dd/MM/yy HH:mm' }}</td>
+              <td>{{ v.customer ?? '—' }}</td>
+              <td>{{ v.cashier }}</td>
+              <td>{{ metodo(v.paymentMethod) }}</td>
               <td class="text-right font-medium">{{ v.total | money }}</td>
               <td>
                 <span
                   class="badge"
                   [class]="
-                    v.estado === 'ANULADA'
+                    v.status === 'VOIDED'
                       ? 'bg-red-100 text-red-700'
                       : 'bg-emerald-100 text-emerald-700'
                   "
                 >
-                  {{ v.estado === 'ANULADA' ? 'Anulada' : 'Completada' }}
+                  {{ v.status === 'VOIDED' ? 'Anulada' : 'Completada' }}
                 </span>
               </td>
               <td class="text-right whitespace-nowrap">
                 <button type="button" class="btn-ghost btn-sm" (click)="verTicket(v)">
                   Ticket
                 </button>
-                @if (esAdmin && v.estado === 'COMPLETADA' && v.cajaAbierta) {
+                @if (esAdmin && v.status === 'COMPLETED' && v.cashRegisterOpen) {
                   <button type="button" class="btn-ghost btn-sm text-red-600" (click)="anular(v)">
                     Anular
                   </button>
@@ -103,29 +104,7 @@ import { TicketDialog } from './ticket.dialog';
       </table>
     </div>
 
-    @if (page(); as p) {
-      @if (p.totalPages > 1) {
-        <div class="mt-4 flex items-center justify-end gap-2 text-sm">
-          <button
-            type="button"
-            class="btn-secondary btn-sm"
-            [disabled]="p.page === 0"
-            (click)="buscar(p.page - 1)"
-          >
-            Anterior
-          </button>
-          <span>Página {{ p.page + 1 }} de {{ p.totalPages }}</span>
-          <button
-            type="button"
-            class="btn-secondary btn-sm"
-            [disabled]="p.page + 1 >= p.totalPages"
-            (click)="buscar(p.page + 1)"
-          >
-            Siguiente
-          </button>
-        </div>
-      }
-    }
+    <sf-paginator [page]="page()" (pagina)="buscar($event)" (tamano)="cambiarTamano($event)" />
   `,
 })
 export class VentasPage {
@@ -144,6 +123,7 @@ export class VentasPage {
   protected readonly desde = signal(isoDate());
   protected readonly hasta = signal(isoDate());
   protected readonly page = signal<Page<VentaResumen> | null>(null);
+  protected readonly tamano = signal(20);
 
   constructor() {
     // Se reevalúa con cada cambio de URL: entrar desde Clientes filtra, volver a /ventas lo quita.
@@ -166,13 +146,18 @@ export class VentasPage {
   protected buscar(page: number): void {
     this.api.ventas
       .buscar({
-        desde: this.desde(),
-        hasta: this.hasta(),
-        clienteId: this.filtroCliente()?.id,
+        from: this.desde(),
+        to: this.hasta(),
+        customerId: this.filtroCliente()?.id,
         page,
-        size: 20,
+        size: this.tamano(),
       })
       .subscribe((p) => this.page.set(p));
+  }
+
+  protected cambiarTamano(size: number): void {
+    this.tamano.set(size);
+    this.buscar(0);
   }
 
   protected quitarCliente(): void {

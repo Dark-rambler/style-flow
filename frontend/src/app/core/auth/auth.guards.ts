@@ -13,7 +13,7 @@ export const guestGuard: CanActivateFn = () => {
   return auth.isLoggedIn() ? inject(Router).createUrlTree([auth.homePath()]) : true;
 };
 
-/** Uso: `canActivate: [roleGuard('ADMIN', 'CAJERO')]` */
+/** Uso: `canActivate: [roleGuard('ADMIN', 'CASHIER')]` */
 export const roleGuard =
   (...roles: Rol[]): CanActivateFn =>
   () => {

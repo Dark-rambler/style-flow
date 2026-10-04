@@ -8,7 +8,7 @@ import { FiltroTipo, OrdenCatalogo } from '../pos.models';
   imports: [FormsModule],
   host: { class: 'flex flex-wrap gap-2' },
   template: `
-    <label class="relative w-40 shrink-0">
+    <label class="relative w-40 shrink-0 @max-lg:w-full">
       <svg
         class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
         viewBox="0 0 24 24"
@@ -28,7 +28,7 @@ import { FiltroTipo, OrdenCatalogo } from '../pos.models';
         (keydown.enter)="enviarCodigo()"
       />
     </label>
-    <div class="flex min-w-[16rem] flex-1">
+    <div class="flex min-w-[16rem] flex-1 @max-lg:min-w-0">
       <input
         class="input min-w-0 rounded-r-none uppercase placeholder:normal-case"
         placeholder="Buscar…"
@@ -41,8 +41,8 @@ import { FiltroTipo, OrdenCatalogo } from '../pos.models';
         [(ngModel)]="tipo"
       >
         <option value="TODOS">Todos</option>
-        <option value="SERVICIO">Servicios</option>
-        <option value="PRODUCTO">Productos</option>
+        <option value="SERVICE">Servicios</option>
+        <option value="PRODUCT">Productos</option>
       </select>
       <select
         class="rounded-r-lg bg-brand-600 px-2 text-sm font-medium text-white outline-none"

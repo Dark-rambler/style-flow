@@ -53,18 +53,29 @@ type Tab = 'servicios' | 'productos' | 'categorias';
             </thead>
             <tbody>
               @for (s of servicios(); track s.id) {
-                <tr [class.opacity-50]="!s.activo">
-                  <td class="font-medium">{{ s.nombre }}</td>
-                  <td>{{ s.categoria }}</td>
-                  <td class="text-right">{{ s.duracionMin }} min</td>
-                  <td class="text-right">{{ s.precio | money }}</td>
+                <tr [class.opacity-50]="!s.active">
+                  <td class="font-medium">
+                    <div class="flex items-center gap-3">
+                      <img
+                        class="size-10 shrink-0 rounded-md border border-slate-200 bg-slate-50"
+                        [class]="s.imageUrl ? 'object-cover' : 'object-contain p-1'"
+                        [src]="s.imageUrl ?? SIN_IMAGEN"
+                        alt=""
+                        loading="lazy"
+                      />
+                      {{ s.name }}
+                    </div>
+                  </td>
+                  <td>{{ s.category }}</td>
+                  <td class="text-right">{{ s.durationMinutes }} min</td>
+                  <td class="text-right">{{ s.price | money }}</td>
                   <td>
                     <span
                       class="badge"
                       [class]="
-                        s.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                        s.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
                       "
-                      >{{ s.activo ? 'Activo' : 'Inactivo' }}</span
+                      >{{ s.active ? 'Activo' : 'Inactivo' }}</span
                     >
                   </td>
                   <td class="text-right">
@@ -98,23 +109,34 @@ type Tab = 'servicios' | 'productos' | 'categorias';
             </thead>
             <tbody>
               @for (p of productos(); track p.id) {
-                <tr [class.opacity-50]="!p.activo">
-                  <td class="font-medium">{{ p.nombre }}</td>
+                <tr [class.opacity-50]="!p.active">
+                  <td class="font-medium">
+                    <div class="flex items-center gap-3">
+                      <img
+                        class="size-10 shrink-0 rounded-md border border-slate-200 bg-slate-50"
+                        [class]="p.imageUrl ? 'object-cover' : 'object-contain p-1'"
+                        [src]="p.imageUrl ?? SIN_IMAGEN"
+                        alt=""
+                        loading="lazy"
+                      />
+                      {{ p.name }}
+                    </div>
+                  </td>
                   <td class="text-slate-500">{{ p.sku ?? '—' }}</td>
-                  <td class="text-right">{{ p.precio | money }}</td>
+                  <td class="text-right">{{ p.price | money }}</td>
                   <td class="text-right">
-                    <span [class]="p.stockBajo ? 'font-semibold text-amber-600' : ''">{{
+                    <span [class]="p.lowStock ? 'font-semibold text-amber-600' : ''">{{
                       p.stock
                     }}</span>
-                    <span class="text-xs text-slate-400"> / mín {{ p.stockMinimo }}</span>
+                    <span class="text-xs text-slate-400"> / mín {{ p.minStock }}</span>
                   </td>
                   <td>
                     <span
                       class="badge"
                       [class]="
-                        p.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                        p.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
                       "
-                      >{{ p.activo ? 'Activo' : 'Inactivo' }}</span
+                      >{{ p.active ? 'Activo' : 'Inactivo' }}</span
                     >
                   </td>
                   <td class="text-right whitespace-nowrap">
@@ -156,18 +178,18 @@ type Tab = 'servicios' | 'productos' | 'categorias';
             <tbody>
               @for (c of categorias(); track c.id) {
                 <tr>
-                  <td class="font-medium">{{ c.nombre }}</td>
+                  <td class="font-medium">{{ c.name }}</td>
                   <td>
                     <button
                       type="button"
                       class="badge"
                       [class]="
-                        c.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                        c.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
                       "
                       (click)="toggleCategoria(c)"
                       title="Cambiar estado"
                     >
-                      {{ c.activo ? 'Activa' : 'Inactiva' }}
+                      {{ c.active ? 'Activa' : 'Inactiva' }}
                     </button>
                   </td>
                   <td class="text-right">
@@ -192,6 +214,7 @@ export class CatalogoPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastService);
   private readonly dialog = injectDialog();
+  protected readonly SIN_IMAGEN = '/image/non-image.png';
 
   protected readonly tabs: { id: Tab; label: string }[] = [
     { id: 'servicios', label: 'Servicios' },
@@ -233,7 +256,7 @@ export class CatalogoPage implements OnInit {
 
   protected ajustarStock(p: Producto): void {
     const data: ConfirmData = {
-      title: `Ajustar stock: ${p.nombre}`,
+      title: `Ajustar stock: ${p.name}`,
       message: `Stock actual: ${p.stock}. Ingrese la cantidad a sumar (compra) o restar con signo menos (merma), p. ej. 10 o -2.`,
       inputLabel: 'Cantidad',
       confirmText: 'Aplicar',
@@ -257,7 +280,7 @@ export class CatalogoPage implements OnInit {
   }
 
   protected crearCategoria(): void {
-    this.api.catalogo.crearCategoria({ nombre: this.nuevaCategoria().trim() }).subscribe(() => {
+    this.api.catalogo.crearCategoria({ name: this.nuevaCategoria().trim() }).subscribe(() => {
       this.nuevaCategoria.set('');
       this.cargar();
     });
@@ -265,14 +288,14 @@ export class CatalogoPage implements OnInit {
 
   protected toggleCategoria(c: Categoria): void {
     this.api.catalogo
-      .actualizarCategoria(c.id, { nombre: c.nombre, activo: !c.activo })
+      .actualizarCategoria(c.id, { name: c.name, active: !c.active })
       .subscribe(() => this.cargar());
   }
 
   protected eliminarCategoria(c: Categoria): void {
     const data: ConfirmData = {
       title: 'Eliminar categoría',
-      message: `¿Eliminar "${c.nombre}"?`,
+      message: `¿Eliminar "${c.name}"?`,
       confirmText: 'Eliminar',
       danger: true,
     };

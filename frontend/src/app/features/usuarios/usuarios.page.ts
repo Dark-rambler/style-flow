@@ -15,7 +15,7 @@ import { injectDialog, openDialog } from '../../shared/ui/dialog';
       <div class="mt-4 grid grid-cols-2 gap-4">
         <label class="field col-span-2">
           <span class="label">Nombre completo *</span>
-          <input class="input" formControlName="nombre" />
+          <input class="input" formControlName="name" />
         </label>
         <label class="field">
           <span class="label">Usuario *</span>
@@ -33,7 +33,7 @@ import { injectDialog, openDialog } from '../../shared/ui/dialog';
         </label>
         <label class="field">
           <span class="label">Rol *</span>
-          <select class="input" formControlName="rol">
+          <select class="input" formControlName="role">
             @for (r of roles; track r.value) {
               <option [ngValue]="r.value">{{ r.label }}</option>
             }
@@ -41,9 +41,9 @@ import { injectDialog, openDialog } from '../../shared/ui/dialog';
         </label>
         <label class="field">
           <span class="label">Teléfono</span>
-          <input class="input" formControlName="telefono" />
+          <input class="input" formControlName="phone" />
         </label>
-        @if (form.value.rol === 'ESTILISTA') {
+        @if (form.value.role === 'STYLIST') {
           <label class="field">
             <span class="label">Comisión (%)</span>
             <input
@@ -52,12 +52,12 @@ import { injectDialog, openDialog } from '../../shared/ui/dialog';
               min="0"
               max="100"
               step="1"
-              formControlName="comisionPorcentaje"
+              formControlName="commissionRate"
             />
           </label>
         }
         <label class="col-span-2 flex items-center gap-2 text-sm">
-          <input type="checkbox" formControlName="activo" class="size-4 accent-brand-600" /> Activo
+          <input type="checkbox" formControlName="active" class="size-4 accent-brand-600" /> Activo
           (puede iniciar sesión)
         </label>
       </div>
@@ -79,7 +79,7 @@ export class UsuarioFormDialog {
   protected readonly saving = signal(false);
 
   protected readonly form = inject(NonNullableFormBuilder).group({
-    nombre: [this.u?.nombre ?? '', [Validators.required, Validators.maxLength(120)]],
+    name: [this.u?.name ?? '', [Validators.required, Validators.maxLength(120)]],
     username: [
       this.u?.username ?? '',
       [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9._-]+$/)],
@@ -88,10 +88,10 @@ export class UsuarioFormDialog {
       '',
       this.u ? [Validators.minLength(6)] : [Validators.required, Validators.minLength(6)],
     ],
-    rol: [this.u?.rol ?? ('ESTILISTA' as Rol), Validators.required],
-    telefono: [this.u?.telefono ?? ''],
-    comisionPorcentaje: [this.u?.comisionPorcentaje ?? 0, [Validators.min(0), Validators.max(100)]],
-    activo: [this.u?.activo ?? true],
+    role: [this.u?.role ?? ('STYLIST' as Rol), Validators.required],
+    phone: [this.u?.phone ?? ''],
+    commissionRate: [this.u?.commissionRate ?? 0, [Validators.min(0), Validators.max(100)]],
+    active: [this.u?.active ?? true],
   });
 
   protected guardar(): void {
@@ -132,22 +132,22 @@ export class UsuarioFormDialog {
         </thead>
         <tbody>
           @for (u of usuarios(); track u.id) {
-            <tr [class.opacity-50]="!u.activo">
-              <td class="font-medium">{{ u.nombre }}</td>
+            <tr [class.opacity-50]="!u.active">
+              <td class="font-medium">{{ u.name }}</td>
               <td class="text-slate-500">{{ u.username }}</td>
               <td>
-                <span class="badge bg-brand-50 text-brand-700">{{ rolLabel(u.rol) }}</span>
+                <span class="badge bg-brand-50 text-brand-700">{{ rolLabel(u.role) }}</span>
               </td>
               <td class="text-right">
-                {{ u.rol === 'ESTILISTA' ? u.comisionPorcentaje + '%' : '—' }}
+                {{ u.role === 'STYLIST' ? u.commissionRate + '%' : '—' }}
               </td>
               <td>
                 <span
                   class="badge"
                   [class]="
-                    u.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                    u.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
                   "
-                  >{{ u.activo ? 'Activo' : 'Inactivo' }}</span
+                  >{{ u.active ? 'Activo' : 'Inactivo' }}</span
                 >
               </td>
               <td class="text-right">

@@ -8,7 +8,7 @@ import { ItemPos } from '../pos.models';
   imports: [MoneyPipe],
   template: `
     <div
-      class="relative flex h-full flex-col rounded-xl border-2 bg-white p-2 shadow-sm transition"
+      class="relative flex h-full flex-col rounded-xl border-2 bg-white p-2 m-1 shadow-sm transition"
       [class]="
         enCarrito() ? 'border-brand-300 bg-brand-50' : 'border-transparent hover:border-slate-200'
       "
@@ -32,9 +32,9 @@ import { ItemPos } from '../pos.models';
         </div>
         <span
           class="absolute top-3 right-3 rounded px-2 py-0.5 text-[11px] font-medium text-white"
-          [class]="item().tipo === 'SERVICIO' ? 'bg-orange-400' : 'bg-sky-500'"
+          [class]="item().tipo === 'SERVICE' ? 'bg-orange-400' : 'bg-sky-500'"
         >
-          {{ item().tipo === 'SERVICIO' ? 'Servicio' : 'Producto' }}
+          {{ item().tipo === 'SERVICE' ? 'Servicio' : 'Producto' }}
         </span>
         <span class="mt-2 line-clamp-2 text-xs font-medium text-slate-700 uppercase">{{
           item().nombre
