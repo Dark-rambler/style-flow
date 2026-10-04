@@ -31,8 +31,8 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
     }
 
     @Override
-    public Optional<Product> findByIdForUpdate(Long id) {
-        return productRepository.findByIdForUpdate(id).map(catalogMapper::toDomain);
+    public Optional<Product> findByIdUpdate(Long id) {
+        return productRepository.findByIdUpdate(id).map(catalogMapper::toDomain);
     }
 
     @Override
@@ -40,11 +40,10 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
         return productRepository.existsBySkuIgnoreCase(sku);
     }
 
-    /** Inside the transaction it reuses the entity already loaded (and locked) by {@link #findByIdForUpdate}. */
     @Override
     public Product save(Product product) {
-        ProductEntity entity = product.getId() == null ? new ProductEntity()
-                : productRepository.findById(product.getId())
+        var entity = product.getId() == null ? new ProductEntity() :
+                productRepository.findById(product.getId())
                         .orElseThrow(() -> new NotFoundException("Product", product.getId()));
         catalogMapper.updateEntity(product, entity);
         return catalogMapper.toDomain(productRepository.save(entity));

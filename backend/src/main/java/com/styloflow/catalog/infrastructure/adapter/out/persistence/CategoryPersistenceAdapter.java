@@ -32,8 +32,8 @@ public class CategoryPersistenceAdapter implements CategoryRepositoryPort {
 
     @Override
     public Category save(Category category) {
-        CategoryEntity entity = category.getId() == null ? new CategoryEntity()
-                : categoryRepository.findById(category.getId())
+        var entity = category.getId() == null ? new CategoryEntity() :
+                categoryRepository.findById(category.getId())
                         .orElseThrow(() -> new NotFoundException("Category", category.getId()));
         catalogMapper.updateEntity(category, entity);
         return catalogMapper.toDomain(categoryRepository.save(entity));

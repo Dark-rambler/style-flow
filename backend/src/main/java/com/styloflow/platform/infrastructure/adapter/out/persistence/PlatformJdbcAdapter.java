@@ -9,10 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
-/**
- * Cross-business SQL: the panel spans all tenants and the sign-up runs before the business exists as a tenant,
- * so every INSERT sets {@code negocio_id} explicitly. Literals such as 'COMPLETADA' or 'ADMIN' are database values.
- */
 @Component
 @RequiredArgsConstructor
 public class PlatformJdbcAdapter implements PlatformRepositoryPort {
@@ -32,15 +28,22 @@ public class PlatformJdbcAdapter implements PlatformRepositoryPort {
                         GROUP BY n.id
                         ORDER BY n.created_at DESC
                         """)
-                .query((rs, i) -> new BusinessSummary(rs.getLong("id"), rs.getString("codigo"), rs.getString("nombre"),
-                        rs.getBoolean("activo"), rs.getTimestamp("created_at").toInstant(), rs.getLong("users"),
-                        rs.getLong("sales30d"), rs.getBigDecimal("total30d")))
+                .query((rs, _) -> new BusinessSummary(
+                        rs.getLong("id"),
+                        rs.getString("codigo"),
+                        rs.getString("nombre"),
+                        rs.getBoolean("activo"),
+                        rs.getTimestamp("created_at").toInstant(),
+                        rs.getLong("users"),
+                        rs.getLong("sales30d"),
+                        rs.getBigDecimal("total30d"))
+                )
                 .list();
     }
 
     @Override
     public long register(NewBusiness business) {
-        Long id = jdbc.sql("""
+        var id = jdbc.sql("""
                         INSERT INTO negocio (codigo, nombre, nit, telefono, moneda, simbolo, iva_porcentaje, mensaje_ticket)
                         VALUES (:code, :name, :taxId, :phone, 'BOB', 'Bs', 13.00, '¡Gracias por su visita!')
                         RETURNING id
@@ -51,7 +54,6 @@ public class PlatformJdbcAdapter implements PlatformRepositoryPort {
                 .param("phone", business.phone())
                 .query(Long.class)
                 .single();
-
         jdbc.sql("""
                         INSERT INTO usuarios (negocio_id, nombre, username, password_hash, rol)
                         VALUES (:businessId, :name, :username, :hash, 'ADMIN')
@@ -61,9 +63,8 @@ public class PlatformJdbcAdapter implements PlatformRepositoryPort {
                 .param("username", business.adminUsername())
                 .param("hash", business.adminPasswordHash())
                 .update();
-
         for (BaseCatalog.CategorySeed category : business.catalog()) {
-            Long categoryId = jdbc.sql("INSERT INTO categorias (negocio_id, nombre) VALUES (:businessId, :name) RETURNING id")
+            var categoryId = jdbc.sql("INSERT INTO categorias (negocio_id, nombre) VALUES (:businessId, :name) RETURNING id")
                     .param("businessId", id)
                     .param("name", category.name())
                     .query(Long.class)

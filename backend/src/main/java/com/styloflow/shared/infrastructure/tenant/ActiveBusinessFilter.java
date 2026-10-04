@@ -6,14 +6,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/** Rejects requests of a suspended business with 403, even while its token is still valid. */
 public class ActiveBusinessFilter extends OncePerRequestFilter {
 
-    /** ProblemDetail title the frontend uses to detect a suspended business. */
     public static final String SUSPENDED_TITLE = "Business suspended";
 
     private final BusinessStatusUseCase businessStatus;
@@ -23,9 +23,12 @@ public class ActiveBusinessFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-        Long businessId = TenantContext.businessIdFromToken();
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain chain
+    ) throws ServletException, IOException {
+        var businessId = TenantContext.businessIdFromToken();
         if (businessId != null && !businessStatus.isActive(businessId)) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);

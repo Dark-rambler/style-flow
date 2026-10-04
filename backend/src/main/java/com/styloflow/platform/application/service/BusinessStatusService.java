@@ -9,7 +9,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Cached: {@code ActiveBusinessFilter} checks it on every request. */
 @Service
 @RequiredArgsConstructor
 public class BusinessStatusService implements BusinessStatusUseCase {
@@ -22,7 +21,9 @@ public class BusinessStatusService implements BusinessStatusUseCase {
     @Cacheable(CACHE)
     @Transactional(readOnly = true)
     public boolean isActive(Long businessId) {
-        return businessRepository.findById(businessId).map(Business::isActive).orElse(false);
+        return businessRepository.findById(businessId)
+                .map(Business::isActive)
+                .orElse(false);
     }
 
     @Override

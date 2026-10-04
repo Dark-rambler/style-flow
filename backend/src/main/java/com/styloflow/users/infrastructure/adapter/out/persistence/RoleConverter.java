@@ -1,7 +1,7 @@
 package com.styloflow.users.infrastructure.adapter.out.persistence;
 
 import com.styloflow.shared.infrastructure.persistence.DbEnumConverter;
-import com.styloflow.users.domain.model.Role;
+import com.styloflow.users.domain.enums.Role;
 import jakarta.persistence.Converter;
 import java.util.Map;
 

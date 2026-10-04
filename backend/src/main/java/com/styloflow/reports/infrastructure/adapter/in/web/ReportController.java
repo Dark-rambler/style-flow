@@ -5,7 +5,7 @@ import com.styloflow.reports.infrastructure.adapter.in.web.dto.DailySalesRespons
 import com.styloflow.reports.infrastructure.adapter.in.web.dto.SalesSummaryResponse;
 import com.styloflow.reports.infrastructure.adapter.in.web.dto.StylistTotalResponse;
 import com.styloflow.reports.infrastructure.adapter.in.web.dto.TopItemResponse;
-import com.styloflow.sales.domain.model.ItemType;
+import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.shared.domain.model.DateRange;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

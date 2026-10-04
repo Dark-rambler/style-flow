@@ -14,4 +14,5 @@ public record CreateBusinessRequest(
         @NotBlank @Size(min = 3, max = 50) @Pattern(regexp = "^[a-zA-Z0-9._-]+$",
                 message = "only letters, numbers, dot, hyphen and underscore") String adminUsername,
         @NotBlank @Size(min = 6, max = 72) String adminPassword,
-        boolean baseCatalog) {}
+        boolean baseCatalog
+) {}

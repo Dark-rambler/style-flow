@@ -5,4 +5,5 @@ import java.time.Instant;
 public record PlatformLoginResponse(
         String token,
         Instant expiresAt,
-        String name) {}
+        String name
+) {}

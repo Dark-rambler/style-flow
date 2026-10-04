@@ -27,9 +27,8 @@ public class Product {
     private boolean active = true;
 
     public void decreaseStock(int quantity) {
-        if (quantity > stock) {
+        if (quantity > stock)
             throw new BusinessRuleException("Insufficient stock for '" + name + "' (available: " + stock + ")");
-        }
         stock -= quantity;
     }
 
@@ -37,13 +36,11 @@ public class Product {
         stock += quantity;
     }
 
-    /** Adds (or subtracts, when negative) units: purchases, shrinkage, inventory counts. */
     public void adjustStock(int quantity) {
-        if (quantity < 0) {
+        if (quantity < 0)
             decreaseStock(-quantity);
-        } else {
+        else
             increaseStock(quantity);
-        }
     }
 
     public boolean isLowStock() {

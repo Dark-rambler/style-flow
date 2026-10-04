@@ -9,4 +9,5 @@ public record CustomerRequest(
         @Size(max = 30) String phone,
         @Email @Size(max = 120) String email,
         @Size(max = 30) String taxId,
-        @Size(max = 500) String notes) {}
+        @Size(max = 500) String notes
+) {}

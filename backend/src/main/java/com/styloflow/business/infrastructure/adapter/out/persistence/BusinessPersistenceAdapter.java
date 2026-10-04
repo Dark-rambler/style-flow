@@ -26,7 +26,7 @@ public class BusinessPersistenceAdapter implements BusinessRepositoryPort {
 
     @Override
     public Business save(Business business) {
-        BusinessEntity entity = businessRepository.findById(business.getId())
+        var entity = businessRepository.findById(business.getId())
                 .orElseThrow(() -> new NotFoundException("Business", business.getId()));
         businessMapper.updateEntity(business, entity);
         return businessMapper.toDomain(businessRepository.save(entity));

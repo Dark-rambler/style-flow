@@ -26,8 +26,8 @@ public class SuperadminPersistenceAdapter implements SuperadminRepositoryPort {
 
     @Override
     public Superadmin save(Superadmin superadmin) {
-        SuperadminEntity entity = superadmin.getId() == null ? new SuperadminEntity()
-                : superadminRepository.findById(superadmin.getId())
+        var entity = superadmin.getId() == null ? new SuperadminEntity() :
+                superadminRepository.findById(superadmin.getId())
                         .orElseThrow(() -> new NotFoundException("Superadmin", superadmin.getId()));
         superadminMapper.updateEntity(superadmin, entity);
         return superadminMapper.toDomain(superadminRepository.save(entity));

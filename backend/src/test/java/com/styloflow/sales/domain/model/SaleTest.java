@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.styloflow.cashregister.domain.model.CashRegister;
+import com.styloflow.cash.domain.model.Cash;
+import com.styloflow.sales.domain.enums.ItemType;
+import com.styloflow.sales.domain.enums.PaymentMethod;
+import com.styloflow.sales.domain.enums.SaleStatus;
 import com.styloflow.shared.domain.exception.BusinessRuleException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,8 +24,8 @@ class SaleTest {
     private static final Instant NOW = Instant.parse("2026-10-02T15:00:00Z");
     private static final BigDecimal TAX_13 = new BigDecimal("13");
 
-    private static CashRegister openRegister() {
-        return CashRegister.open(null, NOW, new BigDecimal("100.00"), null);
+    private static Cash openRegister() {
+        return Cash.open(null, NOW, new BigDecimal("100.00"), null);
     }
 
     private static SaleItem service(String price, String discount) {
@@ -136,7 +139,7 @@ class SaleTest {
         @Test
         void voidSale_should_throw_when_registerIsClosed() {
             Sale sale = register(List.of(service("80", null)), null, PaymentMethod.CARD, null);
-            sale.getCashRegister().close(null, NOW, new BigDecimal("100.00"), null, List.of());
+            sale.getCash().close(null, NOW, new BigDecimal("100.00"), null, List.of());
 
             assertThatThrownBy(() -> sale.voidSale(null, "x", NOW)).isInstanceOf(BusinessRuleException.class);
         }

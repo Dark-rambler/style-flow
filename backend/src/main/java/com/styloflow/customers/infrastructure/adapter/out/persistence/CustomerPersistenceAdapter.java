@@ -31,8 +31,8 @@ public class CustomerPersistenceAdapter implements CustomerRepositoryPort {
 
     @Override
     public Customer save(Customer customer) {
-        CustomerEntity entity = customer.getId() == null ? new CustomerEntity()
-                : customerRepository.findById(customer.getId())
+        var entity = customer.getId() == null ? new CustomerEntity() :
+                customerRepository.findById(customer.getId())
                         .orElseThrow(() -> new NotFoundException("Customer", customer.getId()));
         customerMapper.updateEntity(customer, entity);
         return customerMapper.toDomain(customerRepository.save(entity));

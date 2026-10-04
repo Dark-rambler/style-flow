@@ -1,6 +1,6 @@
 package com.styloflow.users.infrastructure.adapter.in.web;
 
-import com.styloflow.users.application.port.in.UserCommand;
+import com.styloflow.users.application.port.in.command.UserCommand;
 import com.styloflow.users.domain.model.User;
 import com.styloflow.users.infrastructure.adapter.in.web.dto.UserRequest;
 import com.styloflow.users.infrastructure.adapter.in.web.dto.UserResponse;

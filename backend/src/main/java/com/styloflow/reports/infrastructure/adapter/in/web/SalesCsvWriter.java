@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Component;
 
-/** ';'-separated CSV with a BOM (Excel friendly in Spanish locales). */
 @Component
 public class SalesCsvWriter {
 
@@ -17,7 +16,7 @@ public class SalesCsvWriter {
     }
 
     public void header(PrintWriter out) {
-        out.print('﻿'); // BOM so Excel detects UTF-8
+        out.print('﻿');
         out.println("id;date;cashier;customer;subtotal;discount;total;tax;payment_method;status");
     }
 

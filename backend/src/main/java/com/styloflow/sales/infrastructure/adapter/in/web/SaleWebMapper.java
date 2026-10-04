@@ -1,6 +1,6 @@
 package com.styloflow.sales.infrastructure.adapter.in.web;
 
-import com.styloflow.sales.application.port.in.RegisterSaleCommand;
+import com.styloflow.sales.application.port.in.command.RegisterSaleCommand;
 import com.styloflow.sales.domain.model.Sale;
 import com.styloflow.sales.domain.model.SaleItem;
 import com.styloflow.sales.infrastructure.adapter.in.web.dto.SaleItemResponse;
@@ -15,7 +15,7 @@ public interface SaleWebMapper {
 
     RegisterSaleCommand toCommand(SaleRequest request);
 
-    @Mapping(target = "cashRegisterId", source = "cashRegister.id")
+    @Mapping(target = "cashId", source = "cash.id")
     @Mapping(target = "cashier", source = "cashier.name")
     @Mapping(target = "customerId", source = "customer.id")
     @Mapping(target = "customer", source = "customer.name")
@@ -30,6 +30,6 @@ public interface SaleWebMapper {
     @Mapping(target = "cashier", source = "cashier.name")
     @Mapping(target = "customerId", source = "customer.id")
     @Mapping(target = "customer", source = "customer.name")
-    @Mapping(target = "cashRegisterOpen", source = "cashRegister.open")
+    @Mapping(target = "cashOpen", source = "cash.open")
     SaleSummaryResponse toSummary(Sale sale);
 }

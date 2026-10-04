@@ -1,7 +1,7 @@
 package com.styloflow.users.infrastructure.adapter.out.persistence;
 
 import com.styloflow.shared.infrastructure.persistence.TenantScopedEntity;
-import com.styloflow.users.domain.model.Role;
+import com.styloflow.users.domain.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -18,7 +18,6 @@ public class UserEntity extends TenantScopedEntity {
     @Column(name = "nombre", nullable = false)
     private String name;
 
-    /** Unique within the business (index uq_usuarios_negocio_username). */
     @Column(nullable = false)
     private String username;
 

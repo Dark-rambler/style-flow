@@ -1,6 +1,6 @@
 package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
-import com.styloflow.sales.domain.model.ItemType;
+import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.shared.infrastructure.persistence.DbEnumConverter;
 import jakarta.persistence.Converter;
 import java.util.Map;

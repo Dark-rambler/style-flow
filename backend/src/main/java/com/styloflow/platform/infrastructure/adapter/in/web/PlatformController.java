@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Requires the SUPERADMIN role (see SecurityConfig); the login lives in {@code PlatformAuthController}. */
 @RestController
 @RequestMapping("/api/platform/businesses")
 @RequiredArgsConstructor

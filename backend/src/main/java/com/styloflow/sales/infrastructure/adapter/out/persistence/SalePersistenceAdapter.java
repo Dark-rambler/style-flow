@@ -1,21 +1,26 @@
 package com.styloflow.sales.infrastructure.adapter.out.persistence;
 
-import com.styloflow.cashregister.application.port.out.SalesTotalsPort;
-import com.styloflow.cashregister.domain.model.PaymentTotal;
-import com.styloflow.cashregister.infrastructure.adapter.out.persistence.CashRegisterEntity;
+import com.styloflow.cash.application.port.out.SalesTotalsPort;
+import com.styloflow.cash.domain.model.PaymentTotal;
+import com.styloflow.cash.infrastructure.adapter.out.persistence.CashEntity;
+import com.styloflow.cash.infrastructure.adapter.out.persistence.CashJpaRepository;
 import com.styloflow.catalog.infrastructure.adapter.out.persistence.ProductEntity;
-import com.styloflow.catalog.infrastructure.adapter.out.persistence.SalonServiceEntity;
+import com.styloflow.catalog.infrastructure.adapter.out.persistence.ProductJpaRepository;
+import com.styloflow.catalog.infrastructure.adapter.out.persistence.ServiceEntity;
+import com.styloflow.catalog.infrastructure.adapter.out.persistence.ServiceJpaRepository;
 import com.styloflow.customers.infrastructure.adapter.out.persistence.CustomerEntity;
+import com.styloflow.customers.infrastructure.adapter.out.persistence.CustomerJpaRepository;
 import com.styloflow.sales.application.port.out.SaleRepositoryPort;
-import com.styloflow.sales.domain.model.ItemType;
+import com.styloflow.sales.domain.enums.ItemType;
 import com.styloflow.sales.domain.model.Sale;
 import com.styloflow.sales.domain.model.SaleItem;
-import com.styloflow.sales.domain.model.SaleStatus;
+import com.styloflow.sales.domain.enums.SaleStatus;
 import com.styloflow.shared.domain.exception.NotFoundException;
 import com.styloflow.shared.domain.model.PageResult;
 import com.styloflow.shared.infrastructure.persistence.PageResults;
 import com.styloflow.users.domain.model.User;
 import com.styloflow.users.infrastructure.adapter.out.persistence.UserEntity;
+import com.styloflow.users.infrastructure.adapter.out.persistence.UserJpaRepository;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.util.List;
@@ -30,7 +35,11 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
 
     private final SaleJpaRepository saleRepository;
     private final SalePersistenceMapper saleMapper;
-    private final EntityManager entityManager;
+    private final CashJpaRepository cashRepository;
+    private final CustomerJpaRepository  customerRepository;
+    private final ProductJpaRepository productRepository;
+    private final ServiceJpaRepository serviceRepository;
+    private final UserJpaRepository userRepository;
 
     @Override
     public Optional<Sale> findDetail(Long id) {
@@ -44,41 +53,37 @@ public class SalePersistenceAdapter implements SaleRepositoryPort, SalesTotalsPo
     }
 
     @Override
-    public List<PaymentTotal> totalsByPaymentMethod(Long cashRegisterId) {
-        return saleRepository.totalsByPaymentMethod(cashRegisterId, SaleStatus.COMPLETED).stream()
+    public List<PaymentTotal> totalsByPaymentMethod(Long cashId) {
+        return saleRepository.totalsByPaymentMethod(cashId, SaleStatus.COMPLETED).stream()
                 .map(t -> new PaymentTotal(t.getPaymentMethod(), t.getCount(), t.getTotal()))
                 .toList();
     }
 
-    /** A sale is created with its items; afterward only its status changes (void). */
     @Override
     public Sale save(Sale sale) {
-        SaleEntity entity = sale.getId() == null ? new SaleEntity()
+        var entity = sale.getId() == null ? new SaleEntity()
                 : saleRepository.findById(sale.getId()).orElseThrow(() -> new NotFoundException("Sale", sale.getId()));
         saleMapper.updateEntity(sale, entity);
-        entity.setCashRegister(entityManager.getReference(CashRegisterEntity.class, sale.getCashRegister().getId()));
+        entity.setCash(cashRepository.getReferenceById(sale.getCash().getId()));
         entity.setCashier(user(sale.getCashier()));
-        entity.setCustomer(sale.getCustomer() != null
-                ? entityManager.getReference(CustomerEntity.class, sale.getCustomer().getId()) : null);
+        entity.setCustomer(sale.getCustomer() != null ? customerRepository.getReferenceById(sale.getCustomer().getId()) : null);
         entity.setVoidedBy(user(sale.getVoidedBy()));
-        if (entity.getId() == null) {
+        if (entity.getId() == null)
             sale.getItems().forEach(item -> entity.addItem(toEntity(item)));
-        }
         return saleMapper.toDomain(saleRepository.save(entity));
     }
 
     private SaleItemEntity toEntity(SaleItem item) {
-        SaleItemEntity entity = saleMapper.toEntity(item);
-        if (item.getType() == ItemType.SERVICE) {
-            entity.setService(entityManager.getReference(SalonServiceEntity.class, item.getItemId()));
-        } else {
-            entity.setProduct(entityManager.getReference(ProductEntity.class, item.getItemId()));
-        }
+        var entity = saleMapper.toEntity(item);
+        if (item.getType() == ItemType.SERVICE)
+            entity.setService(serviceRepository.getReferenceById(item.getItemId()));
+        else
+            entity.setProduct(productRepository.getReferenceById(item.getItemId()));
         entity.setStylist(user(item.getStylist()));
         return entity;
     }
 
     private UserEntity user(User user) {
-        return user != null ? entityManager.getReference(UserEntity.class, user.getId()) : null;
+        return user != null ? userRepository.getReferenceById(user.getId()) : null;
     }
 }

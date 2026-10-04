@@ -6,10 +6,6 @@ import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
-/**
- * Connects {@link TenantContext} with Hibernate: entities with {@code @TenantId} are filtered by this value in
- * queries and loads, and receive it automatically on insert.
- */
 @Component
 public class TenantResolver implements CurrentTenantIdentifierResolver<Long>, HibernatePropertiesCustomizer {
 

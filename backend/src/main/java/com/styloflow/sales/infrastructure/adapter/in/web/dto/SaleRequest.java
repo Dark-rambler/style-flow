@@ -1,6 +1,6 @@
 package com.styloflow.sales.infrastructure.adapter.in.web.dto;
 
-import com.styloflow.sales.domain.model.PaymentMethod;
+import com.styloflow.sales.domain.enums.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -16,4 +16,5 @@ public record SaleRequest(
         @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal discount,
         @NotNull PaymentMethod paymentMethod,
         @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal amountReceived,
-        @Size(max = 500) String notes) {}
+        @Size(max = 500) String notes
+) {}

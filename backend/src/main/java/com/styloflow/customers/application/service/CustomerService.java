@@ -1,6 +1,6 @@
 package com.styloflow.customers.application.service;
 
-import com.styloflow.customers.application.port.in.CustomerCommand;
+import com.styloflow.customers.application.port.in.command.CustomerCommand;
 import com.styloflow.customers.application.port.in.CustomerUseCase;
 import com.styloflow.customers.application.port.out.CustomerRepositoryPort;
 import com.styloflow.customers.domain.model.Customer;
@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Default {@link CustomerUseCase} implementation. */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -32,7 +31,7 @@ public class CustomerService implements CustomerUseCase {
     @Override
     @Transactional
     public Customer create(CustomerCommand command) {
-        Customer customer = new Customer();
+        var customer = new Customer();
         apply(customer, command);
         return customerRepository.save(customer);
     }
@@ -40,7 +39,7 @@ public class CustomerService implements CustomerUseCase {
     @Override
     @Transactional
     public Customer update(Long id, CustomerCommand command) {
-        Customer customer = get(id);
+        var customer = get(id);
         apply(customer, command);
         return customerRepository.save(customer);
     }

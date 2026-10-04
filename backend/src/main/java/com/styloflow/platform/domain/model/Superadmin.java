@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Platform user: creates and suspends businesses. Does not belong to any business. */
 @Getter
 @Setter
 @Builder

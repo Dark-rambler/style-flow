@@ -9,7 +9,6 @@ import com.styloflow.shared.infrastructure.tenant.TenantContext;
 import com.styloflow.users.domain.model.User;
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -51,10 +50,10 @@ public class JwtTokenAdapter implements TokenPort {
     }
 
     private AuthToken issue(JwtClaimsSet.Builder builder) {
-        Instant now = clock.instant();
-        Instant expiresAt = now.plus(Duration.ofHours(props.jwt().expirationHours()));
-        JwtClaimsSet claims = builder.issuer(props.jwt().issuer()).issuedAt(now).expiresAt(expiresAt).build();
-        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
+        var now = clock.instant();
+        var expiresAt = now.plus(Duration.ofHours(props.jwt().expirationHours()));
+        var claims = builder.issuer(props.jwt().issuer()).issuedAt(now).expiresAt(expiresAt).build();
+        var header = JwsHeader.with(MacAlgorithm.HS256).build();
         return new AuthToken(encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue(), expiresAt);
     }
 }

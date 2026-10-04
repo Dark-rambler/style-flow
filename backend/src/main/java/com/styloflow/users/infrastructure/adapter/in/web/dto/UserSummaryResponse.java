@@ -1,6 +1,9 @@
 package com.styloflow.users.infrastructure.adapter.in.web.dto;
 
-import com.styloflow.users.domain.model.Role;
+import com.styloflow.users.domain.enums.Role;
 
-/** Reduced view for pickers (e.g. choosing a stylist in the POS). */
-public record UserSummaryResponse(Long id, String name, Role role) {}
+public record UserSummaryResponse(
+        Long id,
+        String name,
+        Role role
+) {}

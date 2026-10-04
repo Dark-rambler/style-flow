@@ -6,10 +6,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-/**
- * Runs code as another business in a new transaction, so Hibernate opens a session bound to that tenant even if
- * a transaction is already in progress (login, initialization).
- */
 @Component
 public class TenantExecutor {
 

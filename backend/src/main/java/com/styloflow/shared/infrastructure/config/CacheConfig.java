@@ -6,7 +6,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** In-memory cache (single instance). When scaling out, replace with Redis/Caffeine with a TTL. */
 @Configuration
 @EnableCaching
 public class CacheConfig {

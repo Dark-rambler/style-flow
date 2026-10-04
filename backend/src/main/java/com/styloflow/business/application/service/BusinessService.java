@@ -20,14 +20,14 @@ public class BusinessService implements BusinessUseCase {
 
     @Override
     public Business getCurrent() {
-        long id = currentTenant.businessId();
+        var id = currentTenant.businessId();
         return businessRepository.findById(id).orElseThrow(() -> new NotFoundException("Business", id));
     }
 
     @Override
     @Transactional
     public Business update(UpdateBusinessCommand command) {
-        Business business = getCurrent();
+        var business = getCurrent();
         apply(business, command);
         return businessRepository.save(business);
     }
