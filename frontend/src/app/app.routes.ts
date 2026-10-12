@@ -1,88 +1,154 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard, roleGuard } from './core/auth/auth.guards';
-import { Shell } from './layout/shell';
+import {
+  businessAuthGuard,
+  homeRedirect,
+  loginGuard,
+  platformAuthGuard,
+  roleGuard,
+} from './core/auth/auth.guards';
+import { ROLES } from './core/navigation/navigation';
 
 export const routes: Routes = [
   {
     path: 'login',
-    canActivate: [guestGuard],
-    loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage),
+    title: 'Iniciar sesión',
+    canActivate: [loginGuard],
+    loadComponent: () =>
+      import('./features/login/login-page.component').then((m) => m.LoginPageComponent),
   },
   {
     path: 'plataforma/login',
-    canActivate: [guestGuard],
+    title: 'Plataforma',
+    data: { platform: true },
+    canActivate: [loginGuard],
     loadComponent: () =>
-      import('./features/plataforma/plataforma-login.page').then((m) => m.PlataformaLoginPage),
+      import('./features/login/login-page.component').then((m) => m.LoginPageComponent),
+  },
+  {
+    path: 'plataforma',
+    canMatch: [platformAuthGuard],
+    data: { platform: true },
+    loadComponent: () => import('./layout/shell/shell.component').then((m) => m.ShellComponent),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'negocios' },
+      {
+        path: 'negocios',
+        title: 'Negocios',
+        loadComponent: () =>
+          import('./features/platform/businesses-page.component').then(
+            (m) => m.BusinessesPageComponent,
+          ),
+      },
+    ],
   },
   {
     path: '',
-    component: Shell,
-    canActivate: [authGuard],
+    canMatch: [businessAuthGuard],
+    loadComponent: () => import('./layout/shell/shell.component').then((m) => m.ShellComponent),
     children: [
+      { path: '', pathMatch: 'full', redirectTo: homeRedirect },
       {
-        path: 'dashboard',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
+        path: 'inicio',
+        title: 'Inicio',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
         loadComponent: () =>
-          import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
+          import('./features/dashboard/dashboard-page.component').then(
+            (m) => m.DashboardPageComponent,
+          ),
       },
       {
-        path: 'cobrar',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
-        loadComponent: () => import('./features/pos/pos.page').then((m) => m.PosPage),
-      },
-      {
-        path: 'caja',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
-        loadComponent: () => import('./features/caja/caja.page').then((m) => m.CajaPage),
+        path: 'venta',
+        title: 'Nueva venta',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/pos/pos-page.component').then((m) => m.PosPageComponent),
       },
       {
         path: 'ventas',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
-        loadComponent: () => import('./features/ventas/ventas.page').then((m) => m.VentasPage),
+        title: 'Ventas',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/sales/sales-list-page.component').then(
+            (m) => m.SalesListPageComponent,
+          ),
+      },
+      {
+        path: 'ventas/:id',
+        title: 'Detalle de venta',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/sales/sale-detail-page.component').then(
+            (m) => m.SaleDetailPageComponent,
+          ),
+      },
+      {
+        path: 'caja',
+        title: 'Caja',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/cash-register/cash-register-page.component').then(
+            (m) => m.CashRegisterPageComponent,
+          ),
       },
       {
         path: 'clientes',
-        canActivate: [roleGuard('ADMIN', 'CAJERO')],
+        title: 'Clientes',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
         loadComponent: () =>
-          import('./features/clientes/clientes.page').then((m) => m.ClientesPage),
+          import('./features/customers/customers-page.component').then(
+            (m) => m.CustomersPageComponent,
+          ),
       },
       {
         path: 'catalogo',
-        canActivate: [roleGuard('ADMIN')],
+        title: 'Catálogo',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
         loadComponent: () =>
-          import('./features/catalogo/catalogo.page').then((m) => m.CatalogoPage),
+          import('./features/catalog/catalog-page.component').then((m) => m.CatalogPageComponent),
       },
       {
         path: 'reportes',
-        canActivate: [roleGuard('ADMIN')],
+        title: 'Reportes',
+        data: { roles: ROLES.staff },
+        canActivate: [roleGuard],
         loadComponent: () =>
-          import('./features/reportes/reportes.page').then((m) => m.ReportesPage),
-      },
-      {
-        path: 'usuarios',
-        canActivate: [roleGuard('ADMIN')],
-        loadComponent: () =>
-          import('./features/usuarios/usuarios.page').then((m) => m.UsuariosPage),
-      },
-      {
-        path: 'configuracion',
-        canActivate: [roleGuard('ADMIN')],
-        loadComponent: () =>
-          import('./features/configuracion/configuracion.page').then((m) => m.ConfiguracionPage),
+          import('./features/reports/reports-page.component').then((m) => m.ReportsPageComponent),
       },
       {
         path: 'mis-comisiones',
+        title: 'Mis comisiones',
+        data: { roles: ROLES.stylist },
+        canActivate: [roleGuard],
         loadComponent: () =>
-          import('./features/mis-comisiones/mis-comisiones.page').then((m) => m.MisComisionesPage),
+          import('./features/my-commissions/my-commissions-page.component').then(
+            (m) => m.MyCommissionsPageComponent,
+          ),
       },
       {
-        path: 'plataforma',
-        canActivate: [roleGuard('SUPERADMIN')],
+        path: 'usuarios',
+        title: 'Usuarios',
+        data: { roles: ROLES.admin },
+        canActivate: [roleGuard],
         loadComponent: () =>
-          import('./features/plataforma/negocios.page').then((m) => m.NegociosPage),
+          import('./features/users/users-page.component').then((m) => m.UsersPageComponent),
       },
-      { path: 'pos', redirectTo: 'cobrar' },
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'ajustes',
+        title: 'Ajustes del negocio',
+        data: { roles: ROLES.admin },
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/settings/business-settings-page.component').then(
+            (m) => m.BusinessSettingsPageComponent,
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -1,19 +1,24 @@
+import { DEFAULT_DIALOG_CONFIG, DialogConfig } from '@angular/cdk/dialog';
 import { registerLocaleData } from '@angular/common';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import localeEsBo from '@angular/common/locales/es-BO';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import localeEs from '@angular/common/locales/es';
 import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { routes } from './app.routes';
-import { authInterceptor } from './core/auth/auth.interceptor';
-import { errorInterceptor } from './core/error.interceptor';
 
-registerLocaleData(localeEsBo);
+import { routes } from './app.routes';
+import { apiUrlInterceptor, authInterceptor } from './core/http/api.interceptors';
+
+registerLocaleData(localeEs);
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),
-    { provide: LOCALE_ID, useValue: 'es-BO' },
+    provideHttpClient(withInterceptors([apiUrlInterceptor, authInterceptor])),
+    { provide: LOCALE_ID, useValue: 'es' },
+    {
+      provide: DEFAULT_DIALOG_CONFIG,
+      useValue: { ...new DialogConfig(), backdropClass: 'glass-backdrop' },
+    },
   ],
 };
